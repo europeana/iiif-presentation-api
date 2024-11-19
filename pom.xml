@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>iiif-presentation-definitions</module>
+        <module>iiif-presentation-collection</module>
+        <module>iiif-presentation-manifest</module>
+        <module>iiif-presentation-web</module>
+    </modules>
+
+    <parent>
+        <groupId>eu.europeana</groupId>
+        <artifactId>europeana-parent-pom</artifactId>
+        <version>2.4</version>
+    </parent>
+
+    <repositories>
+        <repository>
+            <id>libs-release-local</id>
+            <name>europeana-releases</name>
+            <url>https://artifactory.eanadev.org/artifactory/libs-release</url>
+        </repository>
+        <repository>
+            <id>libs-snapshots-local</id>
+            <name>europeana-snapshots</name>
+            <url>https://artifactory.eanadev.org/artifactory/libs-snapshot</url>
+        </repository>
+    </repositories>
+
+    <artifactId>iiif-presentation-api</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>IIIF Presentation API</name>
+    <description>Europeana IIIf Presentation API (IIIF v2 and v3 manifests)</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+
+        <!-- Spring Boot 3 is based on Spring Framework 6.0 and Jakarta EE 9. A-->
+        <spring-boot.version>3.1.2</spring-boot.version>
+        <spring-framework.version>6.0.11</spring-framework.version>
+        <springdoc.version>2.3.0</springdoc.version>
+        <swagger.version>3.0.0</swagger.version>
+
+        <maven-surefire.version>2.22.2</maven-surefire.version>
+        <jackson.version>2.18.1</jackson.version>
+
+
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Import dependency management from Spring Boot (because we don't use Spring-Boot as parent pom)-->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
+</project>
