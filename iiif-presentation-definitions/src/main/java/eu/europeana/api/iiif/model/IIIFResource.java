@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.europeana.api.iiif;
+package eu.europeana.api.iiif.model;
 
 /**
  * @author Hugo

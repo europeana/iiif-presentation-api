@@ -6,7 +6,7 @@ package eu.europeana.api.iiif.v3.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import eu.europeana.api.iiif.IIIFResource;
+import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.v3.io.JsonConstants;
 
 /**

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import eu.europeana.api.iiif.IIIFResource;
+import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.v2.io.JsonConstants;
 
 /**

@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import eu.europeana.api.iiif.IIIFResource;
+import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.v2.io.LanguageValueSerializer;
 import eu.europeana.api.iiif.v2.model.LanguageValue;
 
@@ -34,7 +34,7 @@ import eu.europeana.api.iiif.v2.model.LanguageValue;
  * @author Hugo
  * @since 28 Oct 2024
  */
-public class IIIFFormatHandler {
+public class IIIFJsonHandler {
 
     private static String BASE_CONTEXT = "http://iiif.io/api/presentation/";
 
@@ -234,13 +234,5 @@ public class IIIFFormatHandler {
         
         mapper.findAndRegisterModules();
         return mapper;
-    }
-
-
-
-    public static final void main(String[] args) throws Exception {
-        IIIFFormatHandler handler = new IIIFFormatHandler();
-        IIIFResource r = handler.read(new File("C:\\Work\\incoming\\iiif_collections\\sources\\europeana_manifest_v3.json"));
-        handler.write(r, System.out);
     }
 }
