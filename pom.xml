@@ -38,11 +38,14 @@
         <java.version>17</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
 
-        <!-- Spring Boot 3 is based on Spring Framework 6.0 and Jakarta EE 9. A-->
+        <!-- Spring Boot 3 is based on Spring Framework 6.0 and Jakarta EE 9.-->
         <spring-boot.version>3.1.2</spring-boot.version>
         <spring-framework.version>6.0.11</spring-framework.version>
         <springdoc.version>2.3.0</springdoc.version>
         <swagger.version>3.0.0</swagger.version>
+
+        <!-- Other api versions-->
+        <api-commons-sb3>0.1.1-SNAPSHOT</api-commons-sb3>
 
         <maven-surefire.version>2.22.2</maven-surefire.version>
         <jackson.version>2.18.1</jackson.version>
