@@ -90,6 +90,27 @@
             <artifactId>iiif-presentation-manifest</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+
+       <!-- Error module-->
+        <dependency>
+            <groupId>eu.europeana.api</groupId>
+            <artifactId>commons-sb3-error</artifactId>
+            <version>${api-commons-sb3}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.europeana.api</groupId>
+            <artifactId>commons-sb3-definitions</artifactId>
+            <version>${api-commons-sb3}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.europeana.api</groupId>
+            <artifactId>commons-sb3-web</artifactId>
+            <version>${api-commons-sb3}</version>
+
+        </dependency>
+
     </dependencies>
 
 
