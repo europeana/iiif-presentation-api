@@ -46,6 +46,8 @@
 
         <!-- Other api versions-->
         <api-commons-sb3>0.1.1-SNAPSHOT</api-commons-sb3>
+        <set.api.version>1.0-SNAPSHOT</set.api.version>
+        <fulltext.api.version>0.9.7</fulltext.api.version>
 
         <maven-surefire.version>2.22.2</maven-surefire.version>
         <jackson.version>2.18.1</jackson.version>

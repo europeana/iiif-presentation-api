@@ -19,6 +19,8 @@ import eu.europeana.api.iiif.v3.model.content.Image;
 import eu.europeana.api.iiif.v3.model.content.Dataset;
 import eu.europeana.api.item.Item;
 import eu.europeana.api.set.Set;
+import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.impl.BaseUserSet;
 
 /**
  * @author Hugo
@@ -45,15 +47,15 @@ public class CollectionV3Generator implements GeneratorConstants {
         return col;
     }
 
-    public Collection generateGalleryRoot(java.util.Collection<Set> sets) {
+    public Collection generateGalleryRoot(java.util.Collection<? extends UserSet> sets) {
         Collection col = new Collection(getGalleryRootURI());
         col.setLabel(ROOT_GALLERY_LABEL);
         col.setSummary(ROOT_GALLERY_SUMMARY);
         col.setViewingDirection(ViewingDirection.ltr);
         col.getProvider().add(EUROPEANA);
         col.getBehavior().add(Behavior.unordered);
-        for ( Set set : sets ) {
-            Collection child = new Collection(getGalleryURI(set.getLocalID()));
+        for (UserSet set : sets ) {
+            Collection child = new Collection(getGalleryURI(set.getIdentifier()));
             child.setLabel(new LanguageMap(set.getTitle()));
             col.getItems().add(child);
         }

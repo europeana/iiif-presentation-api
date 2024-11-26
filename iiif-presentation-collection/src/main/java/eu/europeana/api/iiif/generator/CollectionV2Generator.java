@@ -15,6 +15,9 @@ import eu.europeana.api.iiif.v2.model.ViewingHint;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
 import eu.europeana.api.item.Item;
 import eu.europeana.api.set.Set;
+import eu.europeana.set.definitions.model.UserSet;
+
+import java.util.Map;
 
 /**
  * @author Hugo
@@ -40,15 +43,19 @@ public class CollectionV2Generator implements GeneratorConstants {
         return col;
     }
 
-    public Collection generateGalleryRoot(java.util.Collection<Set> sets) {
+    public Collection generateGalleryRoot(java.util.Collection<? extends UserSet> sets) {
         Collection col = new Collection(getGalleryRootURI());
         col.setLabel(ROOT_GALLERY_LABEL);
         col.setDescription(ROOT_GALLERY_DESCRIPTION);
         col.setViewingHint(ViewingHint.individuals);
         col.setLogo(EUROPEANA_LOGO);
-        for ( Set set : sets ) {
-            Collection child = new Collection(getGalleryURI(set.getLocalID()));
-            child.setLabel(newValue(set.getAnyTitle()));
+        for (UserSet set : sets) {
+            Collection child = new Collection(getGalleryURI(set.getIdentifier()));
+            // get the first title for v2
+            for (Map.Entry<String, String> entry : set.getTitle().entrySet()) {
+                child.setLabel(new LanguageValue(entry.getKey(), entry.getValue()));
+                break;
+            }
             col.getCollections().add(child);
         }
         return col;

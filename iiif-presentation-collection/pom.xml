@@ -26,6 +26,12 @@
             <artifactId>iiif-presentation-definitions</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>eu.europeana.set</groupId>
+            <artifactId>set-client</artifactId>
+            <version>${set.api.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
