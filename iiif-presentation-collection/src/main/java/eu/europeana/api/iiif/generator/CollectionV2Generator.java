@@ -18,6 +18,7 @@ import eu.europeana.api.set.Set;
 import eu.europeana.set.definitions.model.UserSet;
 
 import java.util.Map;
+import static eu.europeana.api.iiif.generator.GeneratorUtils.buildGalleryUrl;
 
 /**
  * @author Hugo
@@ -33,24 +34,24 @@ public class CollectionV2Generator implements GeneratorConstants {
 
     private static Image         EUROPEANA_LOGO        = new Image(GeneratorConstants.EUROPEANA_LOGO);
 
-    public Collection generateRoot() {
-        Collection col = new Collection(getRootURI());
+    public Collection generateRoot(String collectionRootUri, String galleryRootUri) {
+        Collection col = new Collection(collectionRootUri);
         col.setLabel(ROOT_LABEL);
         col.setDescription(ROOT_DESCRIPTION);
         col.setViewingHint(ViewingHint.individuals);
         col.setLogo(EUROPEANA_LOGO);
-        col.getCollections().add(new Collection(getGalleryRootURI()));
+        col.getCollections().add(new Collection(galleryRootUri));
         return col;
     }
 
-    public Collection generateGalleryRoot(java.util.Collection<? extends UserSet> sets) {
-        Collection col = new Collection(getGalleryRootURI());
+    public Collection generateGalleryRoot(String galleryRootUri, java.util.Collection<? extends UserSet> sets) {
+        Collection col = new Collection(galleryRootUri);
         col.setLabel(ROOT_GALLERY_LABEL);
         col.setDescription(ROOT_GALLERY_DESCRIPTION);
         col.setViewingHint(ViewingHint.individuals);
         col.setLogo(EUROPEANA_LOGO);
         for (UserSet set : sets) {
-            Collection child = new Collection(getGalleryURI(set.getIdentifier()));
+            Collection child = new Collection(buildGalleryUrl(galleryRootUri, set.getIdentifier()));
             // get the first title for v2
             for (Map.Entry<String, String> entry : set.getTitle().entrySet()) {
                 child.setLabel(new LanguageValue(entry.getKey(), entry.getValue()));
@@ -61,8 +62,8 @@ public class CollectionV2Generator implements GeneratorConstants {
         return col;
     }
 
-    public Collection generateGallery(Set set) {
-        Collection col = new Collection(getGalleryURI(set.getLocalID()));
+    public Collection generateGallery(String iiifBaseUrl, Set set) {
+        Collection col = new Collection(getGalleryURI(iiifBaseUrl, set.getLocalID()));
         col.setLabel(newValue(set.getAnyTitle()));
         col.setViewingHint(ViewingHint.individuals);
         col.setLogo(EUROPEANA_LOGO);
@@ -70,14 +71,14 @@ public class CollectionV2Generator implements GeneratorConstants {
         col.getSeeAlso().add(newDataset(set));
         if ( set.hasItems() ) {
             for ( Item item : set.getItems() ) {
-                col.getManifests().add(getManifest(item));
+                col.getManifests().add(getManifest(iiifBaseUrl, item));
             }
         }
         return col;
     }
 
-    protected Manifest getManifest(Item item) {
-        Manifest manifest = new Manifest(getManifestURI(item.getLocalID()));
+    protected Manifest getManifest(String iiifBaseUrl, Item item) {
+        Manifest manifest = new Manifest(getManifestURI(iiifBaseUrl, item.getLocalID()));
 
         manifest.setThumbnail(newThumbnail(item));
         

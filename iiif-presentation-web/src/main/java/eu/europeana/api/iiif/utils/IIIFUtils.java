@@ -6,10 +6,37 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 
+import java.util.Arrays;
+
 public class IIIFUtils {
 
     /**
+     * Returns RdfFormat if the ACCEPT header is provided
+     *
+     * @param request
+     * @return
+     */
+    public static RdfFormat getRDFFormatFromHeader(HttpServletRequest request) {
+        RdfFormat format = null;
+        for (String header : Arrays.asList(request.getHeader(HttpHeaders.ACCEPT).split(";"))) {
+            format = RdfFormat.getFormatByMediaType(header);
+            if (format != null) {
+                break;
+            }
+        }
+        if (isValidFormat(format)) {
+            return format;
+        }
+        // if accept header was empty default to JSONLD
+        else if (format == null) {
+            return RdfFormat.JSONLD;
+        }
+        return null;
+    }
+
+    /**
      * Retuns RDF Format if the extension id either json or jsonld
+     *
      * @param setId
      * @return
      */
@@ -26,20 +53,8 @@ public class IIIFUtils {
     }
 
     /**
-     * Returns RdfFormat if the ACCEPT header is provided
-     * @param request
-     * @return
-     */
-    public static RdfFormat getRDFFormatFromHeader(HttpServletRequest request) {
-        RdfFormat format = RdfFormat.getFormatByMediaType(request.getHeader(HttpHeaders.ACCEPT));
-        if (isValidFormat(format)) {
-            return format;
-        }
-        return null;
-    }
-
-    /**
      * In IIIF presentaion api we only support json OR jsonld formats
+     *
      * @param format
      * @return
      */

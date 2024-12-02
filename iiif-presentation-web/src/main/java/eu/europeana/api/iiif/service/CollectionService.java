@@ -1,23 +1,22 @@
 package eu.europeana.api.iiif.service;
 
-import com.jayway.jsonpath.JsonPath;
+import eu.europeana.api.iiif.config.IIIfSettings;
 import eu.europeana.api.iiif.generator.CollectionV2Generator;
 import eu.europeana.api.iiif.generator.CollectionV3Generator;
 import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.utils.IIIFConstants;
 import eu.europeana.set.client.UserSetApiClient;
+import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.impl.BaseUserSet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.PROFILE_STANDARD;
 
 @Service
 public class CollectionService {
@@ -27,23 +26,23 @@ public class CollectionService {
     private final UserSetApiClient userSetApiClient;
     private final CollectionV2Generator collectionV2Generator;
     private final CollectionV3Generator collectionV3Generator;
+    private final IIIfSettings settings;
 
     public CollectionService(@Qualifier(IIIFConstants.BEAN_USER_SET_API_CLIENT) UserSetApiClient userSetApiClient,
                              @Qualifier(IIIFConstants.BEAN_COLLECTION_V2_GENERATOR) CollectionV2Generator collectionV2Generator,
-                             @Qualifier(IIIFConstants.BEAN_COLLECTION_V3_GENERATOR) CollectionV3Generator collectionV3Generator) {
+                             @Qualifier(IIIFConstants.BEAN_COLLECTION_V3_GENERATOR) CollectionV3Generator collectionV3Generator, IIIfSettings settings) {
         this.userSetApiClient = userSetApiClient;
         this.collectionV2Generator = collectionV2Generator;
         this.collectionV3Generator = collectionV3Generator;
+        this.settings = settings;
     }
 
 
     public <T extends IIIFResource> T retrieveCollection(String version) {
         if (StringUtils.equals(version, "2")) {
-            return (T) collectionV2Generator.generateRoot();
-
+            return (T) collectionV2Generator.generateRoot(settings.getCollectionRootURI(), settings.getGalleryRootURI());
         }
-        return (T) collectionV3Generator.generateRoot();
-
+        return (T) collectionV3Generator.generateRoot(settings.getCollectionRootURI(), settings.getGalleryRootURI());
     }
 
     /**
@@ -54,37 +53,36 @@ public class CollectionService {
      */
     public <T extends IIIFResource> T getGalleryCollection(String iiifVersion) {
         // get the response from Set Api
-        ResponseEntity<String> publishedSets = userSetApiClient.getSearchUserSetApi().searchUserSet("visibility:published", null, null, 0,
-                1000, null, 0, "standard");
-
-        // parse the response
-        List<Map> items = JsonPath.read(publishedSets.getBody(), "$.items[*]");
-        List<BaseUserSet> sets = new ArrayList<>(items.size());
-        for (Map item : items) {
-            String id = (String) item.get("id");
-            BaseUserSet set = null;
-            set.setTitle((Map) item.get("title"));
-            set.setDescription((Map) item.get("description"));
-            copyItems((List) item.get("items"), set);
-            sets.add(set);
-        }
+        try {
+            List<? extends UserSet> publishedSets = userSetApiClient.getSearchUserSetApi().searchUserSet("visibility:published", null, null, 1,
+                    100, null, 0, null);
         if (StringUtils.equals(iiifVersion, "2")) {
-            return (T) collectionV2Generator.generateGalleryRoot(sets);
+            return (T) collectionV2Generator.generateGalleryRoot(settings.getGalleryRootURI(), publishedSets);
         }
-        return (T) collectionV3Generator.generateGalleryRoot(sets);
+        return (T) collectionV3Generator.generateGalleryRoot(settings.getGalleryRootURI(), publishedSets);
+        } catch (SetApiClientException e) {
+            // todo handling other responses
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    protected void copyItems(List list, UserSet set) {
-        for ( Object item : list ) {
-            if ( item instanceof String ) {
-                set.getItems().add((String)item);
+    // TODO set client is not set up for pagination request in getUserset and return object is yet not decided.
+    // https://set-api.acceptance.eanadev.org/set/15456?&page=1&pageSize=100&profile=items.meta
+    public <T extends IIIFResource> T retrieveGallery(String iiifVersion) {
+        // get the response from Set Api
+        try {
+            UserSet set = userSetApiClient.getWebUserSetApi().getUserSet("1160954", PROFILE_STANDARD);
+            if (StringUtils.equals(iiifVersion, "2")) {
+                return (T) collectionV2Generator.generateGallery(settings.getGalleryRootURI(), null);
             }
+            return (T) collectionV3Generator.generateGallery(settings.getGalleryRootURI(), null);
+        } catch (SetApiClientException e) {
+            e.printStackTrace();
+            // todo handling other responses
+
         }
+        return null;
     }
-
-    public void retrieveGallery(String version) {
-
-    }
-
 
 }

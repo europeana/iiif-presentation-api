@@ -3,31 +3,35 @@
  */
 package eu.europeana.api.iiif.generator;
 
-import eu.europeana.api.item.Item;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Hugo
  * @since 14 Oct 2024
  */
-public class GeneratorUtils implements GeneratorConstants
-{
-    private static String host = "iiif.europeana.eu";
-    private static String host_rnd = "rnd-2.eanadev.org/share/iiif/v3";
+public class GeneratorUtils implements GeneratorConstants {
 
-    public static String getRootURI() {
-        return String.format(rootURI, host_rnd);
+    public static String buildGalleryUrl(String galleryRootUri, String setId) {
+        if (StringUtils.endsWith(galleryRootUri, "/")) {
+            return galleryRootUri + setId;
+        }
+        return galleryRootUri + "/" + setId;
     }
 
-    public static String getGalleryRootURI() {
-        return String.format(galleryRootURI, host_rnd);
+    public static String getRootURI(String iiifBaseUrl) {
+        return String.format(rootURI, iiifBaseUrl);
     }
 
-    public static String getGalleryURI(String setId) {
-        return String.format(galleryURI, host_rnd, setId);
+    public static String getGalleryRootURI(String iiifBaseUrl) {
+        return String.format(galleryRootURI, iiifBaseUrl);
     }
 
-    public static String getManifestURI(String itemId) {
-        return String.format(manifestURI, host, itemId);
+    public static String getGalleryURI(String iiifBaseUrl, String setId) {
+        return String.format(galleryURI, iiifBaseUrl, setId);
+    }
+
+    public static String getManifestURI(String iiifBaseUrl, String itemId) {
+        return String.format(manifestURI, iiifBaseUrl, itemId);
     }
 
     public static String getSetURL(String setId, String format) {
