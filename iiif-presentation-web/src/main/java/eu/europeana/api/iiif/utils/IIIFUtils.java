@@ -1,12 +1,14 @@
 package eu.europeana.api.iiif.utils;
 
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
+import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
 import eu.europeana.api.iiif.exceptions.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 
 import java.util.Arrays;
+import static eu.europeana.api.iiif.utils.IIIFConstants.V2;
 
 public class IIIFUtils {
 
@@ -60,5 +62,25 @@ public class IIIFUtils {
      */
     private static boolean isValidFormat(RdfFormat format) {
         return RdfFormat.JSONLD.equals(format) || RdfFormat.JSON.equals(format);
+    }
+
+    public static HttpHeaders addContentType(RdfFormat format, String iiifVersion) {
+        HttpHeaders headers = new HttpHeaders();
+        if (format.equals(RdfFormat.JSON)) {
+            if (StringUtils.equals(iiifVersion, V2)) {
+                headers.add(HttpHeaders.CONTENT_TYPE, IIIFDefinitions.MEDIA_TYPE_IIIF_JSON_V2);
+            } else {
+                headers.add(HttpHeaders.CONTENT_TYPE, IIIFDefinitions.MEDIA_TYPE_IIIF_JSON_V3);
+
+            }
+        } else {
+            if (StringUtils.equals(iiifVersion, V2)) {
+                headers.add(HttpHeaders.CONTENT_TYPE, IIIFDefinitions.MEDIA_TYPE_IIIF_JSONLD_V2);
+            } else {
+                headers.add(HttpHeaders.CONTENT_TYPE, IIIFDefinitions.MEDIA_TYPE_IIIF_JSONLD_V3);
+
+            }
+        }
+        return headers;
     }
 }

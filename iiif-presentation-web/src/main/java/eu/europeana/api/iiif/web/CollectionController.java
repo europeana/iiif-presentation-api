@@ -72,12 +72,13 @@ public class CollectionController {
     public ResponseEntity<StreamingResponseBody> retrieveCollection(
             HttpServletRequest request) {
         String iiifVersion = AcceptUtils.getRequestVersion(request, null);
-        IIIFResource resource = collectionService.retrieveCollection(iiifVersion);
-        LOGGER.debug("iiif version {} , Accept : {}", iiifVersion, request.getHeader("Accept"));
+        RdfFormat format = IIIFUtils.getRDFFormatFromHeader(request);
 
-        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        // TODO - Check if the requested media type in the Accept header is supported (if empty defaults to JSON-LD), otherwise respond with HTTP 406;
-        headers.add(org.springframework.http.HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD);
+        IIIFResource resource = collectionService.retrieveCollection(iiifVersion);
+        LOGGER.debug("iiif version {} , Accept : {} rdf format {}", iiifVersion, request.getHeader("Accept"), format);
+
+        org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
+
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
@@ -120,9 +121,7 @@ public class CollectionController {
 
         IIIFResource resource = collectionService.getGalleryCollection(iiifVersion);
 
-        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        // TODO - Check if the requested media type in the Accept header is supported (if empty defaults to JSON-LD), otherwise respond with HTTP 406;
-        headers.add(org.springframework.http.HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD);
+        org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
@@ -161,6 +160,7 @@ public class CollectionController {
             @PathVariable String setId,
             @RequestParam(value = "format", required = false) String version,
             HttpServletRequest request) throws EuropeanaApiException {
+        String iiifVersion = AcceptUtils.getRequestVersion(request, version);
 
         // get format and clean the setId if required
         RdfFormat format = IIIFUtils.getRDFFormatFromId(setId);
@@ -178,8 +178,21 @@ public class CollectionController {
             format = RdfFormat.JSONLD;
         }
 
-        LOGGER.debug("RdfFormat : {} , set ID : {}", format, setId);
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        LOGGER.debug("iiif version {} , Accept : {} rdf format {}", iiifVersion, request.getHeader("Accept"), format);
+
+        IIIFResource resource = collectionService.retrieveGallery(iiifVersion, setId);
+
+        org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
+        StreamingResponseBody responseBody = new StreamingResponseBody() {
+            @Override
+            public void writeTo(OutputStream out) throws IOException {
+                IIIFJsonHandler jsonHandler = new IIIFJsonHandler();
+                jsonHandler.write(resource, out);
+                //formatHandlerRegistry.get(recordRequest.getRdfFormat()).write(providedCHO, out);
+                out.flush();
+            }
+        };
+        return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
     }
 
 

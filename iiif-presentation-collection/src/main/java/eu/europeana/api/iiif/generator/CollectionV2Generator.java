@@ -1,6 +1,3 @@
-/**
- * 
- */
 package eu.europeana.api.iiif.generator;
 
 import static eu.europeana.api.iiif.generator.GeneratorUtils.*;
@@ -12,13 +9,13 @@ import eu.europeana.api.iiif.v2.model.LanguageValue;
 import eu.europeana.api.iiif.v2.model.Manifest;
 import eu.europeana.api.iiif.v2.model.ResourceReference;
 import eu.europeana.api.iiif.v2.model.ViewingHint;
-import eu.europeana.api.iiif.v3.model.LanguageMap;
-import eu.europeana.api.item.Item;
-import eu.europeana.api.set.Set;
+import eu.europeana.set.client.model.result.RecordPreview;
 import eu.europeana.set.definitions.model.UserSet;
+import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Map;
-import static eu.europeana.api.iiif.generator.GeneratorUtils.buildGalleryUrl;
 
 /**
  * @author Hugo
@@ -30,28 +27,30 @@ public class CollectionV2Generator implements GeneratorConstants {
     private static LanguageValue ROOT_DESCRIPTION         = new LanguageValue(GeneratorConstants.ROOT_DESCRIPTION, LANG_META);
     private static LanguageValue ROOT_GALLERY_LABEL       = new LanguageValue(GeneratorConstants.ROOT_GALLERY_LABEL, LANG_META);
     private static LanguageValue ROOT_GALLERY_DESCRIPTION = new LanguageValue(GeneratorConstants.ROOT_GALLERY_DESCRIPTION, LANG_META);
-  //private static LanguageValue WEBSITE_TITLE_GALLERY    = new LanguageValue(GeneratorConstants.WEBSITE_TITLE_GALLERY, LANG_META);
-
     private static Image         EUROPEANA_LOGO        = new Image(GeneratorConstants.EUROPEANA_LOGO);
 
-    public Collection generateRoot(String collectionRootUri, String galleryRootUri) {
-        Collection col = new Collection(collectionRootUri);
+    @Resource
+    private GeneratorSettings settings;
+
+
+    public Collection generateRoot() {
+        Collection col = new Collection(settings.getCollectionRootURI());
         col.setLabel(ROOT_LABEL);
         col.setDescription(ROOT_DESCRIPTION);
         col.setViewingHint(ViewingHint.individuals);
         col.setLogo(EUROPEANA_LOGO);
-        col.getCollections().add(new Collection(galleryRootUri));
+        col.getCollections().add(new Collection(settings.getGalleryRootURI()));
         return col;
     }
 
-    public Collection generateGalleryRoot(String galleryRootUri, java.util.Collection<? extends UserSet> sets) {
-        Collection col = new Collection(galleryRootUri);
+    public Collection generateGalleryRoot(java.util.Collection<? extends UserSet> sets) {
+        Collection col = new Collection(settings.getGalleryRootURI());
         col.setLabel(ROOT_GALLERY_LABEL);
         col.setDescription(ROOT_GALLERY_DESCRIPTION);
         col.setViewingHint(ViewingHint.individuals);
         col.setLogo(EUROPEANA_LOGO);
         for (UserSet set : sets) {
-            Collection child = new Collection(buildGalleryUrl(galleryRootUri, set.getIdentifier()));
+            Collection child = new Collection(buildUrlWithSetId(settings.getGalleryRootURI(), set.getIdentifier()));
             // get the first title for v2
             for (Map.Entry<String, String> entry : set.getTitle().entrySet()) {
                 child.setLabel(new LanguageValue(entry.getKey(), entry.getValue()));
@@ -62,55 +61,61 @@ public class CollectionV2Generator implements GeneratorConstants {
         return col;
     }
 
-    public Collection generateGallery(String iiifBaseUrl, Set set) {
-        Collection col = new Collection(getGalleryURI(iiifBaseUrl, set.getLocalID()));
-        col.setLabel(newValue(set.getAnyTitle()));
+    public Collection generateGallery(UserSet set, List<RecordPreview> items) {
+        Collection col = new Collection(buildUrlWithSetId(settings.getGalleryRootURI(), set.getIdentifier()));
+        if (set.getTitle() != null) {
+            col.setLabel(newValue(set.getTitle().values().iterator().next()));
+        }
         col.setViewingHint(ViewingHint.individuals);
         col.setLogo(EUROPEANA_LOGO);
         col.getRelated().add(newReference(set));
         col.getSeeAlso().add(newDataset(set));
-        if ( set.hasItems() ) {
-            for ( Item item : set.getItems() ) {
-                col.getManifests().add(getManifest(iiifBaseUrl, item));
+        if (items != null && items.size() > 0) {
+            for (RecordPreview item : items) {
+                col.getManifests().add(getManifest(item));
             }
         }
         return col;
     }
 
-    protected Manifest getManifest(String iiifBaseUrl, Item item) {
-        Manifest manifest = new Manifest(getManifestURI(iiifBaseUrl, item.getLocalID()));
 
+    protected Manifest getManifest(RecordPreview item) {
+        Manifest manifest = new Manifest(StringUtils.replace(settings.getIIIfManifestUrl(), settings.getIIIFApiIdPlaceholder(), item.getId()));
         manifest.setThumbnail(newThumbnail(item));
-        
-        String title = item.getAnyTitle();
-        if ( title == null ) {
-            String description = item.getAnyDescription();
-            manifest.setLabel(newValue(description));
-            return manifest;
+        if (item.hasDescription()) {
+            String description = item.getDescription().values().iterator().next().get(0);
+            if (item.hasTitle()) {
+                String title = item.getTitle().values().iterator().next().get(0);
+                manifest.setLabel(newValue(title));
+                manifest.setDescription(newValue(description));
+            } else {
+                manifest.setLabel(newValue(description));
+            }
         }
-
-        manifest.setLabel(newValue(title));
-        manifest.setDescription(newValue(item.getAnyDescription()));
-        return manifest;
+        return  manifest;
     }
 
     protected LanguageValue newValue(String value) {
         return ( value == null ? null : new LanguageValue(value) );
     }
 
-    protected Dataset newDataset(Set set) {
-        Dataset ds = new Dataset(getSetURL(set.getLocalID(), EXTENSION_JSONLD));
+    protected Dataset newDataset(UserSet set) {
+        Dataset ds = new Dataset(buildUrlWithSetId(settings.getSetApiBaseUrl(), set.getIdentifier()) + EXTENSION_JSONLD);
         ds.setFormat(MIMETYPE_JSONLD);
         ds.setProfile(SET_JSONLD_CONTEXT);
         return ds;
     }
 
-    protected Image newThumbnail(Item item) {
-        return new Image(item.getPreview());
+    protected Image newThumbnail(RecordPreview item) {
+        if (item.hasPreview()) {
+            return new Image(item.getEdmPreview().get(0));
+        }
+        return null;
     }
 
-    protected ResourceReference newReference(Set set) {
-        ResourceReference ref = new ResourceReference(set.getLandingPage());
+    protected ResourceReference newReference(UserSet set) {
+        // landing page https://www.europeana.eu/galleries/{setId}"
+        ResourceReference ref = new ResourceReference(buildUrlWithSetId(settings.getGalleryLandingPage(), set.getIdentifier()));
         ref.setLabel(WEBSITE_TITLE_GALLERY);
         ref.setFormat(MIMETYPE_HTML);
         return ref;
