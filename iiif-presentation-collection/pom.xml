@@ -26,6 +26,26 @@
             <artifactId>iiif-presentation-definitions</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>eu.europeana.set</groupId>
+            <artifactId>set-client</artifactId>
+            <version>${set.api.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-beans -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring-framework.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring-framework.version}</version>
+        </dependency>
+
     </dependencies>
 
 </project>
