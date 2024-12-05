@@ -5,7 +5,8 @@ import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.web.http.HttpHeaders;
-import eu.europeana.api.iiif.io.IIIFJsonHandler;
+import eu.europeana.api.iiif.exceptions.CollectionException;
+import eu.europeana.api.iiif.service.IIIFJsonHandler;
 import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.service.CollectionService;
 import eu.europeana.api.iiif.utils.IIIFUtils;
@@ -41,10 +42,12 @@ public class CollectionController {
     private static final Logger LOGGER = LogManager.getLogger(CollectionController.class);
 
     private final CollectionService collectionService;
+    private final IIIFJsonHandler iiifJsonHandler;
 
     @Autowired
-    public CollectionController(CollectionService collectionService) {
+    public CollectionController(CollectionService collectionService, IIIFJsonHandler iiifJsonHandler) {
         this.collectionService = collectionService;
+        this.iiifJsonHandler = iiifJsonHandler;
     }
 
 
@@ -73,18 +76,16 @@ public class CollectionController {
             HttpServletRequest request) {
         String iiifVersion = AcceptUtils.getRequestVersion(request, null);
         RdfFormat format = IIIFUtils.getRDFFormatFromHeader(request);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("IIIF Version {} , RDF format {}", iiifVersion, format);
+        }
 
         IIIFResource resource = collectionService.retrieveCollection(iiifVersion);
-        LOGGER.debug("iiif version {} , Accept : {} rdf format {}", iiifVersion, request.getHeader("Accept"), format);
-
         org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
-
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
-                IIIFJsonHandler jsonHandler = new IIIFJsonHandler();
-                jsonHandler.write(resource, out);
-                //formatHandlerRegistry.get(recordRequest.getRdfFormat()).write(providedCHO, out);
+                iiifJsonHandler.write(resource, out);
                 out.flush();
             }
         };
@@ -113,22 +114,20 @@ public class CollectionController {
             },
             headers = {ACCEPT_HEADER_JSONLD, ACCEPT_HEADER_JSON})
     public ResponseEntity<StreamingResponseBody> galleryCollection(
-            HttpServletRequest request) {
+            HttpServletRequest request) throws EuropeanaApiException {
         String iiifVersion = AcceptUtils.getRequestVersion(request, null);
         RdfFormat format = IIIFUtils.getRDFFormatFromHeader(request);
-
-        LOGGER.debug("iiif version {} , Accept : {} rdf format {}", iiifVersion, request.getHeader("Accept"), format);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("IIIF Version {} , RDF format {}", iiifVersion, format);
+        }
 
         IIIFResource resource = collectionService.getGalleryCollection(iiifVersion);
-
         org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
-                IIIFJsonHandler jsonHandler = new IIIFJsonHandler();
-                jsonHandler.write(resource, out);
-                //formatHandlerRegistry.get(recordRequest.getRdfFormat()).write(providedCHO, out);
-                out.flush();
+              iiifJsonHandler.write(resource, out);
+              out.flush();
             }
         };
         return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
@@ -138,6 +137,8 @@ public class CollectionController {
     /**
      * Endpoint to serve a collection generated from a set/gallery
      *
+     * @param setId set id. Can be present with .json or .jsonld
+     * @param version version param for IIIF
      * @param request HttpServlet request
      * @return Response Entity with StreamingResponseBody
      */
@@ -154,15 +155,14 @@ public class CollectionController {
             value = {
                     "collection/gallery/{setId}",
             },
-            headers = {ACCEPT_HEADER_JSONLD, ACCEPT_HEADER_JSON},
-            produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+            headers = {ACCEPT_HEADER_JSONLD, ACCEPT_HEADER_JSON})
     public ResponseEntity<StreamingResponseBody> retrieveGallery(
             @PathVariable String setId,
             @RequestParam(value = "format", required = false) String version,
             HttpServletRequest request) throws EuropeanaApiException {
         String iiifVersion = AcceptUtils.getRequestVersion(request, version);
 
-        // get format and clean the setId if required
+        // 1) get format and clean the setId if required
         RdfFormat format = IIIFUtils.getRDFFormatFromId(setId);
         // if there is an extension present .json/.jsonld, clean the set id
         if (format != null) {
@@ -178,22 +178,19 @@ public class CollectionController {
             format = RdfFormat.JSONLD;
         }
 
-        LOGGER.debug("iiif version {} , Accept : {} rdf format {}", iiifVersion, request.getHeader("Accept"), format);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("IIIF Version {} , RDF format {}", iiifVersion, format);
+        }
 
         IIIFResource resource = collectionService.retrieveGallery(iiifVersion, setId);
-
         org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
-                IIIFJsonHandler jsonHandler = new IIIFJsonHandler();
-                jsonHandler.write(resource, out);
-                //formatHandlerRegistry.get(recordRequest.getRdfFormat()).write(providedCHO, out);
+                iiifJsonHandler.write(resource, out);
                 out.flush();
             }
         };
         return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
     }
-
-
 }

@@ -1,6 +1,6 @@
 package eu.europeana.api.iiif.service;
 
-import eu.europeana.api.iiif.config.IIIfSettings;
+import eu.europeana.api.iiif.exceptions.CollectionException;
 import eu.europeana.api.iiif.generator.CollectionV2Generator;
 import eu.europeana.api.iiif.generator.CollectionV3Generator;
 import eu.europeana.api.iiif.model.IIIFResource;
@@ -29,15 +29,13 @@ public class CollectionService {
     private final UserSetApiClient userSetApiClient;
     private final CollectionV2Generator collectionV2Generator;
     private final CollectionV3Generator collectionV3Generator;
-    private final IIIfSettings settings;
 
     public CollectionService(@Qualifier(IIIFConstants.BEAN_USER_SET_API_CLIENT) UserSetApiClient userSetApiClient,
                              @Qualifier(IIIFConstants.BEAN_COLLECTION_V2_GENERATOR) CollectionV2Generator collectionV2Generator,
-                             @Qualifier(IIIFConstants.BEAN_COLLECTION_V3_GENERATOR) CollectionV3Generator collectionV3Generator, IIIfSettings settings) {
+                             @Qualifier(IIIFConstants.BEAN_COLLECTION_V3_GENERATOR) CollectionV3Generator collectionV3Generator) {
         this.userSetApiClient = userSetApiClient;
         this.collectionV2Generator = collectionV2Generator;
         this.collectionV3Generator = collectionV3Generator;
-        this.settings = settings;
     }
 
 
@@ -54,20 +52,18 @@ public class CollectionService {
      *
      * @param iiifVersion
      */
-    public <T extends IIIFResource> T getGalleryCollection(String iiifVersion) {
+    public <T extends IIIFResource> T getGalleryCollection(String iiifVersion) throws CollectionException {
         try {
             List<? extends UserSet> publishedSets = userSetApiClient.getSearchUserSetApi().searchUserSet(
-                    QUERY_VISIBILITY_PUBLISHED, null, null, 1, 100, null, 0, null);
+                    QUERY_VISIBILITY_PUBLISHED, null, null, 1, 1000, null, 0, null);
 
             if (StringUtils.equals(iiifVersion, V2)) {
                 return (T) collectionV2Generator.generateGalleryRoot(publishedSets);
             }
             return (T) collectionV3Generator.generateGalleryRoot(publishedSets);
         } catch (SetApiClientException e) {
-            // todo handling other responses
-            e.printStackTrace();
+            throw new CollectionException(e.getLocalizedMessage(), e);
         }
-        return null;
     }
 
     /**
@@ -79,10 +75,10 @@ public class CollectionService {
      * @param <T>
      * @return
      */
-    public <T extends IIIFResource> T retrieveGallery(String iiifVersion, String setId) {
+    public <T extends IIIFResource> T retrieveGallery(String iiifVersion, String setId) throws CollectionException {
         try {
             UserSet set = userSetApiClient.getWebUserSetApi().getUserSet(setId, null);
-
+            // TODO caching
             List<RecordPreview> items = userSetApiClient.getWebUserSetApi().getPaginationUserSet(
                     set.getIdentifier(), null, null, 1, 100, ProfileConstants.VALUE_PARAM_ITEMS_META);
             if (StringUtils.equals(iiifVersion, V2)) {
@@ -90,11 +86,8 @@ public class CollectionService {
             }
             return (T) collectionV3Generator.generateGallery(set, items);
         } catch (SetApiClientException e) {
-            e.printStackTrace();
-            // todo handling other responses
-
+            throw new CollectionException(e.getLocalizedMessage(), e);
         }
-        return null;
     }
 
 }

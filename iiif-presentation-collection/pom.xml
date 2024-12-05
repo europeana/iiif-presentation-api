@@ -31,9 +31,16 @@
             <groupId>eu.europeana.set</groupId>
             <artifactId>set-client</artifactId>
             <version>${set.api.version}</version>
+            <exclusions>
+         <!--    Exclude legacy MongoDB. Transitive - coming from set-definitions -> commons-definitions   -->
+                <exclusion>
+                    <groupId>org.mongodb</groupId>
+                    <artifactId>mongodb-driver-legacy</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.springframework/spring-beans -->
+        <!-- Added to create Generator Settings class to generate the Collections urls from the property file -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
