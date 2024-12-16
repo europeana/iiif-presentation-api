@@ -48,14 +48,14 @@ public class CollectionService {
 
     /**
      * Fetch all the published sets
-     * Query : /set/search?query=visibility:published&pageSize=1000
+     * Query : /set/search?query=visibility:published&pageSize=100
      *
      * @param iiifVersion
      */
     public <T extends IIIFResource> T getGalleryCollection(String iiifVersion) throws CollectionException {
         try {
             List<? extends UserSet> publishedSets = userSetApiClient.getSearchUserSetApi().searchUserSet(
-                    QUERY_VISIBILITY_PUBLISHED, null, null, 1, 1000, null, 0, null);
+                    QUERY_VISIBILITY_PUBLISHED, null, null, "1", "100", null, 0, null);
 
             if (StringUtils.equals(iiifVersion, V2)) {
                 return (T) collectionV2Generator.generateGalleryRoot(publishedSets);
@@ -80,7 +80,7 @@ public class CollectionService {
             UserSet set = userSetApiClient.getWebUserSetApi().getUserSet(setId, null);
             // TODO caching
             List<RecordPreview> items = userSetApiClient.getWebUserSetApi().getPaginationUserSet(
-                    set.getIdentifier(), null, null, 1, 100, ProfileConstants.VALUE_PARAM_ITEMS_META);
+                    set.getIdentifier(), null, null, "1", "100", ProfileConstants.VALUE_PARAM_ITEMS_META);
             if (StringUtils.equals(iiifVersion, V2)) {
                 return (T) collectionV2Generator.generateGallery(set, items);
             }
