@@ -28,6 +28,11 @@ public class Dataset extends ContentResource {
         super(id);
     }
 
+    public Dataset(String id, String profile) {
+        super(id);
+        this.profile = profile;
+    }
+
     protected Dataset() {}
 
 

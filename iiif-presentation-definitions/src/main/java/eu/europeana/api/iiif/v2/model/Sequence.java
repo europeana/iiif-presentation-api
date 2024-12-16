@@ -42,7 +42,7 @@ public class Sequence extends PresentationResource {
         super(id);
     }
 
-    protected Sequence() {}
+    public Sequence() {}
 
     @JsonProperty(JsonConstants.type)
     public String getType() {
@@ -75,5 +75,9 @@ public class Sequence extends PresentationResource {
     public List<Canvas> getCanvases() {
         return ( this.canvases != null ? this.canvases
                                        : (this.canvases = new ArrayList<>()));
+    }
+
+    public void setCanvases(List<Canvas> canvases) {
+        this.canvases = canvases;
     }
 }
