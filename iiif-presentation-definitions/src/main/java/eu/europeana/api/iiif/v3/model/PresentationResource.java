@@ -107,6 +107,10 @@ public abstract class PresentationResource extends IIIFv3Resource {
                                        : (this.metadata = new ArrayList<>()));
     }
 
+    public void addMetadata(LabelledValue metadata) {
+        getMetadata().add(metadata);
+    }
+
     public LabelledValue getRequiredStatement() {
         return this.requiredStatement;
     }
@@ -152,6 +156,9 @@ public abstract class PresentationResource extends IIIFv3Resource {
                                       : (this.seeAlso = new ArrayList<>()));
     }
 
+    public void setSeeAlso(List<Dataset> seeAlso) {
+        this.seeAlso = seeAlso;
+    }
 
     public boolean hasServices() {
         return ( this.service != null && !this.service.isEmpty() );
@@ -160,6 +167,10 @@ public abstract class PresentationResource extends IIIFv3Resource {
     public List<Service> getServices() {
         return ( this.service != null ? this.service
                                       : (this.service = new ArrayList<>()));
+    }
+
+    public void addService(Service service) {
+        getServices().add(service);
     }
 
 

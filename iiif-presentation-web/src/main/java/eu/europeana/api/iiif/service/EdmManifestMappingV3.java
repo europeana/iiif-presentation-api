@@ -2,13 +2,19 @@ package eu.europeana.api.iiif.service;
 
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
+import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.iiif.config.IIIfSettings;
 import eu.europeana.api.iiif.config.MediaTypes;
+import eu.europeana.api.iiif.model.ManifestDefinitions;
 import eu.europeana.api.iiif.utils.EdmManifestUtils;
 import eu.europeana.api.iiif.utils.LanguageMapUtils;
+import eu.europeana.api.iiif.v3.model.Canvas;
+import eu.europeana.api.iiif.v3.model.LabelledValue;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
 import eu.europeana.api.iiif.v3.*;
 import eu.europeana.api.iiif.v3.model.Manifest;
+import eu.europeana.api.iiif.v3.model.content.Dataset;
+import eu.europeana.api.iiif.v3.model.content.Image;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -107,13 +113,14 @@ public final class EdmManifestMappingV3 {
 
         // if Item is EU screen then get the mediaTypevalue and the isShownBy value is replaced with isShownAt if empty
         MediaType euScreenTypeHack = ifEuScreenGetMediaType(mediaTypes, jsonDoc, europeanaId, isShownBy);
-        Manifest manifest = new Manifest(europeanaId, ms.getManifestId(europeanaId), isShownBy);
-        manifest.setService(getServiceDescriptionV3(ms, europeanaId));
+        Manifest manifest = new Manifest(europeanaId);
+                // TODO (europeanaId, ms.getManifestId(europeanaId), isShownBy);
+        manifest.addService(getServiceDescriptionV3(ms, europeanaId));
         // EA-3325
 //        manifest.setPartOf(getWithinV3(jsonDoc));
         manifest.setLabel(getLabelsV3(jsonDoc));
         manifest.setSummary(getDescriptionV3(jsonDoc));
-        manifest.setMetadata(getMetaDataV3(jsonDoc));
+        manifest.addMetadata(getMetaDataV3(jsonDoc));
         manifest.setThumbnail(getThumbnailImageV3(europeanaId, jsonDoc));
         manifest.setNavDate(EdmManifestUtils.getNavDate(europeanaId, jsonDoc));
         manifest.setHomePage(EdmManifestUtils.getHomePage(europeanaId, jsonDoc));
@@ -190,8 +197,8 @@ public final class EdmManifestMappingV3 {
      * @param jsonDoc parsed json document
      * @return
      */
-    static eu.europeana.iiif.model.v3.MetaData[] getMetaDataV3(Object jsonDoc) {
-        List<eu.europeana.iiif.model.v3.MetaData> metaData = new ArrayList<>();
+    static List<LabelledValue> getMetaDataV3(Object jsonDoc) {
+        List<LabelledValue> metaData = new ArrayList<>();
         addMetaDataV3(metaData, "date", jsonDoc, "$.object.proxies[*].dcDate");
         addMetaDataV3(metaData, "format", jsonDoc, "$.object.proxies[*].dcFormat");
         addMetaDataV3(metaData, "relation", jsonDoc, "$.object.proxies[*].dcRelation");
@@ -199,13 +206,13 @@ public final class EdmManifestMappingV3 {
         addMetaDataV3(metaData, "language", jsonDoc,"$.object.proxies[*].dcLanguage");
         addMetaDataV3(metaData, "source", jsonDoc, "$.object.proxies[*].dcSource");
         if (!metaData.isEmpty()) {
-            return metaData.toArray(new eu.europeana.iiif.model.v3.MetaData[0]);
+            return metaData;
         }
         return null;
     }
 
 
-    private static void addMetaDataV3(List<eu.europeana.iiif.model.v3.MetaData> metaData, String fieldName, Object jsonDoc, String jsonPath) {
+    private static void addMetaDataV3(List<LabelledValue> metaData, String fieldName, Object jsonDoc, String jsonPath) {
         // We go over all meta data values and check if it's an url or not.
         // Non-url values are always included as is. If it's an url then we wrap that with an html anchor tag.
         // Additionally we check if the url is also present in object.timespans, agents, concepts or places. If so we
@@ -218,11 +225,11 @@ public final class EdmManifestMappingV3 {
             LOG.trace("START '{}' value map: {} ", fieldName, metaDataValue);
 
             List<LanguageMap> extraPrefLabelMaps = new ArrayList<>(); // keep track of extra prefLabels we need to add
-            for (Map.Entry<String, String[]> entry : metaDataValue.entrySet()) {
+            for (Map.Entry<String, List<String>> entry : metaDataValue.entrySet()) {
                 String      key = entry.getKey();
-                String[] values = entry.getValue();
+                List<String> values = entry.getValue();
 
-                LOG.trace("  checking key {} with {} values", key, values.length);
+                LOG.trace("  checking key {} with {} values", key, values.size());
 
                 List<String> newValues = new ArrayList<>(); // recreate all values (because we may change one)
                 for (String value : values) {
@@ -231,7 +238,7 @@ public final class EdmManifestMappingV3 {
 
                 // replace old values with new ones for the current key
                 LOG.trace("  done checking key = {}, new values = {}", key, newValues);
-                metaDataValue.replace(key, newValues.toArray(new String[0]));
+                metaDataValue.replace(key, newValues);
             }
             // if there are extra prefLabel maps, we merge all into our metaDataValues map
             if (!extraPrefLabelMaps.isEmpty()) {
@@ -242,7 +249,7 @@ public final class EdmManifestMappingV3 {
             }
             LOG.trace("FINISH '{}' value map = {}", fieldName, metaDataValue);
 
-            metaData.add(new eu.europeana.iiif.model.v3.MetaData(metaDataLabel, metaDataValue));
+            metaData.add(new LabelledValue(metaDataLabel, metaDataValue));
         }
     }
 
@@ -314,13 +321,12 @@ public final class EdmManifestMappingV3 {
      * @param jsonDoc parsed json document
      * @return Image object, or null if no edmPreview was found
      */
-    static eu.europeana.iiif.model.v3.Image[] getThumbnailImageV3(String europeanaId, Object jsonDoc) {
+    static List<Image> getThumbnailImageV3(String europeanaId, Object jsonDoc) {
         String thumbnailId = EdmManifestUtils.getThumbnailId(europeanaId, jsonDoc);
         if (StringUtils.isEmpty(thumbnailId)) {
-//            return new eu.europeana.iiif.model.v3.Image[] {};
             return null;
         }
-        return new eu.europeana.iiif.model.v3.Image[] {new eu.europeana.iiif.model.v3.Image(thumbnailId)};
+        return Collections.singletonList(new Image(thumbnailId));
     }
 
     /**
@@ -328,11 +334,11 @@ public final class EdmManifestMappingV3 {
      * @param webresourceId hasview image ID
      * @return Image object, or null if either provided String was null
      */
-    static eu.europeana.iiif.model.v3.Image[] getCanvasThumbnailImageV3(String webresourceId) {
+    static List<Image> getCanvasThumbnailImageV3(String webresourceId) {
         if (StringUtils.isAnyEmpty(THUMBNAIL_API_URL, webresourceId)) {
-            return new eu.europeana.iiif.model.v3.Image[] {};
+            return Collections.emptyList();
         }
-        return new eu.europeana.iiif.model.v3.Image[] {new eu.europeana.iiif.model.v3.Image(THUMBNAIL_API_URL + webresourceId + CANVAS_THUMBNAIL_POSTFIX)};
+        return Collections.singletonList(new Image(THUMBNAIL_API_URL + webresourceId + ManifestDefinitions.CANVAS_THUMBNAIL_POSTFIX));
     }
 
 
@@ -365,14 +371,14 @@ public final class EdmManifestMappingV3 {
      * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
      * @return array of 3 datasets
      */
-    static eu.europeana.iiif.model.v3.DataSet[] getDataSetsV3(ManifestSettings settings, String europeanaId) {
-        eu.europeana.iiif.model.v3.DataSet[] result = new eu.europeana.iiif.model.v3.DataSet[3];
-        result[0] = new eu.europeana.iiif.model.v3.DataSet(settings.getDatasetId(europeanaId, ".json-ld"),
-                AcceptUtils.MEDIA_TYPE_JSONLD);
-        result[1] = new eu.europeana.iiif.model.v3.DataSet(settings.getDatasetId(europeanaId, ".json"),
-                org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
-        result[2] = new eu.europeana.iiif.model.v3.DataSet(settings.getDatasetId(europeanaId, ".rdf"),
-                ManifestDefinitions.MEDIA_TYPE_RDF);
+    static List<Dataset> getDataSetsV3(IIIfSettings settings, String europeanaId) {
+        List<Dataset> result = new ArrayList<>(3);
+        result.add(new Dataset(settings.getDatasetId(europeanaId, ".json-ld"),
+                AcceptUtils.MEDIA_TYPE_JSONLD));
+        result.add(new Dataset(settings.getDatasetId(europeanaId, ".json"),
+                org.springframework.http.MediaType.APPLICATION_JSON_VALUE));
+        result.add(new Dataset(settings.getDatasetId(europeanaId, ".rdf"),
+                ManifestDefinitions.MEDIA_TYPE_RDF));
         return result;
     }
 
@@ -381,14 +387,14 @@ public final class EdmManifestMappingV3 {
     /**
      * @return the {@link eu.europeana.iiif.model.v3.Canvas} that refers to edmIsShownBy, or else just the first Canvas
      */
-    static eu.europeana.iiif.model.v3.Canvas getStartCanvasV3(eu.europeana.iiif.model.v3.Canvas[] items, String edmIsShownBy) {
+    static Canvas getStartCanvasV3(Canvas[] items, String edmIsShownBy) {
         if (items == null) {
             LOG.trace("Start canvas = null (no canvases present)");
             return null;
         }
 
-        eu.europeana.iiif.model.v3.Canvas result = null;
-        for (eu.europeana.iiif.model.v3.Canvas c : items) {
+       Canvas result = null;
+        for (Canvas c : items) {
             String annotationBodyId = c.getStartCanvasAnnotation().getBody().getId();
             if (!StringUtils.isEmpty(edmIsShownBy) && edmIsShownBy.equals(annotationBodyId)) {
                 result = c;
@@ -412,7 +418,7 @@ public final class EdmManifestMappingV3 {
      * @param jsonDoc
      * @return array of Canvases
      */
-    static eu.europeana.iiif.model.v3.Canvas[] getItems(ManifestSettings settings, MediaTypes mediaTypes, String europeanaId, String isShownBy, Object jsonDoc, MediaType euScreenTypeHack) {
+    static Canvas[] getItems(IIIfSettings settings, MediaTypes mediaTypes, String europeanaId, String isShownBy, Object jsonDoc, MediaType euScreenTypeHack) {
         // generate canvases in a same order as the web resources
         List<WebResource> sortedResources = EdmManifestUtils.getSortedWebResources(europeanaId, isShownBy, jsonDoc);
         if (sortedResources.isEmpty()) {
@@ -437,7 +443,7 @@ public final class EdmManifestMappingV3 {
     /**
      * Generates a new canvas, but note that we do not fill the otherContent (Full-Text) here. That's done later.
      */
-    private static eu.europeana.iiif.model.v3.Canvas getCanvasV3(ManifestSettings settings,
+    private static Canvas getCanvasV3(IIIfSettings settings,
                                                                  MediaTypes mediaTypes,
                                                                  String europeanaId,
                                                                  int order,

@@ -2,12 +2,14 @@ package eu.europeana.api.iiif.service;
 
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
+import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.iiif.config.IIIfSettings;
 import eu.europeana.api.iiif.config.MediaTypes;
 import eu.europeana.api.iiif.model.ManifestDefinitions;
 import eu.europeana.api.iiif.utils.EdmManifestUtils;
-import eu.europeana.api.iiif.v2.model.Manifest;
-import eu.europeana.api.iiif.v2.model.Service;
+import eu.europeana.api.iiif.utils.LanguageMapUtils;
+import eu.europeana.api.iiif.v2.model.*;
+import eu.europeana.api.iiif.v3.model.LanguageMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,12 +58,12 @@ public final class EdmManifestMappingV2 {
         Manifest manifest = new Manifest(europeanaId);
                 // Srishti TODO check why is europeanaId and isShownBy used
                 // new ManifestV2(europeanaId, settings.getManifestId(europeanaId), isShownBy);
-        manifest.setService(getServiceDescriptionV2(settings, europeanaId));
+        manifest.addService(getServiceDescriptionV2(settings, europeanaId));
         // EA-3325
 //        manifest.setWithin(getWithinV2(jsonDoc));
         manifest.setLabel(getLabelsV2(jsonDoc));
         manifest.setDescription(getDescriptionV2(jsonDoc));
-        manifest.setMetadata(getMetaDataV2(jsonDoc));
+        manifest.addMetadata(getMetaDataV2(jsonDoc));
         manifest.setThumbnail(getThumbnailImageV2(europeanaId, jsonDoc));
         manifest.setNavDate(EdmManifestUtils.getNavDate(europeanaId, jsonDoc));
         manifest.setAttribution(getAttributionV2(europeanaId, isShownBy, jsonDoc));
@@ -81,9 +83,11 @@ public final class EdmManifestMappingV2 {
      * Generates a serviceV2 description for the manifest
      */
     private static Service getServiceDescriptionV2(IIIfSettings settings, String europeanaId) {
-        return new Service(settings.getContentSearchURL(europeanaId),
-                                                      ManifestDefinitions.SEARCH_CONTEXT_VALUE,
-                                                      ManifestDefinitions.SEARCH_PROFILE_VALUE);
+        Service service = new Service(settings.getContentSearchURL(europeanaId), null);
+        service.setContext(ManifestDefinitions.SEARCH_CONTEXT_VALUE);
+        service.setProfile(ManifestDefinitions.SEARCH_PROFILE_VALUE);
+
+        return service;
     }
 
     /**
@@ -106,9 +110,9 @@ public final class EdmManifestMappingV2 {
      * @param jsonDoc parsed json document
      * @return array of LanguageObject
      */
-    static LanguageObject[] getLabelsV2(Object jsonDoc) {
+    static LanguageValue[] getLabelsV2(Object jsonDoc) {
         // we read everything in as LanguageMap[] because that best matches the EDM implementation, then we convert to LanguageObjects[]
-        LanguageMap labelsV3 = eu.europeana.iiif.service.EdmManifestMappingV3.getLabelsV3(jsonDoc);
+        LanguageMap labelsV3 = EdmManifestMappingV3.getLabelsV3(jsonDoc);
         if (labelsV3 == null) {
             return null;
         }
@@ -120,13 +124,13 @@ public final class EdmManifestMappingV2 {
      * @param jsonDoc parsed json document
      * @return
      */
-    static LanguageObject[] getDescriptionV2(Object jsonDoc) {
+    static LanguageValue[] getDescriptionV2(Object jsonDoc) {
         // we read everything in as LanguageMap[] because that best matches the EDM implementation, then we convert to LanguageObjects[]
-        LanguageMap descriptionsV3 = eu.europeana.iiif.service.EdmManifestMappingV3.getDescriptionV3(jsonDoc);
+        LanguageMap descriptionsV3 = EdmManifestMappingV3.getDescriptionV3(jsonDoc);
         if (descriptionsV3 == null) {
             return null;
         }
-        return LanguageMapUtils.langMapToObjects(eu.europeana.iiif.service.EdmManifestMappingV3.getDescriptionV3(jsonDoc));
+        return LanguageMapUtils.langMapToObjects(EdmManifestMappingV3.getDescriptionV3(jsonDoc));
     }
 
     /**
@@ -135,8 +139,8 @@ public final class EdmManifestMappingV2 {
      * @param jsonDoc parsed json document
      * @return
      */
-    static eu.europeana.iiif.model.v2.MetaData[] getMetaDataV2(Object jsonDoc) {
-        Map<String, List<LanguageObject>> data = new LinkedHashMap<>();
+    static List<LabelledValue> getMetaDataV2(Object jsonDoc) {
+        Map<String, List<LanguageValue>> data = new LinkedHashMap<>();
         addMetaDataV2(data, JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcDate", LanguageMap[].class), "date");
         addMetaDataV2(data, JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcFormat", LanguageMap[].class), "format");
         addMetaDataV2(data, JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcRelation", LanguageMap[].class), "relation");
@@ -144,28 +148,28 @@ public final class EdmManifestMappingV2 {
         addMetaDataV2(data, JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcLanguage", LanguageMap[].class), "language");
         addMetaDataV2(data, JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcSource", LanguageMap[].class), "source");
 
-        List<eu.europeana.iiif.model.v2.MetaData> result = new ArrayList<>(data.entrySet().size());
-        for (Map.Entry<String, List<LanguageObject>> entry : data.entrySet()) {
+        List<LabelledValue> result = new ArrayList<>(data.entrySet().size());
+        for (Map.Entry<String, List<LanguageValue>> entry : data.entrySet()) {
             String label = entry.getKey();
-            List<LanguageObject> values = entry.getValue();
-            result.add(new eu.europeana.iiif.model.v2.MetaData(label, values.toArray(new LanguageObject[0])));
+            List<LanguageValue> values = entry.getValue();
+            result.add(new LabelledValue(label, values));
         }
 
         if (result.isEmpty()) {
             return null;
         }
-        return result.toArray(new eu.europeana.iiif.model.v2.MetaData[0]);
+        return result;
     }
 
     /**
      * We read in metadata as a LanguageMap[], but we need to convert it to Map consisting of labels and List<LanguageObjects>
      * Also if the key is 'def' we should leave that out (for v2)
      */
-    private static void addMetaDataV2(Map<String, List<LanguageObject>> metaData, LanguageMap[] dataToAdd, String fieldName) {
+    private static void addMetaDataV2(Map<String, List<LanguageValue>> metaData, LanguageMap[] dataToAdd, String fieldName) {
         for (LanguageMap map : dataToAdd) {
-            for (Map.Entry<String, String[]> entry : map.entrySet()) {
+            for (Map.Entry<String, List<String>>entry : map.entrySet()) {
                 String language = entry.getKey();
-                String[] values = entry.getValue();
+                List<String> values = entry.getValue();
                 for (String value: values) {
                     processMetaDataField(fieldName, metaData, language, value);
                 }
@@ -173,15 +177,15 @@ public final class EdmManifestMappingV2 {
         }
     }
 
-    private static void processMetaDataField(String fieldName,  Map<String, List<LanguageObject>> metaData, String language, String value) {
-        List<LanguageObject> langObjects;
+    private static void processMetaDataField(String fieldName,  Map<String, List<LanguageValue>> metaData, String language, String value) {
+        List<LanguageValue> langObjects;
         if (!metaData.containsKey(fieldName)) {
             langObjects = new ArrayList<>();
             metaData.put(fieldName, langObjects);
         } else {
             langObjects = metaData.get(fieldName);
         }
-        langObjects.add(new LanguageObject(language, value));
+        langObjects.add(new LanguageValue(language, value));
     }
 
     /**
@@ -189,12 +193,12 @@ public final class EdmManifestMappingV2 {
      * @param jsonDoc parsed json document
      * @return Image object, or null if no edmPreview was found
      */
-    static eu.europeana.iiif.model.v2.Image getThumbnailImageV2(String europeanaId, Object jsonDoc) {
+    static Image getThumbnailImageV2(String europeanaId, Object jsonDoc) {
         String thumbnailId = EdmManifestUtils.getThumbnailId(europeanaId, jsonDoc);
         if (StringUtils.isEmpty(thumbnailId)) {
             return null;
         }
-        return new eu.europeana.iiif.model.v2.Image(EdmManifestUtils.getThumbnailId(europeanaId, jsonDoc), null, null);
+        return new Image(EdmManifestUtils.getThumbnailId(europeanaId, jsonDoc));
     }
 
     /**
@@ -202,14 +206,12 @@ public final class EdmManifestMappingV2 {
      * @param webresourceId hasview image ID
      * @return Image object, or null if either provided String was null
      */
-    static eu.europeana.iiif.model.v2.Image getCanvasThumbnailImageV2(String webresourceId) {
+    static Image getCanvasThumbnailImageV2(String webresourceId) {
         if (StringUtils.isAnyEmpty(THUMBNAIL_API_URL, webresourceId)) {
             return null;
         }
-        return new eu.europeana.iiif.model.v2.Image(
-            THUMBNAIL_API_URL + webresourceId + CANVAS_THUMBNAIL_POSTFIX,
-            null,
-            null);
+        return new Image(
+            THUMBNAIL_API_URL + webresourceId + ManifestDefinitions.CANVAS_THUMBNAIL_POSTFIX);
     }
 
     /**
@@ -233,14 +235,14 @@ public final class EdmManifestMappingV2 {
      * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
      * @return array of 3 datasets
      */
-    static eu.europeana.iiif.model.v2.DataSet[] getDataSetsV2(ManifestSettings settings, String europeanaId) {
-        eu.europeana.iiif.model.v2.DataSet[] result = new eu.europeana.iiif.model.v2.DataSet[3];
-        result[0] = new eu.europeana.iiif.model.v2.DataSet(settings.getDatasetId(europeanaId, ".json-ld"),
-                AcceptUtils.MEDIA_TYPE_JSONLD);
-        result[1] = new eu.europeana.iiif.model.v2.DataSet(settings.getDatasetId(europeanaId, ".json"),
-                org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
-        result[2] = new eu.europeana.iiif.model.v2.DataSet(settings.getDatasetId(europeanaId, ".rdf"),
-                ManifestDefinitions.MEDIA_TYPE_RDF);
+    static List<Dataset> getDataSetsV2(IIIfSettings settings, String europeanaId) {
+        List<Dataset> result = new ArrayList<>(3);
+        result.add(new Dataset(settings.getDatasetId(europeanaId, ".json-ld"),
+                AcceptUtils.MEDIA_TYPE_JSONLD));
+        result.add(new Dataset(settings.getDatasetId(europeanaId, ".json"),
+                org.springframework.http.MediaType.APPLICATION_JSON_VALUE));
+        result.add(new Dataset(settings.getDatasetId(europeanaId, ".rdf"),
+                ManifestDefinitions.MEDIA_TYPE_RDF));
         return result;
     }
 
@@ -250,7 +252,7 @@ public final class EdmManifestMappingV2 {
      * @param jsonDoc parsed json document
      * @return
      */
-    static eu.europeana.iiif.model.v2.Sequence[] getSequencesV2(ManifestSettings settings, MediaTypes mediaTypes,String europeanaId, String isShownBy, Object jsonDoc) {
+    static List<Sequence> getSequencesV2(IIIfSettings settings, MediaTypes mediaTypes,String europeanaId, String isShownBy, Object jsonDoc) {
         // generate canvases in a same order as the web resources
         List<WebResource> sortedResources = EdmManifestUtils.getSortedWebResources(europeanaId, isShownBy, jsonDoc);
         if (sortedResources.isEmpty()) {
@@ -258,7 +260,7 @@ public final class EdmManifestMappingV2 {
         }
         int order = 1;
         Map<String, Object>[] services = JsonPath.parse(jsonDoc).read("$.object[?(@.services)].services[*]", Map[].class);
-        List<eu.europeana.iiif.model.v2.Canvas> canvases = new ArrayList<>(sortedResources.size());
+        List<Canvas> canvases = new ArrayList<>(sortedResources.size());
         for (WebResource webResource: sortedResources) {
             Canvas canvas = getCanvasV2(settings, mediaTypes, europeanaId, order, webResource, services);
             // for non supported media types we do not create any canvas. Case-4 of media type handling : See-EA-3413
@@ -270,10 +272,11 @@ public final class EdmManifestMappingV2 {
         // if there are canvas generated add the sequence
         if (!canvases.isEmpty()) {
             // there should be only 1 sequence, so sequence number is always 1
-            eu.europeana.iiif.model.v2.Sequence[] result = new eu.europeana.iiif.model.v2.Sequence[1];
-            result[0] = new eu.europeana.iiif.model.v2.Sequence();
-            result[0].setStartCanvas(settings.getCanvasId(europeanaId, 1));
-            result[0].setCanvases(canvases.toArray(new eu.europeana.iiif.model.v2.Canvas[0]));
+            List<Sequence> result = new ArrayList<>(1);
+            Sequence sequence = new Sequence();
+            sequence.setStartCanvas(settings.getCanvasId(europeanaId, 1));
+            sequence.setCanvases(canvases);
+            result.add(sequence);
             return result;
         }
         return null;
@@ -295,14 +298,14 @@ public final class EdmManifestMappingV2 {
      * @return Integer containing the page number of the canvas that refers to the edmIsShownBy, or else just the first
      *  Canvas. Null if there are no canvases
      */
-    static Integer getStartCanvasV2(eu.europeana.iiif.model.v2.Canvas[] items, String edmIsShownBy) {
+    static Integer getStartCanvasV2(Canvas[] items, String edmIsShownBy) {
         if (items == null) {
             LOG.trace("Start canvas = null (no canvases present)");
             return null;
         }
 
-        eu.europeana.iiif.model.v2.Canvas result = null;
-        for (eu.europeana.iiif.model.v2.Canvas c : items) {
+        Canvas result = null;
+        for (Canvas c : items) {
             String annotationBodyId = c.getStartImageAnnotation().getResource().getId();
             if (!StringUtils.isEmpty(edmIsShownBy) && edmIsShownBy.equals(annotationBodyId)) {
                 result = c;
@@ -321,14 +324,14 @@ public final class EdmManifestMappingV2 {
     /**
      * Generates a new canvas, but note that we do not fill the otherContent (Full-Text) here. That is done later
      */
-    private static eu.europeana.iiif.model.v2.Canvas getCanvasV2(ManifestSettings settings,
+    private static Canvas getCanvasV2(IIIfSettings settings,
                                                                  MediaTypes mediaTypes,
                                                                  String europeanaId,
                                                                  int order,
                                                                  WebResource webResource,
                                                                  Map<String, Object>[] services) {
-        eu.europeana.iiif.model.v2.Canvas c =
-                new eu.europeana.iiif.model.v2.Canvas(settings.getCanvasId(europeanaId, order), order);
+        Canvas c =
+                new Canvas(settings.getCanvasId(europeanaId, order), order);
 
         c.setLabel("p. "+order);
 
@@ -383,7 +386,7 @@ public final class EdmManifestMappingV2 {
         }
 
         // Now create the annotation body based on the media type (annotation has 1 annotationBody)
-        eu.europeana.iiif.model.v2.AnnotationBody annoBody = new eu.europeana.iiif.model.v2.AnnotationBody((String) webResource.get(EdmManifestUtils.ABOUT));
+        AnnotationBody annoBody = new AnnotationBody((String) webResource.get(EdmManifestUtils.ABOUT));
 
         // EA- 3436 add technical metadata for case 2 and 3
         // case 2
@@ -405,7 +408,7 @@ public final class EdmManifestMappingV2 {
         // body can have a service
         String serviceId = EdmManifestUtils.getServiceId(webResource, europeanaId);
         if (serviceId != null) {
-            eu.europeana.iiif.model.v2.Service service = new eu.europeana.iiif.model.v2.Service(serviceId, ManifestDefinitions.IMAGE_CONTEXT_VALUE);
+            Service service = new Service(serviceId, ManifestDefinitions.IMAGE_CONTEXT_VALUE);
             service.setProfile(EdmManifestUtils.lookupServiceDoapImplements(services, serviceId, europeanaId));
             annoBody.setService(service);
         }
