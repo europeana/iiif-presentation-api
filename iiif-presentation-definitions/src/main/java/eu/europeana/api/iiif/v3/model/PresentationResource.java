@@ -66,6 +66,7 @@ public abstract class PresentationResource extends IIIFv3Resource {
     @JsonProperty(JsonConstants.thumbnail)
     private List<Image> thumbnail;
 
+    // TODO are we sure this is string ???
     @JsonProperty(JsonConstants.rendering)
     private List<String> rendering;
 
@@ -107,9 +108,6 @@ public abstract class PresentationResource extends IIIFv3Resource {
                                        : (this.metadata = new ArrayList<>()));
     }
 
-    public void addMetadata(LabelledValue metadata) {
-        getMetadata().add(metadata);
-    }
 
     public LabelledValue getRequiredStatement() {
         return this.requiredStatement;

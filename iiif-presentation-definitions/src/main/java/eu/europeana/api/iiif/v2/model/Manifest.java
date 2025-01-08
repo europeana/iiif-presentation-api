@@ -76,4 +76,8 @@ public class Manifest extends PresentationResource {
         return ( this.sequences != null ? this.sequences
                                         : (this.sequences = new ArrayList<>()));
     }
+
+    public void setSequences(List<Sequence> sequences) {
+        this.sequences = sequences;
+    }
 }

@@ -41,7 +41,7 @@ public class LanguageValue {
         this.lang  = lang;
     }
 
-    protected LanguageValue() {}
+    public LanguageValue() {}
 
     public String getValue() {
         return this.value;

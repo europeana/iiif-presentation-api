@@ -1,11 +1,11 @@
 package eu.europeana.api.iiif.utils;
 
 import com.jayway.jsonpath.JsonPath;
-import eu.europeana.iiif.exception.DataInconsistentException;
-import eu.europeana.iiif.model.WebResource;
-import eu.europeana.iiif.model.WebResourceSorter;
-import eu.europeana.iiif.model.v3.LanguageMap;
-import eu.europeana.iiif.model.v3.Text;
+import eu.europeana.api.iiif.exceptions.DataInconsistentException;
+import eu.europeana.api.iiif.model.WebResource;
+import eu.europeana.api.iiif.service.WebResourceSorter;
+import eu.europeana.api.iiif.v3.model.LanguageMap;
+import eu.europeana.api.iiif.v3.model.content.Text;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,6 +39,8 @@ public final class EdmManifestUtils {
     public static final String EBUCORE_DURATION = "ebucoreDuration";
     public static final String EBUCORE_HAS_MIMETYPE = "ebucoreHasMimeType";
     public static final String LINGUISTIC = "zxx";
+    public static final String SERVICE = "Service";
+    public static final List<String> EMBEDED_RESOURCE_MIME_TYPES = List.of("application/json+oembed","application/xml+oembed");
 
 
     private EdmManifestUtils() {
@@ -55,7 +57,7 @@ public final class EdmManifestUtils {
      * @param jsonDoc parsed json document
      * @return string containing the Europeana ID of the object (dataset ID and record ID separated by a slash)
      */
-    static String getEuropeanaId(Object jsonDoc) {
+    public static String getEuropeanaId(Object jsonDoc) {
         return JsonPath.parse(jsonDoc).read("$.object.about", String.class);
     }
 
@@ -87,9 +89,9 @@ public final class EdmManifestUtils {
         LocalDate navDate = null;
         LanguageMap[] proxiesLangDates = JsonPath.parse(jsonDoc).read("$.object.proxies[*].dctermsIssued", LanguageMap[].class);
         for (LanguageMap langDates : proxiesLangDates) {
-            for (String[] dates : langDates.values()) {
+            for (List<String> dates : langDates.values()) {
                 // we assume there is only 1 value here
-                String date = (String) EdmManifestUtils.getFirstValueArray("navDate", europeanaId, dates);
+                String date = (String) EdmManifestUtils.getFirstValue("navDate", europeanaId, dates);
                 navDate = EdmDateUtils.dateStringToDate(date);
                 if (navDate != null) {
                     break;
@@ -112,13 +114,13 @@ public final class EdmManifestUtils {
      * @param jsonDoc parsed json document
      * @return {@link Text} containing reference to the landing page of the item on Europeana website
      */
-    public static Text[] getHomePage(String europeanaId, Object jsonDoc) {
+    public static Text getHomePage(String europeanaId, Object jsonDoc) {
         String[] landingPages = JsonPath.parse(jsonDoc).read("$.object.europeanaAggregation[?(@.edmLandingPage)].edmLandingPage", String[].class);
         String landingPage = (String) EdmManifestUtils.getFirstValueArray("landingPage", europeanaId, landingPages);
         if (landingPage == null) {
             return null;
         }
-        return new Text[]{new Text(landingPage, new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana"))};
+        return new Text(landingPage, new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana"), null);
     }
 
 
@@ -134,7 +136,7 @@ public final class EdmManifestUtils {
         }
 
         if (licenseMap != null && !licenseMap.values().isEmpty()) {
-            return (String) EdmManifestUtils.getFirstValueArray("license text", europeanaId, licenseMap.values().iterator().next());
+            return (String) EdmManifestUtils.getFirstValue("license text", europeanaId, licenseMap.values().iterator().next());
         }
         return null;
     }
@@ -273,12 +275,22 @@ public final class EdmManifestUtils {
      * @param values
      * @return first value object from the array of values
      */
-    static Object getFirstValueArray(String fieldName, String europeanaId, Object[] values) {
+    public static Object getFirstValueArray(String fieldName, String europeanaId, Object[] values) {
         if (values.length >= 1) {
             if (!StringUtils.isEmpty(fieldName) && values.length > 1) {
                 LOG.warn("Multiple {} values found for record {}, returning first", fieldName, europeanaId);
             }
             return values[0];
+        }
+        return null;
+    }
+
+    public static Object getFirstValue(String fieldName, String europeanaId, List<String> values) {
+        if (values.size() >= 1) {
+            if (!StringUtils.isEmpty(fieldName) && values.size() > 1) {
+                LOG.warn("Multiple {} values found for record {}, returning first", fieldName, europeanaId);
+            }
+            return values.get(0);
         }
         return null;
     }

@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URL;
 import java.time.ZonedDateTime;
 
@@ -124,10 +123,10 @@ public class ManifestController {
 
         String iiifVersion = AcceptUtils.getRequestVersion(request, version);
         if (StringUtils.isEmpty(iiifVersion)) {
-            throw new InvalidIIIFVersionException(ACCEPT_VERSION_INVALID);
+            throw new InvalidIIIFVersionException(vices ACCEPT_VERSION_INVALID);
         }
 
-        String json = manifestService.getRecordJson(id, wskey, recordApi);
+        String json = manifestService.getRecordJson(recordApi.toString(), id, wskey);
         ZonedDateTime lastModified = EdmManifestUtils.getRecordTimestampUpdate(json);
         String eTag = generateETag(id, lastModified, iiifVersion);
         HttpHeaders headers = CacheUtils.generateCacheHeaders("no-cache", eTag, lastModified, org.springframework.http.HttpHeaders.ACCEPT);
@@ -153,6 +152,7 @@ public class ManifestController {
         }
         AcceptUtils.addContentTypeToResponseHeader(headers, iiifVersion, isJson);
         return new ResponseEntity<>(manifestService.serializeManifest(manifest), headers, HttpStatus.OK);
+        return null;
     }
 
 

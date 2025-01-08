@@ -3,17 +3,16 @@ package eu.europeana.api.iiif.exceptions;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
 
-/**
- * Thrown when we find illegal user input
- * @author Patrick Ehlert
- * Created on 09-07-2018
- */
-public class IllegalArgumentException extends EuropeanaApiException {
+
+public class InvalidArgumentException extends EuropeanaApiException {
 
     private static final long serialVersionUID = 6920934255738422247L;
 
-    public IllegalArgumentException(String msg) {
+    public InvalidArgumentException(String msg) {
         super(msg);
+    }
+    public InvalidArgumentException(String msg, Throwable t) {
+        super(msg, t);
     }
 
     /**

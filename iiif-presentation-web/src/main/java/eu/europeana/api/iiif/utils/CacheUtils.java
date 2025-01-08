@@ -2,7 +2,7 @@ package eu.europeana.api.iiif.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.utils.DateUtils;
+import org.apache.hc.client5.http.utils.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

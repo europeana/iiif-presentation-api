@@ -29,7 +29,7 @@ public class Image extends ContentResource {
         super(id);
     }
 
-    protected Image() {}
+    public Image() {}
 
 
     @JsonProperty(JsonConstants.type)

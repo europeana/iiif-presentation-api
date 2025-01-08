@@ -1,0 +1,169 @@
+package eu.europeana.api.iiif.service;
+
+import eu.europeana.api.iiif.exceptions.DataInconsistentException;
+import eu.europeana.api.iiif.model.WebResource;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.*;
+
+/**
+ * Sorts the webresources based on how they are linked to each other according to their nextInSequence values.
+ * Note that we assume that 1) all webResources are part of 0 or 1 sequences and 2) all nextInSequence values have to
+ * exist in the provided array of webresources
+ *
+ * Basically the algorithm is as follows:
+ * 1. we iterate over all nodes and check each node if it's the start of a sequence
+ * 2. for all the found start nodes, we follow the sequence up to the end node (and remove the webresources part of that
+ * sequence, so we know which webresources are already processed)
+ * 3. the found sequences are added to the final result (in no particular order)
+ * 4. any remaining nodes should not be part of a sequence and are added last (also in no particular order)
+ *
+ * @author Patrick Ehlert
+ * Created on 07-03-2018
+ */
+public final class WebResourceSorter {
+
+    private static final Logger LOG = LogManager.getLogger(WebResourceSorter.class);
+
+    private WebResourceSorter() {
+        // private constructor to prevent initialiation
+    }
+
+    /**
+     * Sorts the provided webResource array. All sequences should be listed first (in reverse sequence order), then
+     * all webresources that are not part of a sequence should be ordered according to orderViews List
+     * if the records contains multiple sequences, then the one containing edmIsShownBY should be the first sequence.
+     * orderViews List contains edm:isShownBy/edmIsShowAt (EUScreen items) as the first element and then order of the edm:hasView
+     * If there are multiple sequences, the order between sequences doesn't matter. Also the order between webresources
+     * not part of a sequence doesn't matter.
+     * @throws DataInconsistentException when
+     * @return sorted array of webResources
+     */
+    public static List<WebResource> sort(List<WebResource> webResources, List<String> orderViews) throws DataInconsistentException {
+        LOG.trace("WebResources = {}", webResources);
+
+        // to simplify/speed up processing we generate a hashmap that links all ids to the appropriate webResource object
+        // and a hashmap with all the id's (keys) and nextInSequence (values)
+        HashMap<String, WebResource> idsWebResources = new HashMap<>();
+        HashMap<String, String> idsNextInSequence = new HashMap<>();
+        for (WebResource wr : webResources) {
+            String wrId = wr.getId();
+            if (idsWebResources.put(wrId, wr) != null) {
+                throw new DataInconsistentException("Duplicate webresource id found "+wrId);
+            }
+            String nextInSequence = wr.getNextInSequence();
+            idsNextInSequence.put(wrId, nextInSequence);
+            LOG.trace("    {} -> {} ", wrId, nextInSequence);
+        }
+
+        // find all start nodes (order doesn't matter)
+        Set<String> startNodes = getSequenceStartItems(idsNextInSequence);
+        LOG.trace("  StartNodes = {}", startNodes);
+
+        // for each start node, follow the sequence down to the end node and list webresource in reverse order
+        ArrayList<WebResource> result = new ArrayList<>();
+        Iterator<String> startNodeIds = startNodes.iterator();
+        while (startNodeIds.hasNext()) {
+            String startNodeId = startNodeIds.next();
+            List<WebResource> sequence = getSequence(startNodeId, idsWebResources, idsNextInSequence);
+            LOG.trace("  Sequence = {}", sequence);
+            // add the edmIsShowmBy sequence first in the results
+            if (seqContainsEdmIsShownBy(orderViews.get(0), sequence)) {
+                result.addAll(0, sequence);
+            } else {
+                result.addAll(sequence);
+            }
+        }
+
+        // add any remaining nodes as the order of orderViews List
+        // (these should be isolated webresources, not part of any sequence)
+        for (String orderId : orderViews) {
+            if(idsWebResources.keySet().contains(orderId)) {
+                WebResource isolated = idsWebResources.get(orderId);
+                if (isolated.hasNextInSequence()) {
+                    throw new DataInconsistentException("Expected webresource "+isolated.getId()+" to not have a nextInSequence value");
+                }
+                LOG.trace("  Adding ordered isolated node = {}", isolated);
+                result.add(isolated);
+            }
+        }
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Webresources = {}", result);
+        }
+        return result;
+    }
+
+    /**
+     * Iterate over the sequence and find if the sequence contains edmIsShownBy
+     */
+    private static boolean seqContainsEdmIsShownBy(String edmIsShownBy, List<WebResource> sequence) {
+        for(WebResource wr : sequence) {
+            if(wr.getId().equals(edmIsShownBy)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Iterate over the webResources and find all items that are the start points of a sequence.
+     */
+    private static Set<String> getSequenceStartItems(Map<String, String> idsSequences) throws DataInconsistentException {
+        Set<String> result = new HashSet<>();
+
+        Iterator<String> ids = idsSequences.keySet().iterator();
+        while (ids.hasNext()) {
+            String id = ids.next();
+            if (isStartOfSequence(id, idsSequences)) {
+                result.add(id);
+            }
+        }
+        return result;
+    }
+
+
+    /**
+     *  Check if the provided webResource is the start point of a sequence (i.e. it has a 'nextInSequence' and there
+     *  is no other webResource that points to it)
+     */
+    private static boolean isStartOfSequence(String webResourceId, Map<String, String> idsSequences) throws DataInconsistentException {
+        // check if it has a nextInSequence
+        String nextInSequenceId = idsSequences.get(webResourceId);
+        if (StringUtils.isNotEmpty(nextInSequenceId)) {
+            // verify the nextInSequence webresource is available
+            if (!idsSequences.keySet().contains(nextInSequenceId)) {
+                throw new DataInconsistentException("Inconsistent data: webresource " +webResourceId+ " hasNextInSequence "
+                        +nextInSequenceId+ " but that webresource cannot be found!");
+            }
+            // check if no other webResources point to this webResource
+            return !idsSequences.values().contains(webResourceId);
+        }
+        return false;
+    }
+
+    /**
+     * Returns the entire sequence that starts in the provided startNode, in reverse order.
+     * Note that we remove all the webresources we found from the provided maps so we 1) know which ones we already
+     * processed later and 2) can check data consistency
+     */
+    private static ArrayList<WebResource> getSequence(String startNodeId,
+                                                      Map<String, WebResource> idsWebResources,
+                                                      Map<String, String> idsNextInSequence) throws DataInconsistentException {
+        ArrayList<WebResource> result = new ArrayList<>();
+        String nodeId = startNodeId;
+        do {
+            WebResource wr = idsWebResources.remove(nodeId);
+            if (wr == null) {
+                throw new DataInconsistentException("Unable to find webresource " + startNodeId + ". Most likely it's part of another sequence");
+            } else {
+                result.add(0, wr);
+            }
+            nodeId = idsNextInSequence.remove(nodeId);
+        } while(nodeId != null);
+        return result;
+    }
+
+}

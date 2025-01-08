@@ -80,6 +80,9 @@ public class Canvas extends PresentationResource {
                                      : (this.images = new ArrayList<>()));
     }
 
+    public void setImages(List<Annotation> images) {
+        this.images = images;
+    }
 
     public boolean hasOtherContent() {
         return ( this.otherContent != null && !this.otherContent.isEmpty() );

@@ -1,6 +1,6 @@
 package eu.europeana.api.iiif.exceptions;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 
 /**
  * Exception that is thrown is there is a problem parsing or serializing an exception

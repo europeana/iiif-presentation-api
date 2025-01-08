@@ -50,10 +50,9 @@
         <fulltext.api.version>0.9.7</fulltext.api.version>
 
         <maven-surefire.version>2.22.2</maven-surefire.version>
-        <jackson.version>2.18.1</jackson.version>
+        <jackson.version>2.18.2</jackson.version>
 
-         <!-- TODO update to httpclient 5-->
-        <http-client.version>4.5.13</http-client.version>
+        <http-client5.version>5.4.1</http-client5.version>
         <jsonpath.version>2.7.0</jsonpath.version>
 
 

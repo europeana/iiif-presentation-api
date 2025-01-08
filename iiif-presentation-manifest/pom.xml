@@ -25,6 +25,13 @@
             <artifactId>iiif-presentation-definitions</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>eu.europeana.api</groupId>
+            <artifactId>commons-sb3-error</artifactId>
+            <version>${api-commons-sb3}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
@@ -33,14 +40,9 @@
 
         <!-- for retrieving data -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${http-client.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient-cache</artifactId>
-            <version>${http-client.version}</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>${http-client5.version}</version>
         </dependency>
 
         <!-- for parsing record json -->

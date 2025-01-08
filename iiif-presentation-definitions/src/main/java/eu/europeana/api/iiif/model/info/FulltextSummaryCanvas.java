@@ -12,6 +12,7 @@ import java.util.Map;
 
 /**
  * Created by luthien on 15/04/2021.
+ * Srishti - TODO create definitions module in Fulltext and use the same class
  */
 public class FulltextSummaryCanvas extends IIIFv3Resource {
 

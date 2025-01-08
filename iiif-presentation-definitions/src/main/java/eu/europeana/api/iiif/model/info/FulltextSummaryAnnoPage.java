@@ -8,6 +8,7 @@ import eu.europeana.api.iiif.v3.model.IIIFv3Resource;
 
 /**
  * Created by luthien on 15/04/2021.
+ * Srishti - TODO create definitions module in Fulltext and use the same class
  */
 public class FulltextSummaryAnnoPage extends IIIFv3Resource {
 
