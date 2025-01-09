@@ -15,7 +15,7 @@ public class IIIfSettings {
 
     private static final Logger LOG = LogManager.getLogger(IIIfSettings.class);
 
-    @Value("${iiif.api.base.url:}")
+    @Value("${iiif-api.base.url:}")
     private String iiifApiBaseUrl;
 
     @Value("${iiif-api.presentation.path:}")

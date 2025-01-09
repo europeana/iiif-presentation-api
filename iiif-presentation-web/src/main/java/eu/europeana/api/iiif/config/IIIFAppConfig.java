@@ -3,6 +3,8 @@ package eu.europeana.api.iiif.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import eu.europeana.api.caching.CachingStrategy;
+import eu.europeana.api.caching.ChainingCachingStrategy;
 import eu.europeana.api.iiif.exceptions.InvalidConfigurationException;
 import eu.europeana.api.iiif.generator.CollectionV2Generator;
 import eu.europeana.api.iiif.generator.CollectionV3Generator;
@@ -31,6 +33,11 @@ public class IIIFAppConfig {
 
     @Resource
     private IIIfSettings settings;
+
+    @Bean
+    public CachingStrategy getCachingStrategy() {
+        return new ChainingCachingStrategy();
+    }
 
     @Bean(name = IIIFConstants.BEAN_IIIF_JSON_HANDLER)
     public IIIFJsonHandler iiifJsonHandler() {

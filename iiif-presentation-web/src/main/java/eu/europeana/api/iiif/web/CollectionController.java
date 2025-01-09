@@ -1,11 +1,13 @@
 package eu.europeana.api.iiif.web;
 
 
+import eu.europeana.api.caching.CachingHeaders;
+import eu.europeana.api.caching.CachingStrategy;
+import eu.europeana.api.caching.CachingUtils;
+import eu.europeana.api.caching.ResourceCaching;
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.commons_sb3.web.http.HttpHeaders;
-import eu.europeana.api.iiif.exceptions.CollectionException;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
 import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.service.CollectionService;
@@ -19,7 +21,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,11 +44,13 @@ public class CollectionController {
 
     private final CollectionService collectionService;
     private final IIIFJsonHandler iiifJsonHandler;
+    private final CachingStrategy cachingStrategy;
 
     @Autowired
-    public CollectionController(CollectionService collectionService, IIIFJsonHandler iiifJsonHandler) {
+    public CollectionController(CollectionService collectionService, IIIFJsonHandler iiifJsonHandler, CachingStrategy cachingStrategy) {
         this.collectionService = collectionService;
         this.iiifJsonHandler = iiifJsonHandler;
+        this.cachingStrategy = cachingStrategy;
     }
 
 
@@ -80,8 +83,13 @@ public class CollectionController {
             LOGGER.debug("IIIF Version {} , RDF format {}", iiifVersion, format);
         }
 
-        IIIFResource resource = collectionService.retrieveCollection(iiifVersion);
         org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
+        // TODO where do i get last modification date for caching
+        if (CachingHeaders.cachingHeadersPresent(request)) {
+           return cachingStrategy.applyForReadAccess( new ResourceCaching("", CachingUtils.genWeakEtag(), null), request, headers);
+        }
+
+        IIIFResource resource = collectionService.retrieveCollection(iiifVersion);
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
@@ -121,8 +129,13 @@ public class CollectionController {
             LOGGER.debug("IIIF Version {} , RDF format {}", iiifVersion, format);
         }
 
-        IIIFResource resource = collectionService.getGalleryCollection(iiifVersion);
         org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
+        // TODO where do i get last modification date for caching
+        if (CachingHeaders.cachingHeadersPresent(request)) {
+            return cachingStrategy.applyForReadAccess( new ResourceCaching("", CachingUtils.genWeakEtag(), null), request, headers);
+        }
+
+        IIIFResource resource = collectionService.getGalleryCollection(iiifVersion);
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
@@ -182,8 +195,13 @@ public class CollectionController {
             LOGGER.debug("IIIF Version {} , RDF format {}", iiifVersion, format);
         }
 
-        IIIFResource resource = collectionService.retrieveGallery(iiifVersion, setId);
         org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
+        // TODO where do i get last modification date for caching
+        if (CachingHeaders.cachingHeadersPresent(request)) {
+            return cachingStrategy.applyForReadAccess( new ResourceCaching("", CachingUtils.genWeakEtag(), null), request, headers);
+        }
+
+        IIIFResource resource = collectionService.retrieveGallery(iiifVersion, setId);
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
