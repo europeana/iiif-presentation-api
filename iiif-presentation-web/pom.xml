@@ -100,12 +100,6 @@
 
         <dependency>
             <groupId>eu.europeana.api</groupId>
-            <artifactId>commons-sb3-definitions</artifactId>
-            <version>${api-commons-sb3}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>eu.europeana.api</groupId>
             <artifactId>commons-sb3-web</artifactId>
             <version>${api-commons-sb3}</version>
         </dependency>

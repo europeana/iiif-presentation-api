@@ -8,10 +8,7 @@ import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.*;
 
 import eu.europeana.api.iiif.v3.io.JsonConstants;
 
@@ -86,5 +83,31 @@ public class Manifest extends PresentationResource {
     public List<Canvas> getItems() {
         return ( this.items != null ? this.items
                                     : (this.items = new ArrayList<>()));
+    }
+
+
+    // TODO review these changes, added as they are present in manifest api
+    @JsonIgnore
+    private String europeanaId; // for internal use only
+    @JsonIgnore
+    private String isShownBy; // for internal use only
+
+    public String getEuropeanaId() {
+        return europeanaId;
+    }
+
+    public String getIsShownBy() {
+        return isShownBy;
+    }
+
+    /**
+     * Create a new empty manifest (only id, context and logo ar filled in)
+     * @param europeanaId
+     * @param manifestId
+     */
+    public Manifest(String europeanaId, String manifestId, String isShownBy) {
+        super(manifestId);
+        this.europeanaId = europeanaId;
+        this.isShownBy = isShownBy;
     }
 }

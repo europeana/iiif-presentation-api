@@ -66,6 +66,7 @@ public abstract class PresentationResource extends IIIFv3Resource {
     @JsonProperty(JsonConstants.thumbnail)
     private List<Image> thumbnail;
 
+    // TODO are we sure this is string ???
     @JsonProperty(JsonConstants.rendering)
     private List<String> rendering;
 
@@ -106,6 +107,7 @@ public abstract class PresentationResource extends IIIFv3Resource {
         return ( this.metadata != null ? this.metadata
                                        : (this.metadata = new ArrayList<>()));
     }
+
 
     public LabelledValue getRequiredStatement() {
         return this.requiredStatement;
@@ -152,6 +154,9 @@ public abstract class PresentationResource extends IIIFv3Resource {
                                       : (this.seeAlso = new ArrayList<>()));
     }
 
+    public void setSeeAlso(List<Dataset> seeAlso) {
+        this.seeAlso = seeAlso;
+    }
 
     public boolean hasServices() {
         return ( this.service != null && !this.service.isEmpty() );
@@ -160,6 +165,10 @@ public abstract class PresentationResource extends IIIFv3Resource {
     public List<Service> getServices() {
         return ( this.service != null ? this.service
                                       : (this.service = new ArrayList<>()));
+    }
+
+    public void addService(Service service) {
+        getServices().add(service);
     }
 
 

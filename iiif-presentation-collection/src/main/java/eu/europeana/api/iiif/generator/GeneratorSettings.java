@@ -72,8 +72,8 @@ public class GeneratorSettings {
     }
 
     /**
-     * {iiifApiBaseUrl}/presentation/<DATASET_ID>/<RECORD_ID>/manifest
-     * @return
+     *
+     * @return   {iiifApiBaseUrl}/presentation/<DATASET_ID>/<RECORD_ID>/manifest
      */
     public String getIIIfManifestUrl() {
         return iiifApiBaseUrl + iiifApiPresentationPath + iiifApiIdPlaceholder + iiifApiManifestPath;

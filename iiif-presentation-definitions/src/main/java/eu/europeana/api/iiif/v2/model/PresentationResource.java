@@ -118,7 +118,6 @@ public abstract class PresentationResource extends IIIFv2Resource {
                                        : (this.metadata = new ArrayList<>()));
     }
 
-
     public String getAttribution() {
         return this.attribution;
     }
@@ -156,6 +155,10 @@ public abstract class PresentationResource extends IIIFv2Resource {
     }
 
 
+    public void setSeeAlso(List<Dataset> seeAlso) {
+        this.seeAlso = seeAlso;
+    }
+
     public boolean hasServices() {
         return ( this.service != null && !this.service.isEmpty() );
     }
@@ -164,7 +167,6 @@ public abstract class PresentationResource extends IIIFv2Resource {
         return ( this.service != null ? this.service
                                       : (this.service = new ArrayList<>()));
     }
-
 
     public String getWithin() {
         return this.within;

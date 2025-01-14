@@ -3,11 +3,13 @@ package eu.europeana.api.iiif.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.api.caching.CachingStrategy;
 import eu.europeana.api.caching.ChainingCachingStrategy;
 import eu.europeana.api.iiif.exceptions.InvalidConfigurationException;
 import eu.europeana.api.iiif.generator.CollectionV2Generator;
 import eu.europeana.api.iiif.generator.CollectionV3Generator;
+import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
 import eu.europeana.api.iiif.utils.IIIFConstants;
 import eu.europeana.api.iiif.v2.io.LanguageValueSerializer;
@@ -22,7 +24,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
@@ -31,8 +40,39 @@ public class IIIFAppConfig {
 
     private static final Logger LOG = LogManager.getLogger(IIIFAppConfig.class);
 
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX");
+
     @Resource
     private IIIfSettings settings;
+
+    @Bean(name = IIIFConstants.BEAN_MEDIA_TYPES)
+    public MediaTypes getMediaTypes() throws IOException {
+        String mediaTypeXMLConfigFile = settings.getMediaXMLConfig();
+
+        MediaTypes mediaTypes;
+        try (InputStream inputStream = getClass().getResourceAsStream(mediaTypeXMLConfigFile)) {
+            assert inputStream != null;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+                mediaTypes = xmlMapper().readValue(contents, MediaTypes.class);
+            }
+        }
+
+        if (!mediaTypes.mediaTypeCategories.isEmpty()) {
+            mediaTypes.getMap().putAll(mediaTypes.mediaTypeCategories.stream().filter(media -> !media.isEuScreen()).collect(Collectors.toMap(MediaType::getMimeType, e-> e)));
+        } else {
+            LOG.error("media Categories not configured at startup. mediacategories.xml file not added or is empty");
+        }
+        return mediaTypes;
+    }
+
+    @Bean(IIIFConstants.BEAN_XML_MAPPER)
+    public XmlMapper xmlMapper() {
+        XmlMapper xmlMapper = new XmlMapper();
+        xmlMapper.setDateFormat(dateFormat);
+        return xmlMapper;
+    }
+
 
     @Bean
     public CachingStrategy getCachingStrategy() {
@@ -114,27 +154,5 @@ public class IIIFAppConfig {
         properties.put(ClientConfiguration.PROP_OAUTH_REQUEST_PARAMS, settings.getOauthTokenRequestParams());
 
         return properties;
-    }
-
-
-    public static ObjectMapper buildV3Mapper() {
-        ObjectMapper mapper = new ObjectMapper();
-
-        SimpleModule module = new SimpleModule();
-
-        mapper.configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
-        mapper.registerModule(module);
-
-        mapper.setVisibility(
-                mapper.getVisibilityChecker()
-                        .withCreatorVisibility(NONE)
-                        .withFieldVisibility(NONE)
-                        .withGetterVisibility(NONE)
-                        .withIsGetterVisibility(NONE)
-                        .withSetterVisibility(NONE));
-
-
-        mapper.findAndRegisterModules();
-        return mapper;
     }
 }
