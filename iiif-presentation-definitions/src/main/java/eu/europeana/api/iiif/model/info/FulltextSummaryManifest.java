@@ -31,6 +31,10 @@ public class FulltextSummaryManifest implements Serializable {
     @JsonProperty("items")
     private List<FulltextSummaryCanvas> canvases;
 
+    FulltextSummaryManifest() {
+        // for jackson deserialisation
+    }
+
     /**
      * This is a container object to group "fake" SummaryCanvas objects AnnoPages for a given Fulltext record / object
      *

@@ -1,5 +1,6 @@
 package eu.europeana.api.iiif.utils;
 
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * This class was partly copied from Fulltext API, to avoid adding another dependency
@@ -12,10 +13,10 @@ public class GenerateUtils {
      * @param mediaUrl media (target) url
      * @return MD5 hash of media url truncated to the first 5 characters
      */
-//    public static String derivePageId(String mediaUrl) {
-//        // truncate hash to reduce URL length.
-//        // Should not be changed as this method can be used in place of fetching the pageId from the
-//        // database.
-//        return DigestUtils.sha1Hex(mediaUrl).substring(0,7);
-//    }
+    public static String derivePageId(String mediaUrl) {
+        // truncate hash to reduce URL length.
+        // Should not be changed as this method can be used in place of fetching the pageId from the
+        // database.
+        return DigestUtils.sha1Hex(mediaUrl).substring(0,7);
+    }
 }

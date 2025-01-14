@@ -45,6 +45,14 @@
             <version>${http-client5.version}</version>
         </dependency>
 
+<!--    To generate MD5 hash. See - eu.europeana.api.iiif.utils.GenerateUtils -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons-codec.version}</version>
+        </dependency>
+
+
         <!-- for parsing record json -->
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>

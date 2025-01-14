@@ -23,6 +23,7 @@ import java.time.ZonedDateTime;
 
 import static eu.europeana.api.iiif.utils.IIIFConstants.ACCEPT_HEADER_JSON;
 import static eu.europeana.api.iiif.utils.IIIFConstants.ACCEPT_HEADER_JSONLD;
+import static eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils.ACCEPT_VERSION_INVALID;
 
 
 /**
@@ -123,10 +124,10 @@ public class ManifestController {
 
         String iiifVersion = AcceptUtils.getRequestVersion(request, version);
         if (StringUtils.isEmpty(iiifVersion)) {
-            throw new InvalidIIIFVersionException(vices ACCEPT_VERSION_INVALID);
+            throw new InvalidIIIFVersionException(ACCEPT_VERSION_INVALID);
         }
 
-        String json = manifestService.getRecordJson(recordApi.toString(), id, wskey);
+        String json = manifestService.getRecordJson(recordApi, id, wskey);
         ZonedDateTime lastModified = EdmManifestUtils.getRecordTimestampUpdate(json);
         String eTag = generateETag(id, lastModified, iiifVersion);
         HttpHeaders headers = CacheUtils.generateCacheHeaders("no-cache", eTag, lastModified, org.springframework.http.HttpHeaders.ACCEPT);
@@ -152,7 +153,6 @@ public class ManifestController {
         }
         AcceptUtils.addContentTypeToResponseHeader(headers, iiifVersion, isJson);
         return new ResponseEntity<>(manifestService.serializeManifest(manifest), headers, HttpStatus.OK);
-        return null;
     }
 
 

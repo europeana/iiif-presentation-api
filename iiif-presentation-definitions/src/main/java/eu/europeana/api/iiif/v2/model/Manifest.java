@@ -8,11 +8,7 @@ import static eu.europeana.api.iiif.v2.io.JsonConstants.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.*;
 
 import eu.europeana.api.iiif.v2.io.JsonConstants;
 
@@ -26,6 +22,7 @@ import eu.europeana.api.iiif.v2.io.JsonConstants;
                    , attribution, license, logo, seeAlso, service
                    , within, related, navDate, viewingHint, viewingDirection
                    , thumbnail, rendering, sequences })
+// TODO needs to have europeana ID field for internal use
 public class Manifest extends PresentationResource {
 
     @JsonProperty(JsonConstants.navDate)
@@ -79,5 +76,33 @@ public class Manifest extends PresentationResource {
 
     public void setSequences(List<Sequence> sequences) {
         this.sequences = sequences;
+    }
+
+
+    // TODO review these changes, added as they are present in manifest api
+    @JsonIgnore
+    private Integer startCanvasPageNr; // for internal use only, similar to 'start' field in v3
+    @JsonIgnore
+    private String europeanaId; // for internal use only
+    @JsonIgnore
+    private String isShownBy; // for internal use only
+
+    public String getEuropeanaId() {
+        return europeanaId;
+    }
+
+    public String getIsShownBy() {
+        return isShownBy;
+    }
+
+    /**
+     * Create a new empty manifest (only id is filled)
+     * @param europeanaId
+     * @param manifestId
+     */
+    public Manifest(String europeanaId, String manifestId, String isShownBy) {
+        super(manifestId);
+        this.europeanaId = europeanaId;
+        this.isShownBy = isShownBy;
     }
 }

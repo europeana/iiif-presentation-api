@@ -8,10 +8,7 @@ import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.*;
 
 import eu.europeana.api.iiif.v3.io.JsonConstants;
 
@@ -114,4 +111,33 @@ public class Canvas extends PresentationResource {
         return ( this.annotations != null ? this.annotations
                                   : (this.annotations = new ArrayList<>()));
     }
+
+    // TODO review this added as it is present in manifest api
+
+    @JsonIgnore
+    private int pageNr; // for internal use
+
+    public int getPageNr() {
+        return pageNr;
+    }
+
+    /**
+     * Create a new canvas object
+     * @param id
+     * @param pageNr
+     */
+    public Canvas(String id, int pageNr) {
+        super(id);
+        this.pageNr = pageNr;
+    }
+
+    @JsonIgnore
+    public Annotation getStartCanvasAnnotation() {
+        if (items == null || items.size() > 0) {
+            return null;
+        }
+        return items.get(0).getItems().get(0);
+    }
+
+
 }

@@ -1,6 +1,11 @@
 package eu.europeana.api.iiif.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.spi.json.JacksonJsonNodeJsonProvider;
+import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.config.IIIfSettings;
 import eu.europeana.api.iiif.config.MediaTypes;
@@ -22,9 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -57,33 +60,33 @@ public class ManifestService {
         this.mediaTypes = mediaTypes;
         mapper = new ObjectMapper();
 
-//        // configure jsonpath: we use jsonpath in combination with Jackson because that makes it easier to know what
-//        // type of objects are returned (see also https://stackoverflow.com/a/40963445)
-//        com.jayway.jsonpath.Configuration.setDefaults(new com.jayway.jsonpath.Configuration.Defaults() {
-//
-//            private final JsonProvider jsonProvider = new JacksonJsonNodeJsonProvider();
-//            private final MappingProvider mappingProvider = new JacksonMappingProvider();
-//
-//            @Override
-//            public JsonProvider jsonProvider() {
-//                return jsonProvider;
-//            }
-//
-//            @Override
-//            public MappingProvider mappingProvider() {
-//                return mappingProvider;
-//            }
-//
-//            @Override
-//            public Set<Option> options() {
-//                if (Boolean.TRUE.equals(settings.getSuppressParseException())) {
-//                    // we want to be fault tolerant in production, but for testing we may want to disable this option
-//                    return EnumSet.of(Option.SUPPRESS_EXCEPTIONS);
-//                } else {
-//                    return EnumSet.noneOf(Option.class);
-//                }
-//            }
-//        });
+        // configure jsonpath: we use jsonpath in combination with Jackson because that makes it easier to know what
+        // type of objects are returned (see also https://stackoverflow.com/a/40963445)
+        com.jayway.jsonpath.Configuration.setDefaults(new com.jayway.jsonpath.Configuration.Defaults() {
+
+            private final JsonProvider jsonProvider = new JacksonJsonNodeJsonProvider();
+            private final MappingProvider mappingProvider = new JacksonMappingProvider();
+
+            @Override
+            public JsonProvider jsonProvider() {
+                return jsonProvider;
+            }
+
+            @Override
+            public MappingProvider mappingProvider() {
+                return mappingProvider;
+            }
+
+            @Override
+            public Set<Option> options() {
+                if (Boolean.TRUE.equals(settings.getSuppressParseException())) {
+                    // we want to be fault tolerant in production, but for testing we may want to disable this option
+                    return EnumSet.of(Option.SUPPRESS_EXCEPTIONS);
+                } else {
+                    return EnumSet.noneOf(Option.class);
+                }
+            }
+        });
 
         this.fulltextService = fulltextService;
         this.recordService = recordService;
@@ -101,11 +104,11 @@ public class ManifestService {
      *                               RecordNotFoundException if there was a 404,
      *                               RecordRetrieveException on all other problems)
      */
-    public String getRecordJson(String recordApiUrl, String recordId, String wsKey) throws EuropeanaApiException {
-        if (StringUtils.isNotEmpty(recordApiUrl)) {
-            return recordService.getRecordJson(recordApiUrl, recordId, wsKey);
+    public String getRecordJson(URL recordApiUrl, String recordId, String wsKey) throws EuropeanaApiException {
+        if (recordApiUrl != null) {
+            return recordService.getRecordJson(recordApiUrl + settings.getRecordApiPath(), recordId, wsKey);
         }
-        return recordService.getRecordJson(settings.getRecordApiBaseUrl(), recordId, wsKey);
+        return recordService.getRecordJson(settings.getRecordApiEndpoint(), recordId, wsKey);
     }
 
     /**
@@ -208,7 +211,7 @@ public class ManifestService {
                 // loop over canvases to add full-text link(s) to all
                 for (Canvas canvas : sequence.getCanvases()) {
                     // we need to generate the same annopageId hash based on imageId
-                    String apHash = GenerateUtils.derivePageId(canvas.getStartImageAnnotation().getResource().getId());
+                    String apHash = GenerateUtils.derivePageId(canvas.getStartImageAnnotation().getBody().getID());
                     FulltextSummaryCanvas ftCanvas = summaryCanvasMap.get(apHash);
                     if (ftCanvas == null) {
                         // This warning can be logged for empty pages that do not have a fulltext, but if we get a lot
@@ -226,11 +229,11 @@ public class ManifestService {
     }
 
     private void addFulltextLinkToCanvasV2(Canvas canvas, FulltextSummaryCanvas summaryCanvas) {
-        canvas.setOtherContent(summaryCanvas.getAnnoPageIDs().toArray(new String[0]));
-        for (eu.europeana.iiif.model.v2.Annotation ann : canvas.getImages()) {
+        canvas.getOtherContent().addAll(summaryCanvas.getAnnoPageIDs());
+        for (eu.europeana.api.iiif.v2.model.Annotation ann : canvas.getImages()) {
             // original language will be null for translation
             if (StringUtils.equalsAnyIgnoreCase(ann.getMotivation(), "sc:painting") && summaryCanvas.getOriginalLanguage() != null) {
-                ann.getResource().setOriginalLanguage(summaryCanvas.getOriginalLanguage());
+                ann.getBody().setLanguage(summaryCanvas.getOriginalLanguage());
             }
         }
     }
@@ -243,7 +246,7 @@ public class ManifestService {
      */
     private void fillInFullTextLinksV3(eu.europeana.api.iiif.v3.model.Manifest manifest, URL fullTextApi) throws EuropeanaApiException {
         Map<String, FulltextSummaryCanvas> summaryCanvasMap;
-        eu.europeana.api.iiif.v3.model.Canvas[] canvases = manifest.getItems();
+        List<eu.europeana.api.iiif.v3.model.Canvas> canvases = manifest.getItems();
         if (canvases != null) {
             // Get all the available AnnoPages incl translations from the summary endpoint of Fulltext
             String fullTextSummaryUrl = generateFullTextSummaryUrl(manifest.getEuropeanaId(), fullTextApi);
@@ -252,7 +255,7 @@ public class ManifestService {
                 // loop over canvases to add full-text link(s) to all
                 for (eu.europeana.api.iiif.v3.model.Canvas canvas : canvases) {
                     // we need to generate the same annopageId hash based on imageId
-                    String apHash = GenerateUtils.derivePageId(canvas.getStartCanvasAnnotation().getBody().getId());
+                    String apHash = GenerateUtils.derivePageId(canvas.getStartCanvasAnnotation().getBody().getID());
                     FulltextSummaryCanvas ftCanvas = summaryCanvasMap.get(apHash);
                     if (ftCanvas == null) {
                         // This warning can be logged for empty pages that do not have a fulltext, but if we get a lot
@@ -272,12 +275,12 @@ public class ManifestService {
     private void addFulltextLinkToCanvasV3(eu.europeana.api.iiif.v3.model.Canvas canvas, FulltextSummaryCanvas summaryCanvas) {
         List<AnnotationPage> summaryAnnoPages = new ArrayList<>();
         createFTSummaryAnnoPages(summaryAnnoPages, summaryCanvas);
-        canvas.setFtSummaryAnnoPages(summaryAnnoPages.toArray(new AnnotationPage[0]));
-        for (eu.europeana.iiif.model.v3.AnnotationPage ap : canvas.getItems()) {
-            for (eu.europeana.iiif.model.v3.Annotation ann : ap.getItems()) {
+        canvas.getAnnotations().addAll(summaryAnnoPages);
+        for (eu.europeana.api.iiif.v3.model.AnnotationPage ap : canvas.getItems()) {
+            for (eu.europeana.api.iiif.v3.model.Annotation ann : ap.getItems()) {
                 // for translations originalLanguage will be null
                 if (StringUtils.equalsAnyIgnoreCase(ann.getMotivation(), "painting") && summaryCanvas.getOriginalLanguage() != null) {
-                    ann.getBody().setOriginalLanguage(summaryCanvas.getOriginalLanguage());
+                    ann.getBody().setLanguage(summaryCanvas.getOriginalLanguage());
                 }
             }
         }
@@ -285,7 +288,10 @@ public class ManifestService {
 
     private void createFTSummaryAnnoPages(List<AnnotationPage> summaryAnnoPages, FulltextSummaryCanvas summaryCanvas) {
         for (FulltextSummaryAnnoPage sap : summaryCanvas.getFTSummaryAnnoPages()) {
-            summaryAnnoPages.add(new AnnotationPage(sap.getId(), sap.getLanguage(), sap.getTextGranularity(), sap.getSource()));
+            AnnotationPage page = new AnnotationPage(sap.getID());
+            summaryAnnoPages.add(page);
+            // TODO language source and text graulraity field in AnnotationPage class
+            //summaryAnnoPages.add(new AnnotationPage(sap.getId(), sap.getLanguage(), sap.getTextGranularity(), sap.getSource()));
         }
     }
 

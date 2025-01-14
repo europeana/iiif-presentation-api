@@ -112,9 +112,7 @@ public final class EdmManifestMappingV3 {
 
         // if Item is EU screen then get the mediaTypevalue and the isShownBy value is replaced with isShownAt if empty
         MediaType euScreenTypeHack = ifEuScreenGetMediaType(mediaTypes, jsonDoc, europeanaId, isShownBy);
-        Manifest manifest = new Manifest(europeanaId);
-        // todo understand the internal use of isshownby and manifest id
-        //Manifest manifest = new Manifest(europeanaId, ms.getManifestId(europeanaId), isShownBy);
+        Manifest manifest = new Manifest(europeanaId, ms.getManifestId(europeanaId), isShownBy);
         manifest.getServices().add(getServiceDescriptionV3(ms, europeanaId));
         // EA-3325
 //        manifest.setPartOf(getWithinV3(jsonDoc));

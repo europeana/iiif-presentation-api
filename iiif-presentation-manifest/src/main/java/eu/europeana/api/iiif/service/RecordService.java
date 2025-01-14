@@ -1,8 +1,6 @@
 package eu.europeana.api.iiif.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.iiif.connection.HttpConnection;
 import eu.europeana.api.iiif.exceptions.InvalidApiKeyException;
 import eu.europeana.api.iiif.exceptions.InvalidArgumentException;
 import eu.europeana.api.iiif.exceptions.RecordNotFoundException;
@@ -43,7 +41,7 @@ public class RecordService extends BaseService {
             CloseableHttpResponse response = httpConnection.get(uri.toString(), null, null);
             int responseCode = response.getCode();
             if (responseCode == HttpStatus.SC_OK) {
-                return mapper.readValue(EntityUtils.toString(response.getEntity()), String.class);
+                return EntityUtils.toString(response.getEntity());
             }
             if (responseCode == HttpStatus.SC_UNAUTHORIZED) {
                 throw new InvalidApiKeyException("Apikey is not valid !!");
@@ -74,9 +72,8 @@ public class RecordService extends BaseService {
             throw new InvalidArgumentException("Record Id must be present!!");
         }
         try {
-            return new URIBuilder(recordApiUrl).
-                    appendPath(recordId)
-                    .appendPath(".json")
+            return new URIBuilder(recordApiUrl)
+                    .appendPath(recordId + ".json")
                     .addParameter("wskey", wskey)
                     .build();
         } catch (URISyntaxException e) {
