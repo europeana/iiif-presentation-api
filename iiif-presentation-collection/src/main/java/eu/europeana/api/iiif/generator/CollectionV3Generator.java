@@ -99,7 +99,7 @@ public class CollectionV3Generator implements GeneratorConstants {
     }
 
     protected Dataset newDataset(UserSet set) {
-        Dataset ds = new Dataset(buildUrlWithSetId(settings.getSetApiBaseUrl(), set.getIdentifier()) + EXTENSION_JSONLD);
+        Dataset ds = new Dataset(buildUrlWithSetId(settings.getSetApiBaseUrl(), set.getIdentifier()) + "." + EXTENSION_JSONLD);
         ds.setFormat(MIMETYPE_JSONLD);
         ds.setProfile(SET_JSONLD_CONTEXT);
         return ds;

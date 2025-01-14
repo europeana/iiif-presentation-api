@@ -1,6 +1,3 @@
-/**
- * 
- */
 package eu.europeana.api.caching;
 
 import java.time.ZonedDateTime;
