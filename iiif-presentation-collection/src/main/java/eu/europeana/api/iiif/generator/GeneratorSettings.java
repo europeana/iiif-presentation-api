@@ -9,7 +9,7 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource(value = "classpath:iiif.user.properties", ignoreResourceNotFound = true)
 public class GeneratorSettings {
 
-    @Value("${iiif.api.base.url:}")
+    @Value("${iiif-api.base.url:}")
     private String iiifApiBaseUrl;
 
     @Value("${iiif-api.presentation.path:}")
