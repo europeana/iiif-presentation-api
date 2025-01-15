@@ -22,14 +22,16 @@ public class FulltextSummaryCanvas extends IIIFv3Resource {
 
     private String originalLanguage;
 
+    @JsonProperty(JsonConstants.type)
+    private String type;
+
     @JsonProperty("annotations")
     private List<FulltextSummaryAnnoPage> ftSummaryAnnoPages;
 
     public FulltextSummaryCanvas(){}
 
-    @JsonProperty(JsonConstants.type)
     public String getType() {
-        return ManifestDefinitions.INFO_CANVAS_TYPE;
+        return this.type;
     }
 
     /**

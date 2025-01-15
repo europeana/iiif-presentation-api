@@ -19,6 +19,8 @@ public class FulltextSummaryAnnoPage extends IIIFv3Resource {
 
     private String[] textGranularity;
 
+    private String type;
+
     @JsonIgnore
     private boolean orig;
 
@@ -44,7 +46,7 @@ public class FulltextSummaryAnnoPage extends IIIFv3Resource {
 
     @JsonProperty(JsonConstants.type)
     public String getType() {
-        return ManifestDefinitions.INFO_ANNOPAGE_TYPE;
+        return this.type;
     }
 
     public String getLanguage() {

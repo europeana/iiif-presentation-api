@@ -110,7 +110,7 @@ public class Canvas extends PresentationResource {
 
     @JsonIgnore
     public Annotation getStartImageAnnotation() {
-        if (images == null || images.size() > 0) {
+        if (images == null || images.size() == 0) {
             return null;
         }
         return images.get(0);

@@ -1,13 +1,12 @@
 package eu.europeana.api.iiif.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.iiif.connection.HttpConnection;
 
 import eu.europeana.api.iiif.exceptions.FullTextCheckException;
 import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
 import eu.europeana.api.iiif.model.info.FulltextSummaryManifest;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
@@ -35,7 +34,9 @@ public class FulltextService extends BaseService {
         try {
             CloseableHttpResponse response = httpConnection.get(fulltextUrl, null, null);
             if (response.getCode() == HttpStatus.SC_OK) {
-                return mapper.readValue(EntityUtils.toString(response.getEntity()), FulltextSummaryManifest.class);
+                HttpEntity entity = response.getEntity();
+                String jsonV = EntityUtils.toString(entity);
+                return mapper.readValue(jsonV, FulltextSummaryManifest.class);
             }
             LOG.error("Error retrieving fulltext summary {}, reason {}", fulltextUrl, response.getReasonPhrase());
             throw new FullTextCheckException("Error retrieving fulltext summary - " + response.getReasonPhrase());
@@ -63,6 +64,7 @@ public class FulltextService extends BaseService {
      *
      * @return
      */
+    // TODO we are executing ftSummaryCanvasToAdd.getPageNumber() twice
     private Map<String, FulltextSummaryCanvas> createCanvasMap(FulltextSummaryManifest summary) {
         LinkedHashMap<String, FulltextSummaryCanvas> summaryCanvasMap = new LinkedHashMap<>();
 

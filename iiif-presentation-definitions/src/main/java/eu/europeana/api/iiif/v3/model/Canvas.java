@@ -133,7 +133,7 @@ public class Canvas extends PresentationResource {
 
     @JsonIgnore
     public Annotation getStartCanvasAnnotation() {
-        if (items == null || items.size() > 0) {
+        if (items == null || items.size() == 0) {
             return null;
         }
         return items.get(0).getItems().get(0);
