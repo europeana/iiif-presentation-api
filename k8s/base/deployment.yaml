@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iiif-presentation-api-deployment
+spec:
+  # selector.matchLabels is provided via Kustomize
+  template:
+    spec:
+      containers:
+        - name: iiif-presentation-api
+          image: europeana/iiif-presentation-api
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/liveness
+            initialDelaySeconds: 40
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/readiness
+            initialDelaySeconds: 40
+            periodSeconds: 20
+          volumeMounts:
+            - name: secret
+              mountPath: "/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/iiif.user.properties"
+              readOnly: true
+              subPath: iiif.user.properties
+      volumes:
+        - name: secret
+          secret:
+            secretName: iiif-presentation-api-secret

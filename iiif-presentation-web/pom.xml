@@ -116,7 +116,7 @@
 
     <build>
         <!--this removes the version number from the deployed archive-->
-        <finalName>${artifactId}</finalName>
+        <finalName>${parent.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
