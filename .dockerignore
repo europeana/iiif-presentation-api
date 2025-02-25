@@ -1,5 +1,4 @@
 # Send only unzipped war directory to Docker
 **
 !/iiif-presentation-web/target/iiif-presentation-api/
-!/iiif-presentation-web/target/iiif-presentation-api.jar
 **/*.user.properties
