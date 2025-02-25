@@ -15,7 +15,6 @@
     <artifactId>iiif-presentation-definitions</artifactId>
     <description>Europeana IIIf Presentation Definitions</description>
     <version>0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
