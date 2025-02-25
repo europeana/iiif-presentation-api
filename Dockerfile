@@ -7,4 +7,4 @@ ENV ELASTIC_APM_VERSION 1.34.1
 ADD https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/$ELASTIC_APM_VERSION/elastic-apm-agent-$ELASTIC_APM_VERSION.jar /usr/local/elastic-apm-agent.jar
 
 # Copy unzipped directory so we can mount config files in Kubernetes pod
-COPY iiif-presentation-web/target/iiif-presentation-api/ ./ROOT/
+COPY iiif-presentation-web/target/iiif-presentation-api ./ROOT/
