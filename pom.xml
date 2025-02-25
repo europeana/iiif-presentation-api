@@ -55,7 +55,7 @@
         <http-client5.version>5.4.1</http-client5.version>
         <jsonpath.version>2.7.0</jsonpath.version>
         <commons-codec.version>1.17.2</commons-codec.version>
-
+        <jakarta.annotation.version>3.0.0</jakarta.annotation.version>
 
 
     </properties>

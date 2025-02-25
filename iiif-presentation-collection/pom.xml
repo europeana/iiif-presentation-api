@@ -53,6 +53,14 @@
             <version>${spring-framework.version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/jakarta.annotation/jakarta.annotation-api -->
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta.annotation.version}</version>
+        </dependency>
+
+
     </dependencies>
 
 </project>
