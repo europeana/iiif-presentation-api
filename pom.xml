@@ -45,7 +45,7 @@
         <swagger.version>3.0.0</swagger.version>
 
         <!-- Other api versions-->
-        <api-commons-sb3>0.1.1</api-commons-sb3>
+        <api-commons-sb3>0.1.2-SNAPSHOT</api-commons-sb3>
         <set.api.version>1.0-SNAPSHOT</set.api.version>
         <fulltext.api.version>0.9.7</fulltext.api.version>
 
