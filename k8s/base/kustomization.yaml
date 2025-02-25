@@ -1,0 +1,13 @@
+resources:
+  - deployment.yaml
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: iiif-presentation-api
+
+# expects files to be in the same directory
+secretGenerator:
+  - name: iiif-presentation-api-secret
+    files:
+      - iiif.user.properties
