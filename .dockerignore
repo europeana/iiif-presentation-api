@@ -2,3 +2,4 @@
 **
 !/iiif-presentation-web/target/iiif-presentation-api/
 **/*.user.properties
+**/build-info.properties
