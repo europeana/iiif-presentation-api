@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>iiif-presentation-web</artifactId>
+    <name>IIIF Presentation API</name>
     <description>Europeana IIIf Presentation API web module</description>
     <version>0.1-SNAPSHOT</version>
     <packaging>war</packaging>
@@ -115,6 +116,28 @@
 
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>*.properties</include>
+                    <include>*/*.info</include>
+                    <include>*.xml</include>
+                </includes>
+                <excludes>
+                    <exclude>**/*.jks</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.jks</include>
+                    <include>public/**</include>
+                </includes>
+            </resource>
+        </resources>
         <!--this removes the version number from the deployed archive-->
         <finalName>${parent.artifactId}</finalName>
         <plugins>
