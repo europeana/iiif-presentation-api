@@ -139,7 +139,7 @@
             </resource>
         </resources>
         <!--this removes the version number from the deployed archive-->
-        <finalName>${parent.artifactId}</finalName>
+        <finalName>${project.parent.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
