@@ -50,15 +50,6 @@ public class IIIfSettings {
     @Value("${set.service.uri:}")
     private String setApiServiceUri;
 
-    @Value("${set.api.key:}")
-    private String setApiKey ;
-
-    @Value("${oauth.service.uri}")
-    private String oauthServiceUri;
-
-    @Value("${oauth.token.request.params:}")
-    private String oauthTokenRequestParams;
-
     @Value("${content-search-api.baseurl}")
     private String contentSearchBaseUrl;
 
@@ -311,18 +302,6 @@ public class IIIfSettings {
 
     public String getSetApiServiceUri() {
         return setApiServiceUri;
-    }
-
-    public String getSetApiKey() {
-        return setApiKey;
-    }
-
-    public String getOauthServiceUri() {
-        return oauthServiceUri;
-    }
-
-    public String getOauthTokenRequestParams() {
-        return oauthTokenRequestParams;
     }
 
 

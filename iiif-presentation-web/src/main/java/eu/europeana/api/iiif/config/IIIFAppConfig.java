@@ -149,10 +149,6 @@ public class IIIFAppConfig {
     private Properties loadProperties() {
         Properties properties = new Properties();
         properties.put(ClientConfiguration.PROP_SET_SERVICE_URI, settings.getSetApiServiceUri());
-        properties.put(ClientConfiguration.PROP_SET_API_KEY, settings.getSetApiKey());
-        properties.put(ClientConfiguration.PROP_OAUTH_SERVICE_URI, settings.getOauthServiceUri());
-        properties.put(ClientConfiguration.PROP_OAUTH_REQUEST_PARAMS, settings.getOauthTokenRequestParams());
-
         return properties;
     }
 }

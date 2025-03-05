@@ -8,6 +8,7 @@ import eu.europeana.api.caching.ResourceCaching;
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.iiif.oauth.AuthenticationHandler;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
 import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.service.CollectionService;
@@ -122,7 +123,10 @@ public class CollectionController {
             },
             headers = {ACCEPT_HEADER_JSONLD, ACCEPT_HEADER_JSON})
     public ResponseEntity<StreamingResponseBody> galleryCollection(
+            @RequestParam(value = "wskey", required = false) String wskey,
             HttpServletRequest request) throws EuropeanaApiException {
+        String token = AuthenticationHandler.getAuthentication(request);
+
         String iiifVersion = AcceptUtils.getRequestVersion(request, null);
         RdfFormat format = IIIFUtils.getRDFFormatFromHeader(request);
         if (LOGGER.isDebugEnabled()) {
@@ -135,7 +139,7 @@ public class CollectionController {
             return cachingStrategy.applyForReadAccess( new ResourceCaching("", CachingUtils.genWeakEtag(), null), request, headers);
         }
 
-        IIIFResource resource = collectionService.getGalleryCollection(iiifVersion);
+        IIIFResource resource = collectionService.getGalleryCollection(iiifVersion, token);
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
@@ -172,7 +176,9 @@ public class CollectionController {
     public ResponseEntity<StreamingResponseBody> retrieveGallery(
             @PathVariable String setId,
             @RequestParam(value = "format", required = false) String version,
+            @RequestParam(value = "wskey", required = false) String wskey,
             HttpServletRequest request) throws EuropeanaApiException {
+        String token = AuthenticationHandler.getAuthentication(request);
         String iiifVersion = AcceptUtils.getRequestVersion(request, version);
 
         // 1) get format and clean the setId if required
@@ -201,7 +207,7 @@ public class CollectionController {
             return cachingStrategy.applyForReadAccess( new ResourceCaching("", CachingUtils.genWeakEtag(), null), request, headers);
         }
 
-        IIIFResource resource = collectionService.retrieveGallery(iiifVersion, setId);
+        IIIFResource resource = collectionService.retrieveGallery(iiifVersion, setId, token);
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {

@@ -52,8 +52,9 @@ public class CollectionService {
      *
      * @param iiifVersion
      */
-    public <T extends IIIFResource> T getGalleryCollection(String iiifVersion) throws CollectionException {
+    public <T extends IIIFResource> T getGalleryCollection(String iiifVersion, String token) throws CollectionException {
         try {
+            userSetApiClient.setAuthToken(token);
             List<? extends UserSet> publishedSets = userSetApiClient.getSearchUserSetApi().searchUserSet(
                     QUERY_VISIBILITY_PUBLISHED, null, null, "1", "100", null, 0, null);
 
@@ -75,8 +76,9 @@ public class CollectionService {
      * @param <T>
      * @return
      */
-    public <T extends IIIFResource> T retrieveGallery(String iiifVersion, String setId) throws CollectionException {
+    public <T extends IIIFResource> T retrieveGallery(String iiifVersion, String setId, String token) throws CollectionException {
         try {
+            userSetApiClient.setAuthToken(token);
             UserSet set = userSetApiClient.getWebUserSetApi().getUserSet(setId, null);
             // TODO caching
             List<RecordPreview> items = userSetApiClient.getWebUserSetApi().getPaginationUserSet(
