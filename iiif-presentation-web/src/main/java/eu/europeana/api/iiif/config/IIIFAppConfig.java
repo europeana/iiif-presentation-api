@@ -140,15 +140,9 @@ public class IIIFAppConfig {
     @Bean(name = IIIFConstants.BEAN_USER_SET_API_CLIENT)
     public UserSetApiClient userSetApiClient() throws InvalidConfigurationException {
         try {
-            return new UserSetApiClient(new ClientConfiguration(loadProperties()));
+            return new UserSetApiClient(settings.getSetApiServiceUri(), null);
         } catch (SetApiClientException e) {
             throw new InvalidConfigurationException(e.getLocalizedMessage());
         }
-    }
-
-    private Properties loadProperties() {
-        Properties properties = new Properties();
-        properties.put(ClientConfiguration.PROP_SET_SERVICE_URI, settings.getSetApiServiceUri());
-        return properties;
     }
 }
