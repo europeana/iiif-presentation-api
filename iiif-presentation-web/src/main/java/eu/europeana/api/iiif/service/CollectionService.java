@@ -1,5 +1,6 @@
 package eu.europeana.api.iiif.service;
 
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.iiif.exceptions.CollectionException;
 import eu.europeana.api.iiif.generator.CollectionV2Generator;
 import eu.europeana.api.iiif.generator.CollectionV3Generator;
@@ -52,9 +53,9 @@ public class CollectionService {
      *
      * @param iiifVersion
      */
-    public <T extends IIIFResource> T getGalleryCollection(String iiifVersion, String token) throws CollectionException {
+    public <T extends IIIFResource> T getGalleryCollection(String iiifVersion, AuthenticationHandler auth) throws CollectionException {
         try {
-            userSetApiClient.setAuthToken(token);
+            userSetApiClient.setAuthenticationHandler(auth);
             List<? extends UserSet> publishedSets = userSetApiClient.getSearchUserSetApi().searchUserSet(
                     QUERY_VISIBILITY_PUBLISHED, null, null, "1", "100", null, 0, null);
 
@@ -76,9 +77,9 @@ public class CollectionService {
      * @param <T>
      * @return
      */
-    public <T extends IIIFResource> T retrieveGallery(String iiifVersion, String setId, String token) throws CollectionException {
+    public <T extends IIIFResource> T retrieveGallery(String iiifVersion, String setId, AuthenticationHandler auth) throws CollectionException {
         try {
-            userSetApiClient.setAuthToken(token);
+            userSetApiClient.setAuthenticationHandler(auth);
             UserSet set = userSetApiClient.getWebUserSetApi().getUserSet(setId, null);
             // TODO caching
             List<RecordPreview> items = userSetApiClient.getWebUserSetApi().getPaginationUserSet(

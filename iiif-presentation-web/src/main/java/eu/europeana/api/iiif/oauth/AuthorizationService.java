@@ -1,19 +1,24 @@
 package eu.europeana.api.iiif.oauth;
 
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.auth.apikey.ApikeyBasedAuthentication;
+import eu.europeana.api.commons_sb3.auth.token.StaticTokenAuthentication;
 import eu.europeana.api.iiif.exceptions.AuthorizationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.hc.core5.http.HttpHeaders;
 
 /**
- * Authentication Handler for IIIF presentation API
+ * Authorization Service for IIIF presentation API
  * Extracts wskey or token if provided in the IIIF Collection requests
+ * and wraps them into a AuthenticationHandler object for the client calls
  *
- * TODO - this needs to be replaced by api-commons-sb3 authentication functionality.
+ * TODO - this needs to be replaced by api-commons-sb3 full authentication functionality.
  *      As that is yet not developed in the new commons api, this is a temporary class to handle authentication
+ *      In Future the new functionality to verify access will return an Authentication Handler object.
  * @author Srishti Singh
  * @since 5 march 2025
  */
-public class AuthenticationHandler {
+public class AuthorizationService {
 
     private static  final String Bearer = "Bearer";
     private static  final String APIKEY = "APIKEY";
@@ -21,23 +26,24 @@ public class AuthenticationHandler {
     /**
      * TODO - temp method to fetch the apikey or token (if provided).
      *        This doesn't validates the apikey or token. Will be replaced by oauth functionality developed by Shweta
-     * fetches the apikey if provided or the token from the Authorisation Header.
+     * Returns the AuthenticationHandler based on if an apikey is provided or the token from the request
      *
      * @param request
      * @return
      * @throws AuthorizationException when no authentication is provided
      */
-    public static String getAuthentication(HttpServletRequest request) throws AuthorizationException {
-        String authToken = extractApikey(request);
-        if ( authToken != null) {
-            return APIKEY + " " + authToken;
+    public static AuthenticationHandler getAuthorization(HttpServletRequest request) throws AuthorizationException {
+        String apikey = extractApikey(request);
+        if ( apikey != null) {
+            return new ApikeyBasedAuthentication(apikey);
         } else {
-            authToken = extractToken(request);
+            String token = extractToken(request);
+            if (token != null) {
+                return new StaticTokenAuthentication(token);
+            } else {
+                throw new AuthorizationException("No authentication information provided, Authorization header or Api key should be provided !!!");
+            }
         }
-        if (authToken == null) {
-            throw new AuthorizationException("No authentication information provided, Authorization header or Api key should be provided !!!");
-        }
-        return Bearer + " " + authToken;
     }
 
     private static String extractApikey(HttpServletRequest request) throws AuthorizationException {

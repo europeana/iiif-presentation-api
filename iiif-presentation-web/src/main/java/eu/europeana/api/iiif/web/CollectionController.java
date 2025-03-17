@@ -5,10 +5,11 @@ import eu.europeana.api.caching.CachingHeaders;
 import eu.europeana.api.caching.CachingStrategy;
 import eu.europeana.api.caching.CachingUtils;
 import eu.europeana.api.caching.ResourceCaching;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.iiif.oauth.AuthenticationHandler;
+import eu.europeana.api.iiif.oauth.AuthorizationService;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
 import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.service.CollectionService;
@@ -125,7 +126,7 @@ public class CollectionController {
     public ResponseEntity<StreamingResponseBody> galleryCollection(
             @RequestParam(value = "wskey", required = false) String wskey,
             HttpServletRequest request) throws EuropeanaApiException {
-        String token = AuthenticationHandler.getAuthentication(request);
+        AuthenticationHandler auth = AuthorizationService.getAuthorization(request);
 
         String iiifVersion = AcceptUtils.getRequestVersion(request, null);
         RdfFormat format = IIIFUtils.getRDFFormatFromHeader(request);
@@ -139,7 +140,7 @@ public class CollectionController {
             return cachingStrategy.applyForReadAccess( new ResourceCaching("", CachingUtils.genWeakEtag(), null), request, headers);
         }
 
-        IIIFResource resource = collectionService.getGalleryCollection(iiifVersion, token);
+        IIIFResource resource = collectionService.getGalleryCollection(iiifVersion, auth);
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
@@ -178,7 +179,7 @@ public class CollectionController {
             @RequestParam(value = "format", required = false) String version,
             @RequestParam(value = "wskey", required = false) String wskey,
             HttpServletRequest request) throws EuropeanaApiException {
-        String token = AuthenticationHandler.getAuthentication(request);
+        AuthenticationHandler auth = AuthorizationService.getAuthorization(request);
         String iiifVersion = AcceptUtils.getRequestVersion(request, version);
 
         // 1) get format and clean the setId if required
@@ -207,7 +208,7 @@ public class CollectionController {
             return cachingStrategy.applyForReadAccess( new ResourceCaching("", CachingUtils.genWeakEtag(), null), request, headers);
         }
 
-        IIIFResource resource = collectionService.retrieveGallery(iiifVersion, setId, token);
+        IIIFResource resource = collectionService.retrieveGallery(iiifVersion, setId, auth);
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
