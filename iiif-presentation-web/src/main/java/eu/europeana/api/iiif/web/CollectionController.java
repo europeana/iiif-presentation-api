@@ -5,7 +5,7 @@ import eu.europeana.api.caching.CachingHeaders;
 import eu.europeana.api.caching.CachingStrategy;
 import eu.europeana.api.caching.CachingUtils;
 import eu.europeana.api.caching.ResourceCaching;
-import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
+import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;

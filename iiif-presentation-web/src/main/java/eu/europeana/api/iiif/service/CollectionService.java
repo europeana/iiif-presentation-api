@@ -1,6 +1,6 @@
 package eu.europeana.api.iiif.service;
 
-import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
+import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.iiif.exceptions.CollectionException;
 import eu.europeana.api.iiif.generator.CollectionV2Generator;
 import eu.europeana.api.iiif.generator.CollectionV3Generator;

@@ -1,8 +1,8 @@
 package eu.europeana.api.iiif.oauth;
 
-import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
-import eu.europeana.api.commons_sb3.auth.apikey.ApikeyBasedAuthentication;
-import eu.europeana.api.commons_sb3.auth.token.StaticTokenAuthentication;
+import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons.auth.apikey.ApikeyBasedAuthentication;
+import eu.europeana.api.commons.auth.token.StaticTokenAuthentication;
 import eu.europeana.api.iiif.exceptions.AuthorizationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.hc.core5.http.HttpHeaders;
