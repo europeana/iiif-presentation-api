@@ -73,7 +73,7 @@ public class CollectionController {
     )
     @GetMapping(
             value = {
-                    "collection/",
+                    "collection",
             },
             headers = {ACCEPT_HEADER_JSONLD, ACCEPT_HEADER_JSON}
     )
@@ -120,7 +120,7 @@ public class CollectionController {
     )
     @GetMapping(
             value = {
-                    "collection/gallery/",
+                    "collection/gallery",
             },
             headers = {ACCEPT_HEADER_JSONLD, ACCEPT_HEADER_JSON})
     public ResponseEntity<StreamingResponseBody> galleryCollection(
