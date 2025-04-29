@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.api.caching.CachingStrategy;
 import eu.europeana.api.caching.ChainingCachingStrategy;
+import eu.europeana.api.commons_sb3.error.i18n.I18nService;
+import eu.europeana.api.commons_sb3.error.i18n.I18nServiceImpl;
 import eu.europeana.api.iiif.exceptions.InvalidConfigurationException;
 import eu.europeana.api.iiif.generator.CollectionV2Generator;
 import eu.europeana.api.iiif.generator.CollectionV3Generator;
@@ -23,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 import java.io.BufferedReader;
 import java.io.IOException;
