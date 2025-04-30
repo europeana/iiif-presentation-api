@@ -2,15 +2,42 @@ package eu.europeana.api.iiif.utils;
 
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
 import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.exceptions.InvalidFormatException;
+import eu.europeana.api.iiif.service.IIIFVersionSupport;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 
 import java.util.Arrays;
+import java.util.Collection;
+
 import static eu.europeana.api.iiif.utils.IIIFConstants.V2;
 
 public class IIIFUtils {
+
+    private static Collection<RdfFormat> validFormats 
+        = Arrays.asList(RdfFormat.JSONLD, RdfFormat.JSON);
+
+    public static String getId(String path) {
+        int i = path.indexOf(".");
+        return ( i < 0 ? path : path.substring(0,i) );
+    }
+
+    public static RdfFormat getFormat(HttpServletRequest request) 
+            throws EuropeanaApiException {
+        String path = request.getRequestURI();
+
+        int i = path.indexOf(".");
+        if ( i < 0 ) { return getFormatFromHeader(request, RdfFormat.JSONLD); }
+        
+        
+        RdfFormat format = RdfFormat.getFormatByExtension(path.substring(i+1));
+        if ( isValidFormat(format) ) { return format; }
+
+        throw new InvalidFormatException("Invalid format !! Valid extensions .json or .jsonld");
+    }
+
 
     /**
      * Returns RdfFormat if the ACCEPT header is provided
@@ -18,40 +45,16 @@ public class IIIFUtils {
      * @param request
      * @return
      */
-    public static RdfFormat getRDFFormatFromHeader(HttpServletRequest request) {
+    public static RdfFormat getFormatFromHeader(HttpServletRequest request
+                                              , RdfFormat def) {
         RdfFormat format = null;
         for (String header : Arrays.asList(request.getHeader(HttpHeaders.ACCEPT).split(";"))) {
             format = RdfFormat.getFormatByMediaType(header);
-            if (format != null) {
-                break;
-            }
+            if (format != null) { break; }
         }
-        if (isValidFormat(format)) {
-            return format;
-        }
-        // if accept header was empty default to JSONLD
-        else if (format == null) {
-            return RdfFormat.JSONLD;
-        }
-        return null;
-    }
+        if ( format == null ) { return def; }
 
-    /**
-     * Retuns RDF Format if the extension id either json or jsonld
-     *
-     * @param setId
-     * @return
-     */
-    public static RdfFormat getRDFFormatFromId(String setId) throws InvalidFormatException {
-        if (StringUtils.contains(setId, ".")) {
-            RdfFormat format = RdfFormat.getFormatByExtension(StringUtils.substringAfter(setId, "."));
-            if (isValidFormat(format)) {
-                return format;
-            } else {
-                throw new InvalidFormatException("Invalid format !! Valid extensions .json or .jsonld");
-            }
-        }
-        return null;
+        return (isValidFormat(format) ? format : def);
     }
 
     /**
@@ -61,26 +64,6 @@ public class IIIFUtils {
      * @return
      */
     private static boolean isValidFormat(RdfFormat format) {
-        return RdfFormat.JSONLD.equals(format) || RdfFormat.JSON.equals(format);
-    }
-
-    public static HttpHeaders addContentType(RdfFormat format, String iiifVersion) {
-        HttpHeaders headers = new HttpHeaders();
-        if (format.equals(RdfFormat.JSON)) {
-            if (StringUtils.equals(iiifVersion, V2)) {
-                headers.add(HttpHeaders.CONTENT_TYPE, IIIFDefinitions.MEDIA_TYPE_IIIF_JSON_V2);
-            } else {
-                headers.add(HttpHeaders.CONTENT_TYPE, IIIFDefinitions.MEDIA_TYPE_IIIF_JSON_V3);
-
-            }
-        } else {
-            if (StringUtils.equals(iiifVersion, V2)) {
-                headers.add(HttpHeaders.CONTENT_TYPE, IIIFDefinitions.MEDIA_TYPE_IIIF_JSONLD_V2);
-            } else {
-                headers.add(HttpHeaders.CONTENT_TYPE, IIIFDefinitions.MEDIA_TYPE_IIIF_JSONLD_V3);
-
-            }
-        }
-        return headers;
+        return validFormats.contains(format);
     }
 }

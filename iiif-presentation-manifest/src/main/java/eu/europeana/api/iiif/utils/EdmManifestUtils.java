@@ -300,8 +300,8 @@ public final class EdmManifestUtils {
      * @param json
      * @return LocalDateTime object with the record's 'timestamp_update' value (UTC)
      */
-    public static ZonedDateTime getRecordTimestampUpdate(String json) {
-        String date = JsonPath.parse(json).read("$.object.timestamp_update", String.class);
+    public static ZonedDateTime getRecordTimestampUpdate(Object jsonDoc) {
+        String date = JsonPath.parse(jsonDoc).read("$.object.timestamp_update", String.class);
         if (StringUtils.isEmpty(date)) {
             return null;
         }

@@ -1,5 +1,8 @@
 package eu.europeana.api.iiif.config;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -20,6 +23,10 @@ public class BuildInfo {
     @Value("${info.build.number}")
     private String buildNumber;
 
+    @Value("${info.build.date}")
+    private String timestamp;
+
+
     public String getAppName() {
         return appName;
     }
@@ -34,5 +41,14 @@ public class BuildInfo {
 
     public String getBuildNumber() {
         return buildNumber;
+    }
+
+    public String getBuildTimestamp() {
+        return timestamp;
+    }
+
+    //@TODO improve
+    public ZonedDateTime getBuildDateTime() {
+        return ZonedDateTime.parse(timestamp, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 }

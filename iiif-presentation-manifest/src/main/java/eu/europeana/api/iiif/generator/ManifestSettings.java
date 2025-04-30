@@ -1,4 +1,4 @@
-package eu.europeana.api.iiif.config;
+package eu.europeana.api.iiif.generator;
 
 import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
 import eu.europeana.api.iiif.model.ManifestDefinitions;
@@ -19,9 +19,9 @@ import static eu.europeana.api.iiif.model.ManifestDefinitions.getFulltextSummary
 @Configuration
 @PropertySource("classpath:iiif.properties")
 @PropertySource(value = "classpath:iiif.user.properties", ignoreResourceNotFound = true)
-public class IIIfSettings {
+public class ManifestSettings {
 
-    private static final Logger LOG = LogManager.getLogger(IIIfSettings.class);
+    private static final Logger LOG = LogManager.getLogger(ManifestSettings.class);
 
     @Value("${iiif-api.base.url:}")
     private String iiifApiBaseUrl;
@@ -34,6 +34,9 @@ public class IIIfSettings {
 
     @Value("${iiif-api.id.placeholder:}")
     private String iiifApiIdPlaceholder;
+
+    @Value("${iiif-api.apikey:}")
+    private String apikey;
 
     @Value("${set.api.base.url:}")
     private String setApiBaseUrl;
@@ -134,6 +137,15 @@ public class IIIfSettings {
             LOG.error("No value found for ID_PLACEHOLDER!");
             return null;
         }
+    }
+
+    /**
+     * Get an api key to be used as fallback when access the Record API, Fulltext API or Set API
+     * @return the value from iiif.properties
+     * If not defined, return the hard-coded value in ManifestDefinitions
+     */
+    public String getDefaultApiKey() {
+        return this.apikey;
     }
 
     /**

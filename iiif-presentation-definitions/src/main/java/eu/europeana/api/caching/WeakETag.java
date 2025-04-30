@@ -9,10 +9,21 @@ package eu.europeana.api.caching;
  */
 public class WeakETag implements ETag {
 
+    private static final String PREFIX = "W/\"";
+    private static final String SUFFIX = "\"";
+
     public static String formatAsWeakEtag(String value) {
         StringBuilder builder = new StringBuilder();
-        builder.append("W/").append('"').append(value).append('"');
+        builder.append(PREFIX).append(value).append(SUFFIX);
         return builder.toString();
+    }
+
+    public static WeakETag parseAsWeakEtag(String value) {
+        if ( value.startsWith(PREFIX) && value.endsWith(SUFFIX) ) {
+            return new WeakETag(value.substring(PREFIX.length()
+                                              , value.length()-SUFFIX.length()));
+        }
+        return null;
     }
 
     private String value;
