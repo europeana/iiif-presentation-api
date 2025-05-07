@@ -64,7 +64,7 @@ public class CollectionService {
             }
             return (T) collectionV3Generator.generateGalleryRoot(publishedSets);
         } catch (SetApiClientException e) {
-            throw new CollectionException(e.getLocalizedMessage());
+            throw new CollectionException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -89,7 +89,7 @@ public class CollectionService {
             }
             return (T) collectionV3Generator.generateGallery(set, items);
         } catch (SetApiClientException e) {
-            throw new CollectionException(e.getLocalizedMessage());
+            throw new CollectionException(e.getLocalizedMessage(), e);
         }
     }
 

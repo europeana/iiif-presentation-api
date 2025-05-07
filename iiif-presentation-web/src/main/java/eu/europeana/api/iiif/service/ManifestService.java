@@ -217,7 +217,7 @@ public class ManifestService {
                         // This warning can be logged for empty pages that do not have a fulltext, but if we get a lot
                         // then Record API and Fulltext API are not in sync (or the hashing algorithm changed)
                         LOG.warn("Possible inconsistent data. No fulltext annopage found for record {} page {}. Generated hash = {}",
-                                manifest.getEuropeanaId(), canvas.getPageNr(), apHash);
+                                manifest.getEuropeanaId(), canvas.getID(), apHash);
                     } else {
                         addFulltextLinkToCanvasV2(canvas, ftCanvas);
                     }

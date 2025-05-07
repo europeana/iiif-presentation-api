@@ -9,8 +9,6 @@ import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.commons_sb3.error.exceptions.InvalidConfigurationException;
-import eu.europeana.api.iiif.exceptions.CollectionException;
 import eu.europeana.api.iiif.oauth.AuthorizationService;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
 import eu.europeana.api.iiif.model.IIIFResource;
@@ -81,28 +79,27 @@ public class CollectionController {
     )
     public ResponseEntity<StreamingResponseBody> retrieveCollection(
             HttpServletRequest request) throws EuropeanaApiException {
-        throw new InvalidConfigurationException(new String[] {"test", "123", "456"});
-//        String iiifVersion = AcceptUtils.getRequestVersion(request, null);
-//        RdfFormat format = IIIFUtils.getRDFFormatFromHeader(request);
-//        if (LOGGER.isDebugEnabled()) {
-//            LOGGER.debug("IIIF Version {} , RDF format {}", iiifVersion, format);
-//        }
-//
-//        org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
-//        // TODO where do i get last modification date for caching
-//        if (CachingHeaders.cachingHeadersPresent(request)) {
-//           return cachingStrategy.applyForReadAccess( new ResourceCaching("", CachingUtils.genWeakEtag(), null), request, headers);
-//        }
-//
-//        IIIFResource resource = collectionService.retrieveCollection(iiifVersion);
-//        StreamingResponseBody responseBody = new StreamingResponseBody() {
-//            @Override
-//            public void writeTo(OutputStream out) throws IOException {
-//                iiifJsonHandler.write(resource, out);
-//                out.flush();
-//            }
-//        };
-//        return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
+        String iiifVersion = AcceptUtils.getRequestVersion(request, null);
+        RdfFormat format = IIIFUtils.getRDFFormatFromHeader(request);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("IIIF Version {} , RDF format {}", iiifVersion, format);
+        }
+
+        org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
+        // TODO where do i get last modification date for caching
+        if (CachingHeaders.cachingHeadersPresent(request)) {
+           return cachingStrategy.applyForReadAccess( new ResourceCaching("", CachingUtils.genWeakEtag(), null), request, headers);
+        }
+
+        IIIFResource resource = collectionService.retrieveCollection(iiifVersion);
+        StreamingResponseBody responseBody = new StreamingResponseBody() {
+            @Override
+            public void writeTo(OutputStream out) throws IOException {
+                iiifJsonHandler.write(resource, out);
+                out.flush();
+            }
+        };
+        return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
     }
 
 
@@ -129,30 +126,29 @@ public class CollectionController {
     public ResponseEntity<StreamingResponseBody> galleryCollection(
             @RequestParam(value = "wskey", required = false) String wskey,
             HttpServletRequest request) throws EuropeanaApiException {
-        throw new CollectionException("hello test");
-//        AuthenticationHandler auth = AuthorizationService.getAuthorization(request);
-//
-//        String iiifVersion = AcceptUtils.getRequestVersion(request, null);
-//        RdfFormat format = IIIFUtils.getRDFFormatFromHeader(request);
-//        if (LOGGER.isDebugEnabled()) {
-//            LOGGER.debug("IIIF Version {} , RDF format {}", iiifVersion, format);
-//        }
-//
-//        org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
-//        // TODO where do i get last modification date for caching
-//        if (CachingHeaders.cachingHeadersPresent(request)) {
-//            return cachingStrategy.applyForReadAccess( new ResourceCaching("", CachingUtils.genWeakEtag(), null), request, headers);
-//        }
-//
-//        IIIFResource resource = collectionService.getGalleryCollection(iiifVersion, auth);
-//        StreamingResponseBody responseBody = new StreamingResponseBody() {
-//            @Override
-//            public void writeTo(OutputStream out) throws IOException {
-//              iiifJsonHandler.write(resource, out);
-//              out.flush();
-//            }
-//        };
-//        return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
+        AuthenticationHandler auth = AuthorizationService.getAuthorization(request);
+
+        String iiifVersion = AcceptUtils.getRequestVersion(request, null);
+        RdfFormat format = IIIFUtils.getRDFFormatFromHeader(request);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("IIIF Version {} , RDF format {}", iiifVersion, format);
+        }
+
+        org.springframework.http.HttpHeaders headers = IIIFUtils.addContentType(format, iiifVersion);
+        // TODO where do i get last modification date for caching
+        if (CachingHeaders.cachingHeadersPresent(request)) {
+            return cachingStrategy.applyForReadAccess( new ResourceCaching("", CachingUtils.genWeakEtag(), null), request, headers);
+        }
+
+        IIIFResource resource = collectionService.getGalleryCollection(iiifVersion, auth);
+        StreamingResponseBody responseBody = new StreamingResponseBody() {
+            @Override
+            public void writeTo(OutputStream out) throws IOException {
+              iiifJsonHandler.write(resource, out);
+              out.flush();
+            }
+        };
+        return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
     }
 
 

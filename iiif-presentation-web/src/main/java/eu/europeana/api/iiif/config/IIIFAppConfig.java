@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.api.caching.CachingStrategy;
 import eu.europeana.api.caching.ChainingCachingStrategy;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidConfigurationException;
 import eu.europeana.api.commons_sb3.error.i18n.I18nService;
 import eu.europeana.api.commons_sb3.error.i18n.I18nServiceImpl;
-import eu.europeana.api.iiif.exceptions.InvalidConfigurationException;
 import eu.europeana.api.iiif.generator.CollectionV2Generator;
 import eu.europeana.api.iiif.generator.CollectionV3Generator;
 import eu.europeana.api.iiif.media.MediaType;
@@ -17,7 +18,6 @@ import eu.europeana.api.iiif.utils.IIIFConstants;
 import eu.europeana.api.iiif.v2.io.LanguageValueSerializer;
 import eu.europeana.api.iiif.v2.model.LanguageValue;
 import eu.europeana.set.client.UserSetApiClient;
-import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.exception.SetApiClientException;
 import jakarta.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
@@ -31,9 +31,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
@@ -145,7 +145,16 @@ public class IIIFAppConfig {
         try {
             return new UserSetApiClient(settings.getSetApiServiceUri(), null);
         } catch (SetApiClientException e) {
-            throw new InvalidConfigurationException(e.getLocalizedMessage());
+            throw new InvalidConfigurationException(new String[] {"Set Api Endpoint", "<not null>", settings.getSetApiServiceUri()});
         }
+    }
+
+    @Bean(name = ErrorConfig.BEAN_I18nService)
+    public I18nService getI18nService() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasenames(ErrorConfig.COMMON_MESSAGE_SOURCE);
+        messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
+        I18nServiceImpl service =  new I18nServiceImpl(messageSource);
+        return service;
     }
 }
