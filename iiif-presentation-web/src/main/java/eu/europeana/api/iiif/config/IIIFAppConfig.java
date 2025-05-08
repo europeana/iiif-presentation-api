@@ -34,6 +34,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
@@ -145,7 +146,7 @@ public class IIIFAppConfig {
         try {
             return new UserSetApiClient(settings.getSetApiServiceUri(), null);
         } catch (SetApiClientException e) {
-            throw new InvalidConfigurationException(new String[] {"Set Api Endpoint", "<not null>", settings.getSetApiServiceUri()});
+            throw new InvalidConfigurationException(Arrays.asList("Set Api Endpoint", "<not null>", settings.getSetApiServiceUri()));
         }
     }
 
