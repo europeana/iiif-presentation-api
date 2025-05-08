@@ -2,7 +2,8 @@ package eu.europeana.api.iiif.utils;
 
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
 import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
-import eu.europeana.api.iiif.exceptions.InvalidFormatException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidIdException;
+import eu.europeana.api.iiif.model.IIIFResource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
@@ -42,13 +43,13 @@ public class IIIFUtils {
      * @param setId
      * @return
      */
-    public static RdfFormat getRDFFormatFromId(String setId) throws InvalidFormatException {
+    public static RdfFormat getRDFFormatFromId(String setId) throws InvalidIdException {
         if (StringUtils.contains(setId, ".")) {
             RdfFormat format = RdfFormat.getFormatByExtension(StringUtils.substringAfter(setId, "."));
             if (isValidFormat(format)) {
                 return format;
             } else {
-                throw new InvalidFormatException("Invalid format !! Valid extensions .json or .jsonld");
+                throw new InvalidIdException(IIIFResource.class, Arrays.asList(RdfFormat.JSONLD  + " OR " + RdfFormat.JSON));
             }
         }
         return null;
