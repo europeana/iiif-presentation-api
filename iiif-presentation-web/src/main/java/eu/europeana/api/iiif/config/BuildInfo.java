@@ -47,7 +47,7 @@ public class BuildInfo {
         return timestamp;
     }
 
-    //@TODO improve
+    //TODO improve
     public ZonedDateTime getBuildDateTime() {
         return ZonedDateTime.parse(timestamp, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }

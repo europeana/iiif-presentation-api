@@ -122,7 +122,10 @@ public class CollectionV3Generator implements CollectionGenerator<Collection>
     }
 
     protected Image newThumbnail(RecordPreview item) {
-        return new Image(item.getEdmPreview().get(0));
+        if (item.hasPreview()) {
+            return new Image(item.getEdmPreview().get(0));
+        }
+        return null;
     }
 
     protected Text newReference(UserSet set) {

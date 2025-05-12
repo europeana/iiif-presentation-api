@@ -50,7 +50,7 @@ public class CollectionService {
      * Fetch all the published sets
      * Query : /set/search?query=visibility:published&pageSize=100
      *
-     * @param iiifVersion
+     * @param version
      */
     public <T extends IIIFResource> T getCollectionOfGalleries(
             IIIFVersionSupport version, AuthenticationHandler auth
@@ -79,7 +79,7 @@ public class CollectionService {
      * Fetch the set and the items
      * items pagination - set/{setId}?&page=1&pageSize=100&profile=items.meta
      *
-     * @param iiifVersion
+     * @param version
      * @param setId
      * @param <T>
      * @return
