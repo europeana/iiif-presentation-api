@@ -1,21 +1,28 @@
-package eu.europeana.api.iiif.service.manifest;
+package eu.europeana.api.iiif.generator;
 
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
+
+import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
-import eu.europeana.api.iiif.config.IIIfSettings;
-import eu.europeana.api.iiif.config.MediaTypes;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.media.MediaType;
+import eu.europeana.api.iiif.media.MediaTypes;
 import eu.europeana.api.iiif.model.ManifestDefinitions;
 import eu.europeana.api.iiif.model.WebResource;
+import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
+import eu.europeana.api.iiif.service.FulltextService;
 import eu.europeana.api.iiif.utils.EdmManifestUtils;
+import eu.europeana.api.iiif.utils.GenerateUtils;
 import eu.europeana.api.iiif.utils.LanguageMapUtils;
 import eu.europeana.api.iiif.v2.model.*;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -37,14 +44,20 @@ import static eu.europeana.api.iiif.model.ManifestDefinitions.CANVAS_THUMBNAIL_P
 // ignore sonarqube rule: we return null on purpose in this class
 // ignore pmd rule:  we want to make a clear which objects are v2 and which v3
 @SuppressWarnings({"squid:S1168", "pmd:UnnecessaryFullyQualifiedName"})
-public final class EdmManifestMappingV2 {
+public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     private static final Logger LOG = LogManager.getLogger(EdmManifestMappingV2.class);
 
+    //@TODO: Why is this static?
     private static String THUMBNAIL_API_URL;
 
-    private EdmManifestMappingV2() {
-        // private constructor to prevent initialization
+    private ManifestSettings     settings;
+    private MediaTypes       mediaTypes;
+
+    public EdmManifestMappingV2(ManifestSettings settings
+                              , MediaTypes mediaTypes) {
+        this.settings        = settings;
+        this.mediaTypes      = mediaTypes;
     }
 
     /**
@@ -52,11 +65,11 @@ public final class EdmManifestMappingV2 {
      * @param jsonDoc parsed json document
      * @return IIIF Manifest v2 object
      */
-    public static Manifest getManifestV2(IIIfSettings settings, MediaTypes mediaTypes, Object jsonDoc) {
+    public Manifest generateManifest(Object jsonDoc) {
         THUMBNAIL_API_URL = settings.getThumbnailApiUrl();
         String europeanaId = EdmManifestUtils.getEuropeanaId(jsonDoc);
         String isShownBy = EdmManifestUtils.getValueFromDataProviderAggregation(jsonDoc, europeanaId, "edmIsShownBy");
-        Manifest manifest = new Manifest(europeanaId, settings.getManifestId(europeanaId), isShownBy);
+        Manifest manifest = new Manifest(settings.getManifestId(europeanaId));
         manifest.getServices().add(getServiceDescriptionV2(settings, europeanaId));
         // EA-3325
 //        manifest.setWithin(getWithinV2(jsonDoc));
@@ -80,9 +93,96 @@ public final class EdmManifestMappingV2 {
     }
 
     /**
+     * We generate all full text links in one place, so we can raise a timeout if retrieving the necessary
+     * data for all full texts is too slow.
+     * From EA-2604 on, originalLanguage is available on the FulltextSummaryCanvas and copied to the AnnotationBody if
+     * motivation = 'sc:painting'
+     */
+    public void fillWithFullText(Manifest manifest
+                               , Map<String, FulltextSummaryCanvas> summary) {
+
+        if (manifest.getSequences() == null || manifest.getSequences().size() == 0) {
+            LOG.debug("Not checking for fulltext because record doesn't have any sequences");
+            return;
+        }
+
+        // there is always only 1 sequence
+        Sequence sequence = manifest.getSequences().get(0);
+        if ( summary == null ) { return; }
+            
+        // loop over canvases to add full-text link(s) to all
+        for (Canvas canvas : sequence.getCanvases()) {
+            // we need to generate the same annopageId hash based on imageId
+            String apHash = GenerateUtils.derivePageId(canvas.getStartImageAnnotation().getBody().getID());
+            FulltextSummaryCanvas ftCanvas = summary.get(apHash);
+            if (ftCanvas == null) {
+                // This warning can be logged for empty pages that do not have a fulltext, but if we get a lot
+                // then Record API and Fulltext API are not in sync (or the hashing algorithm changed)
+                LOG.warn("Possible inconsistent data. No fulltext annopage found for record {} page {}. Generated hash = {}",
+                        manifest.getID(), canvas.getID(), apHash);
+            } else {
+                addFulltextLinkToCanvasV2(canvas, ftCanvas);
+            }
+        }
+
+        /*
+        Map<String, FulltextSummaryCanvas> summaryCanvasMap;
+        if (manifest.getSequences() != null && manifest.getSequences().size() > 0) {
+            // there is always only 1 sequence
+            Sequence sequence = manifest.getSequences().get(0);
+            // Get all the available AnnoPages incl translations from the summary endpoint of Fulltext
+            String fullTextSummaryUrl = generateFullTextSummaryUrl(manifest.getEuropeanaId(), fullTextApi);
+            summaryCanvasMap = fulltextService.getFulltextSummary(fullTextSummaryUrl);
+            if (null != summaryCanvasMap) {
+                // loop over canvases to add full-text link(s) to all
+                for (Canvas canvas : sequence.getCanvases()) {
+                    // we need to generate the same annopageId hash based on imageId
+                    String apHash = GenerateUtils.derivePageId(canvas.getStartImageAnnotation().getBody().getID());
+                    FulltextSummaryCanvas ftCanvas = summaryCanvasMap.get(apHash);
+                    if (ftCanvas == null) {
+                        // This warning can be logged for empty pages that do not have a fulltext, but if we get a lot
+                        // then Record API and Fulltext API are not in sync (or the hashing algorithm changed)
+                        LOG.warn("Possible inconsistent data. No fulltext annopage found for record {} page {}. Generated hash = {}",
+                                manifest.getEuropeanaId(), canvas.getPageNr(), apHash);
+                    } else {
+                        addFulltextLinkToCanvasV2(canvas, ftCanvas);
+                    }
+                }
+            }
+        } else {
+            LOG.debug("Not checking for fulltext because record doesn't have any sequences");
+        }
+        */
+    }
+
+    /**
+     * Generates a url to a full text resource
+     *
+     * @param fullTextApiUrl optional, if not specified then the default Full-Text API specified in .properties is used
+     * @param europeanaId    identifier to include in the path
+     */
+    private String generateFullTextSummaryUrl(String europeanaId, URL fullTextApiUrl) {
+        if (fullTextApiUrl == null) {
+            return settings.getFullTextApiBaseUrl() + ManifestDefinitions.getFulltextSummaryPath(europeanaId);
+        } else {
+            return fullTextApiUrl + ManifestDefinitions.getFulltextSummaryPath(europeanaId);
+        }
+    }
+
+    private void addFulltextLinkToCanvasV2(Canvas canvas, FulltextSummaryCanvas summaryCanvas) {
+        canvas.getOtherContent().addAll(summaryCanvas.getAnnoPageIDs());
+        for (eu.europeana.api.iiif.v2.model.Annotation ann : canvas.getImages()) {
+            // original language will be null for translation
+            if (StringUtils.equalsAnyIgnoreCase(ann.getMotivation(), "sc:painting") && summaryCanvas.getOriginalLanguage() != null) {
+                ann.getBody().setLanguage(summaryCanvas.getOriginalLanguage());
+            }
+        }
+    }
+
+    /**
      * Generates a service description for the manifest
      */
-    private static Service getServiceDescriptionV2(IIIfSettings settings, String europeanaId) {
+    private static Service getServiceDescriptionV2(ManifestSettings settings, String europeanaId) {
         // TODO need to know the type value
         Service service = new Service(settings.getContentSearchURL(europeanaId), null);
         service.setContext(ManifestDefinitions.SEARCH_CONTEXT_VALUE);
@@ -112,7 +212,7 @@ public final class EdmManifestMappingV2 {
      */
     static LanguageValue getLabelsV2(Object jsonDoc) {
         // we read everything in as LanguageMap[] because that best matches the EDM implementation, then we convert to LanguageObjects[]
-        LanguageMap labelsV3 = EdmManifestMappingV3.getLabelsV3(jsonDoc);
+        LanguageMap labelsV3 = EdmManifestMappingV3.getLabels(jsonDoc);
         if (labelsV3 == null) {
             return null;
         }
@@ -126,11 +226,11 @@ public final class EdmManifestMappingV2 {
      */
     static LanguageValue getDescriptionV2(Object jsonDoc) {
         // we read everything in as LanguageMap[] because that best matches the EDM implementation, then we convert to LanguageObjects[]
-        LanguageMap descriptionsV3 = EdmManifestMappingV3.getDescriptionV3(jsonDoc);
+        LanguageMap descriptionsV3 = EdmManifestMappingV3.getDescription(jsonDoc);
         if (descriptionsV3 == null) {
             return null;
         }
-        return LanguageMapUtils.langMapToObjects(EdmManifestMappingV3.getDescriptionV3(jsonDoc));
+        return LanguageMapUtils.langMapToObjects(EdmManifestMappingV3.getDescription(jsonDoc));
     }
 
     /**
@@ -235,7 +335,7 @@ public final class EdmManifestMappingV2 {
      * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
      * @return array of 3 datasets
      */
-    static List<Dataset> getDataSetsV2(IIIfSettings settings, String europeanaId) {
+    static List<Dataset> getDataSetsV2(ManifestSettings settings, String europeanaId) {
         List<Dataset> result = new ArrayList<>(3);
         result.add(new Dataset(settings.getDatasetId(europeanaId, ".json-ld"), AcceptUtils.MEDIA_TYPE_JSONLD));
         result.add(new Dataset(settings.getDatasetId(europeanaId, ".json"), org.springframework.http.MediaType.APPLICATION_JSON_VALUE));
@@ -249,7 +349,7 @@ public final class EdmManifestMappingV2 {
      * @param jsonDoc parsed json document
      * @return
      */
-    static List<Sequence> getSequencesV2(IIIfSettings settings, MediaTypes mediaTypes,String europeanaId, String isShownBy, Object jsonDoc) {
+    static List<Sequence> getSequencesV2(ManifestSettings settings, MediaTypes mediaTypes,String europeanaId, String isShownBy, Object jsonDoc) {
         // generate canvases in a same order as the web resources
         List<WebResource> sortedResources = EdmManifestUtils.getSortedWebResources(europeanaId, isShownBy, jsonDoc);
         if (sortedResources.isEmpty()) {
@@ -323,7 +423,7 @@ public final class EdmManifestMappingV2 {
     /**
      * Generates a new canvas, but note that we do not fill the otherContent (Full-Text) here. That is done later
      */
-    private static Canvas getCanvasV2(IIIfSettings settings,
+    private static Canvas getCanvasV2(ManifestSettings settings,
                                                                  MediaTypes mediaTypes,
                                                                  String europeanaId,
                                                                  int order,

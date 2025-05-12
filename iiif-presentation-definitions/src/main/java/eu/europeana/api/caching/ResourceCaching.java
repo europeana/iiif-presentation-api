@@ -3,6 +3,8 @@
  */
 package eu.europeana.api.caching;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -14,17 +16,32 @@ import static eu.europeana.api.caching.CachingHeaders.*;
  * @author Hugo
  * @since 25 Nov 2024
  */
+/*
+ * Represents the caching information of the resource.
+ * 
+ * Typically used to check caching request headers against and return in response 
+ * to caching requests.
+ */
 public class ResourceCaching {
 
     private String        cacheControl;
     private ETag          etag;
     private ZonedDateTime lastModified;
 
+    public ResourceCaching(ResourceCaching template) {
+        this(template.getCacheControl(), template.getETag()
+           , template.getLastModified());
+    }
+
     public ResourceCaching(String cacheControl, ETag etag
                          , ZonedDateTime lastModified) {
         this.cacheControl = cacheControl;
         this.etag = etag;
         this.lastModified = lastModified;
+    }
+
+    public ResourceCaching() {
+        
     }
 
     public String getCacheControl() {
@@ -52,15 +69,25 @@ public class ResourceCaching {
     }
 
     public void setHeaders(HttpHeaders headers) {
-        if ( cacheControl != null ) { 
-            headers.set(CACHE_CONTROL, cacheControl);
+        if ( cacheControl != null ) {
+            headers.setCacheControl(cacheControl);
         }
         if ( etag != null ) { 
-            headers.set(ETAG, etag.toString());
+            headers.setETag(etag.format());
         }
         if ( lastModified != null ) { 
-            headers.set(LAST_MODIFIED, dateToString(lastModified)); 
+            headers.setLastModified(lastModified); 
         }
+    }
+
+    public void getHeaders(HttpHeaders headers) {
+        this.cacheControl = headers.getCacheControl();
+        this.etag         = CachingUtils.parseETag(headers.getETag());
+        this.lastModified = CachingUtils.getLastModified(headers.getLastModified());
+    }
+
+    public ResourceCaching clone() {
+        return new ResourceCaching(this);
     }
 
     private static String dateToString(ZonedDateTime lastModified) {

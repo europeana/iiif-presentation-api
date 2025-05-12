@@ -77,32 +77,4 @@ public class Manifest extends PresentationResource {
     public void setSequences(List<Sequence> sequences) {
         this.sequences = sequences;
     }
-
-
-    // TODO review these changes, added as they are present in manifest api
-    @JsonIgnore
-    private Integer startCanvasPageNr; // for internal use only, similar to 'start' field in v3
-    @JsonIgnore
-    private String europeanaId; // for internal use only
-    @JsonIgnore
-    private String isShownBy; // for internal use only
-
-    public String getEuropeanaId() {
-        return europeanaId;
-    }
-
-    public String getIsShownBy() {
-        return isShownBy;
-    }
-
-    /**
-     * Create a new empty manifest (only id is filled)
-     * @param europeanaId
-     * @param manifestId
-     */
-    public Manifest(String europeanaId, String manifestId, String isShownBy) {
-        super(manifestId);
-        this.europeanaId = europeanaId;
-        this.isShownBy = isShownBy;
-    }
 }

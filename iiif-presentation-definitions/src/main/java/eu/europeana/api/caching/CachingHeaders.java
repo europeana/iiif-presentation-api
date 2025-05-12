@@ -29,5 +29,4 @@ public interface CachingHeaders {
                 StringUtils.isNotBlank(request.getHeader(IF_NONE_MATCH)) ||
                 StringUtils.isNotBlank(request.getHeader(IF_MATCH));
     }
-
 }

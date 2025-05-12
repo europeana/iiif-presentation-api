@@ -1,5 +1,7 @@
 package eu.europeana.api.iiif.exceptions;
 
+import java.io.IOException;
+
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 
 /**
@@ -7,7 +9,7 @@ import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
  * @author Patrick Ehlert
  * Created on 26-01-2018
  */
-public class RecordParseException extends EuropeanaApiException {
+public class RecordParseException extends IOException {
 
     private static final long serialVersionUID = 1007865165313316802L;
 

@@ -16,19 +16,30 @@ import static eu.europeana.api.iiif.generator.GeneratorUtils.*;
  * @author Hugo
  * @since 14 Oct 2024
  */
-public class CollectionV3Generator implements GeneratorConstants {
+public class CollectionV3Generator implements CollectionGenerator<Collection>
+                                            , GeneratorConstants {
 
-    private static LanguageMap ROOT_LABEL = new LanguageMap(LANG_META, GeneratorConstants.ROOT_LABEL);
-    private static LanguageMap ROOT_SUMMARY = new LanguageMap(LANG_META, ROOT_DESCRIPTION);
-    private static LanguageMap ROOT_GALLERY_LABEL = new LanguageMap(LANG_META, GeneratorConstants.ROOT_GALLERY_LABEL);
-    private static LanguageMap ROOT_GALLERY_SUMMARY = new LanguageMap(LANG_META, ROOT_GALLERY_DESCRIPTION);
-    private static LanguageMap WEBSITE_TITLE_GALLERY = new LanguageMap(LANG_META, GeneratorConstants.WEBSITE_TITLE_GALLERY);
+    private static LanguageMap ROOT_LABEL 
+        = new LanguageMap(LANG_META, GeneratorConstants.ROOT_LABEL);
+    private static LanguageMap ROOT_SUMMARY 
+        = new LanguageMap(LANG_META, ROOT_DESCRIPTION);
+    private static LanguageMap ROOT_GALLERY_LABEL 
+        = new LanguageMap(LANG_META, GeneratorConstants.ROOT_GALLERY_LABEL);
+    private static LanguageMap ROOT_GALLERY_SUMMARY 
+        = new LanguageMap(LANG_META, ROOT_GALLERY_DESCRIPTION);
+    private static LanguageMap WEBSITE_TITLE_GALLERY 
+        = new LanguageMap(LANG_META, GeneratorConstants.WEBSITE_TITLE_GALLERY);
 
     private static Agent EUROPEANA = newEuropeanaProvider();
 
     @Resource
-    private GeneratorSettings settings;
+    private CollectionSettings settings;
 
+    public CollectionV3Generator(CollectionSettings settings) {
+        this.settings = settings;
+    }
+
+    @Override
     public Collection generateRoot() {
         Collection col = new Collection(settings.getCollectionRootURI());
         col.setLabel(ROOT_LABEL);
@@ -40,6 +51,7 @@ public class CollectionV3Generator implements GeneratorConstants {
         return col;
     }
 
+    @Override
     public Collection generateGalleryRoot(java.util.Collection<? extends UserSet> sets) {
         Collection col = new Collection(settings.getGalleryRootURI());
         col.setLabel(ROOT_GALLERY_LABEL);
@@ -48,15 +60,19 @@ public class CollectionV3Generator implements GeneratorConstants {
         col.getProvider().add(EUROPEANA);
         col.getBehavior().add(Behavior.unordered);
         for (UserSet set : sets) {
-            Collection child = new Collection(buildUrlWithSetId(settings.getGalleryRootURI(), set.getIdentifier()));
+            Collection child = new Collection(
+                    buildUrlWithSetId(settings.getGalleryRootURI()
+                                    , set.getIdentifier()));
             child.setLabel(getLanguageMap(set.getTitle()));
             col.getItems().add(child);
         }
         return col;
     }
 
+    @Override
     public Collection generateGallery(UserSet set, List<RecordPreview> items) {
-        Collection col = new Collection(buildUrlWithSetId(settings.getGalleryRootURI(), set.getIdentifier()));
+        Collection col = new Collection(buildUrlWithSetId(
+                settings.getGalleryRootURI(), set.getIdentifier()));
         if (set.getTitle() != null) {
             col.setLabel(getLanguageMap(set.getTitle()));
         }
@@ -77,29 +93,29 @@ public class CollectionV3Generator implements GeneratorConstants {
     }
 
     protected Manifest getManifest(RecordPreview item) {
-        Manifest manifest = new Manifest(StringUtils.replace(settings.getIIIfManifestUrl(), settings.getIIIFApiIdPlaceholder(), item.getId()));
+        Manifest manifest = new Manifest(StringUtils.replace(
+                settings.getIIIfManifestUrl(), settings.getIIIFApiIdPlaceholder()
+              , item.getId()));
         manifest.getThumbnail().add(newThumbnail(item));
 
         if (!item.hasTitle()) {
-            if (!item.hasDescription()) {
-                return manifest;
-            }
+            if (!item.hasDescription()) { return manifest; }
+
             manifest.setLabel(new LanguageMap(item.getDescription()));
             return manifest;
         }
 
         manifest.setLabel(new LanguageMap(item.getTitle()));
 
-        if (!item.hasDescription()) {
-            return manifest;
-        }
+        if (!item.hasDescription()) { return manifest; }
         manifest.setSummary(new LanguageMap(item.getDescription()));
 
         return manifest;
     }
 
     protected Dataset newDataset(UserSet set) {
-        Dataset ds = new Dataset(buildUrlWithSetId(settings.getSetApiBaseUrl(), set.getIdentifier()) + "." + EXTENSION_JSONLD);
+        Dataset ds = new Dataset(buildUrlWithSetId(settings.getSetApiBaseUrl()
+                               , set.getIdentifier()) + "." + EXTENSION_JSONLD);
         ds.setFormat(MIMETYPE_JSONLD);
         ds.setProfile(SET_JSONLD_CONTEXT);
         return ds;
@@ -110,7 +126,8 @@ public class CollectionV3Generator implements GeneratorConstants {
     }
 
     protected Text newReference(UserSet set) {
-        Text ref = new Text(buildUrlWithSetId(settings.getGalleryLandingPage(), set.getIdentifier()));
+        Text ref = new Text(buildUrlWithSetId(settings.getGalleryLandingPage()
+                                            , set.getIdentifier()));
         ref.setLabel(WEBSITE_TITLE_GALLERY);
         ref.setFormat(MIMETYPE_HTML);
         return ref;

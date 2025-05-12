@@ -105,6 +105,7 @@ public final class CacheUtils {
             // Note that according to the specification we have to use strong ETags here (but for now we just ignore that)
             // see https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.24
             // TODO Also we ignore possible multiple eTags for now
+            // TODO THIS IS NOT TO BE APPLIED TO GET REQUESTS!!!!!
             return new ResponseEntity<>(headers, HttpStatus.PRECONDITION_FAILED);
         }
         return null;

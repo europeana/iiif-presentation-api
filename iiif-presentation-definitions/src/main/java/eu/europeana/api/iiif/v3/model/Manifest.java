@@ -84,30 +84,4 @@ public class Manifest extends PresentationResource {
         return ( this.items != null ? this.items
                                     : (this.items = new ArrayList<>()));
     }
-
-
-    // TODO review these changes, added as they are present in manifest api
-    @JsonIgnore
-    private String europeanaId; // for internal use only
-    @JsonIgnore
-    private String isShownBy; // for internal use only
-
-    public String getEuropeanaId() {
-        return europeanaId;
-    }
-
-    public String getIsShownBy() {
-        return isShownBy;
-    }
-
-    /**
-     * Create a new empty manifest (only id, context and logo ar filled in)
-     * @param europeanaId
-     * @param manifestId
-     */
-    public Manifest(String europeanaId, String manifestId, String isShownBy) {
-        super(manifestId);
-        this.europeanaId = europeanaId;
-        this.isShownBy = isShownBy;
-    }
 }

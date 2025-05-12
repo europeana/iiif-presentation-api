@@ -1,9 +1,9 @@
-package eu.europeana.api.iiif.config;
+package eu.europeana.api.iiif.media;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import eu.europeana.api.iiif.media.MediaType;
+
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -23,6 +23,8 @@ public class MediaTypes {
         public List<MediaType> mediaTypeCategories;
 
         private Map<String, MediaType> map = new HashMap<>();
+
+        public MediaTypes() {}
 
          /**
          * Map contains all the suppoerted media types except EU Screen entries
