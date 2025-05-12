@@ -1,6 +1,3 @@
-/**
- * 
- */
 package eu.europeana.api.iiif.service;
 
 import eu.europeana.api.iiif.generator.CollectionGenerator;

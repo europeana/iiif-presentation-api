@@ -3,16 +3,16 @@
  */
 package eu.europeana.api.iiif.service;
 
-import static eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils.*;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.iiif.exceptions.InvalidIIIFVersionException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;
 
-import org.apache.commons.lang3.StringUtils;
-
-import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.iiif.exceptions.InvalidIIIFVersionException;
-import jakarta.servlet.http.HttpServletRequest;
+import static eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils.ACCEPT;
+import static eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils.ACCEPT_PROFILE_PATTERN;
 
 /**
  * @author Hugo
@@ -29,7 +29,7 @@ public class IIIFVersionSupportHandler {
         map.put(support.getVersionId(), support);
     }
 
-    public IIIFVersionSupport getDefaultVersionSupport() 
+    public IIIFVersionSupport getDefaultVersionSupport()
             throws EuropeanaApiException {
         return getVersionSupport(def);
     }
@@ -47,16 +47,15 @@ public class IIIFVersionSupportHandler {
      * Retrieve the requested version from accept header if present
      * OR if not present, check the provided format parameter value.
      * If nothing is specified then 2 is returned as default
-     * @param request the incoming httpservletrequest to process
-     * @param format the format parameter value (if available, can be null is not provided)
-     * @return either version 2, 3 or null (if invalid)
+     * @param request the incoming http servlet request to process
+     * @return IIIFVersionSupport
      */
     public IIIFVersionSupport getVersionSupport(HttpServletRequest request) 
             throws EuropeanaApiException {
         String accept = request.getHeader(ACCEPT);
         if (StringUtils.isNotEmpty(accept)) {
             Matcher m = ACCEPT_PROFILE_PATTERN.matcher(accept);
-         // found a Profile parameter in the Accept header
+            // found a Profile parameter in the Accept header
             if (m.find()) { return getVersionSupport(m.group(1)); }
         }
         IIIFVersionSupport version = getVersionFromParameter(request);

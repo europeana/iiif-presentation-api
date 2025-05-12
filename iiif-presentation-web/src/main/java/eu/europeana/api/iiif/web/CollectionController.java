@@ -6,7 +6,6 @@ import eu.europeana.api.caching.CachingUtils;
 import eu.europeana.api.caching.DefaultCachingStrategy;
 import eu.europeana.api.caching.ResourceCaching;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
-import eu.europeana.api.commons.auth.apikey.ApikeyBasedAuthentication;
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
@@ -62,10 +61,8 @@ public class CollectionController {
     public CollectionController(BuildInfo buildInfo
                               , CollectionService collectionService
                               , IIIFJsonHandler iiifJsonHandler
-                              , @Qualifier(value = BEAN_IIIF_VERSION_SUPPORT) 
-                                IIIFVersionSupportHandler versionHandler
-                              , @Qualifier(value = BEAN_FALLBACK_AUTHORIZATION) 
-                                AuthenticationHandler authFallback) {
+                              , @Qualifier(value = BEAN_IIIF_VERSION_SUPPORT) IIIFVersionSupportHandler versionHandler
+                              , @Qualifier(value = BEAN_FALLBACK_AUTHORIZATION) AuthenticationHandler authFallback) {
         this.collectionService = collectionService;
         this.iiifJsonHandler = iiifJsonHandler;
         this.versionHandler  = versionHandler;
@@ -97,14 +94,12 @@ public class CollectionController {
     )
     public ResponseEntity<StreamingResponseBody> getRootCollection(
             HttpServletRequest request) throws EuropeanaApiException {
-
-
-        AuthenticationHandler auth = getAuthorization(request, authFallback);
+        // TODO there should be either no authentication in this method as we don't need it OR should be checked by readAccess
+        // AuthenticationHandler auth = getAuthorization(request, authFallback);
         IIIFVersionSupport version = versionHandler.getVersionSupport(request);
         RdfFormat          format  = getFormatFromHeader(request, RdfFormat.JSONLD);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("IIIF Version {} , RDF format {}"
-                        , version.getVersionNr(), format);
+            LOGGER.debug(IIIF_VERSION_RDF_FORMAT, version.getVersionNr(), format);
         }
 
         HttpHeaders     headers = new HttpHeaders();
@@ -132,7 +127,7 @@ public class CollectionController {
     /**
      * Endpoint to serve all the gallery collections
      *
-     * @param request HttpServlet request
+     * @param req HttpServlet request
      * @return Response Entity with StreamingResponseBody
      */
 
@@ -157,8 +152,7 @@ public class CollectionController {
         RdfFormat             format  = getFormatFromHeader(req, RdfFormat.JSONLD);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("IIIF Version {} , RDF format {}"
-                       , version.getVersionNr(), format);
+            LOGGER.debug(IIIF_VERSION_RDF_FORMAT, version.getVersionNr(), format);
         }
 
         HttpHeaders     headers = new HttpHeaders();
@@ -187,9 +181,10 @@ public class CollectionController {
     /**
      * Endpoint to serve a collection generated from a set/gallery
      *
-     * @param setId set id. Can be present with .json or .jsonld
-     * @param version version param for IIIF
-     * @param request HttpServlet request
+     * @param path - path consist of  -
+     *                       set id ,
+     *                       Rdf Format extension with .json or .jsonld(optional)
+     * @param req HttpServlet request
      * @return Response Entity with StreamingResponseBody
      */
     @Operation(
@@ -216,8 +211,7 @@ public class CollectionController {
 
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("IIIF Version {} , RDF format {}"
-                       , version.getVersionNr(), format);
+            LOGGER.debug(IIIF_VERSION_RDF_FORMAT, version.getVersionNr(), format);
         }
 
         HttpHeaders     rspHeaders = new HttpHeaders();
@@ -273,6 +267,6 @@ public class CollectionController {
     }
 
     private static class SourceData {
-        public IIIFResource col = null;
+        protected IIIFResource col = null;
     }
 }

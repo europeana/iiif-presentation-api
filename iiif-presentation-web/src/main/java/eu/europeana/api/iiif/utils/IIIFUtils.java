@@ -1,23 +1,23 @@
 package eu.europeana.api.iiif.utils;
 
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
-import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.exceptions.InvalidFormatException;
-import eu.europeana.api.iiif.service.IIIFVersionSupport;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import static eu.europeana.api.iiif.utils.IIIFConstants.V2;
-
 public class IIIFUtils {
 
-    private static Collection<RdfFormat> validFormats 
-        = Arrays.asList(RdfFormat.JSONLD, RdfFormat.JSON);
+    public static final String IIIF_VERSION_RDF_FORMAT = "IIIF Version {} , RDF format {}";
+
+    private static Collection<RdfFormat> validFormats = Arrays.asList(RdfFormat.JSONLD, RdfFormat.JSON);
+
+    private IIIFUtils() {
+        // private to hide implicit one
+    }
 
     public static String getId(String path) {
         int i = path.indexOf(".");
@@ -41,6 +41,7 @@ public class IIIFUtils {
 
     /**
      * Returns RdfFormat if the ACCEPT header is provided
+     * by default returns JSONLD RDF Format (even if the format provided is invalid)
      *
      * @param request
      * @return
@@ -58,7 +59,7 @@ public class IIIFUtils {
     }
 
     /**
-     * In IIIF presentaion api we only support json OR jsonld formats
+     * IIIF presentation api we only support json OR jsonld formats
      *
      * @param format
      * @return

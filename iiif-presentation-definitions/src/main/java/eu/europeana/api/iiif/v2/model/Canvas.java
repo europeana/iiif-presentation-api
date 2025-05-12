@@ -96,6 +96,5 @@ public class Canvas extends PresentationResource {
         }
         return images.get(0);
     }
-    
 
 }
