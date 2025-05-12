@@ -12,7 +12,7 @@ public class RecordRetrievalException extends EuropeanaApiException {
     private HttpStatus status;
 
     public RecordRetrievalException(EuropeanaApiErrorResponse rsp, int status) {
-        super(rsp.getMessage(), null, rsp.getCode());
+        super(rsp.getMessage(), rsp.getCode());
         this.status = HttpStatus.resolve(status);
     }
 

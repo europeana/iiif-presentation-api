@@ -22,7 +22,7 @@ public class ManifestException extends EuropeanaApiException {
      * @param t root cause exception
      */
     public ManifestException(String msg, String errorCode, Throwable t) {
-        super(msg, null, errorCode, t);
+        super(msg, errorCode, t);
     }
 
     /**
@@ -39,6 +39,6 @@ public class ManifestException extends EuropeanaApiException {
      * @param errorCode error code (optional)
      */
     public ManifestException(String msg, String errorCode) {
-        super(msg, null, errorCode);
+        super(msg, errorCode);
     }
 }
