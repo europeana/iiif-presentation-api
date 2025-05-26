@@ -12,17 +12,16 @@ public class ManifestException extends EuropeanaApiException {
      * @param t root cause exception
      */
     public ManifestException(String msg, Throwable t) {
-        this(msg, null, t);
+        super(msg, t);
     }
 
     /**
      * Initialise a new exception with error code
      * @param msg error message
      * @param errorCode error code (optional)
-     * @param t root cause exception
      */
-    public ManifestException(String msg, String errorCode, Throwable t) {
-        super(msg, errorCode, t);
+    public ManifestException(String msg,  String error,  String errorCode) {
+        super(msg, error, errorCode);
     }
 
     /**
@@ -33,12 +32,4 @@ public class ManifestException extends EuropeanaApiException {
         super(msg);
     }
 
-    /**
-     * Initialise a new exception with error code for which there is no root cause
-     * @param msg error message
-     * @param errorCode error code (optional)
-     */
-    public ManifestException(String msg, String errorCode) {
-        super(msg, errorCode);
-    }
 }
