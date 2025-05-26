@@ -92,6 +92,7 @@ public class CollectionController {
             },
             headers = {ACCEPT_HEADER_JSONLD, ACCEPT_HEADER_JSON}
     )
+
     public ResponseEntity<StreamingResponseBody> getRootCollection(
             HttpServletRequest request) throws EuropeanaApiException {
         // TODO there should be either no authentication in this method as we don't need it OR should be checked by readAccess

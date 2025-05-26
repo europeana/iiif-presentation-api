@@ -5,10 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class CollectionException extends EuropeanaApiException {
 
-    public CollectionException(String msg) {
-        super(msg);
-    }
-
     public CollectionException(String msg, Throwable t) {
         super(msg, t);
     }

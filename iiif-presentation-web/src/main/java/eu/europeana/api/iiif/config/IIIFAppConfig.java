@@ -4,6 +4,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import eu.europeana.api.caching.CachingStrategy;
+import eu.europeana.api.caching.ChainingCachingStrategy;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidConfigurationException;
+import eu.europeana.api.commons_sb3.error.i18n.I18nService;
+import eu.europeana.api.commons_sb3.error.i18n.I18nServiceImpl;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons.auth.apikey.ApikeyBasedAuthentication;
 import eu.europeana.api.iiif.exceptions.InvalidConfigurationException;
@@ -30,13 +36,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
@@ -162,7 +172,16 @@ public class IIIFAppConfig {
         try {
             return new UserSetApiClient(settings.getSetApiServiceUri(), null);
         } catch (SetApiClientException e) {
-            throw new InvalidConfigurationException(e.getLocalizedMessage());
+            throw new InvalidConfigurationException(Arrays.asList("Set Api Endpoint", "<not null>", settings.getSetApiServiceUri()));
         }
+    }
+
+    @Bean(name = ErrorConfig.BEAN_I18nService)
+    public I18nService getI18nService() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasenames(ErrorConfig.COMMON_MESSAGE_SOURCE);
+        messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
+        I18nServiceImpl service =  new I18nServiceImpl(messageSource);
+        return service;
     }
 }

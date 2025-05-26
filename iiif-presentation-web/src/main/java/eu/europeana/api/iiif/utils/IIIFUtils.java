@@ -1,6 +1,9 @@
 package eu.europeana.api.iiif.utils;
 
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
+import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidIdException;
+import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.exceptions.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
