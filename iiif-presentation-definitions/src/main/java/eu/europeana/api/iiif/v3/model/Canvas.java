@@ -112,25 +112,7 @@ public class Canvas extends PresentationResource {
                                   : (this.annotations = new ArrayList<>()));
     }
 
-    // TODO review this added as it is present in manifest api
-
-    @JsonIgnore
-    private int pageNr; // for internal use
-
-    public int getPageNr() {
-        return pageNr;
-    }
-
-    /**
-     * Create a new canvas object
-     * @param id
-     * @param pageNr
-     */
-    public Canvas(String id, int pageNr) {
-        super(id);
-        this.pageNr = pageNr;
-    }
-
+    //TODO: Check against iiiif spec
     @JsonIgnore
     public Annotation getStartCanvasAnnotation() {
         if (items == null || items.size() == 0) {
@@ -138,6 +120,4 @@ public class Canvas extends PresentationResource {
         }
         return items.get(0).getItems().get(0);
     }
-
-
 }

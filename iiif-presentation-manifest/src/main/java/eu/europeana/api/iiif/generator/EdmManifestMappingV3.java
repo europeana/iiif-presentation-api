@@ -1,15 +1,18 @@
-package eu.europeana.api.iiif.service.manifest;
+package eu.europeana.api.iiif.generator;
 
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
+
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
-import eu.europeana.api.iiif.config.IIIfSettings;
-import eu.europeana.api.iiif.config.MediaTypes;
 import eu.europeana.api.iiif.media.MediaType;
+import eu.europeana.api.iiif.media.MediaTypes;
 import eu.europeana.api.iiif.model.ManifestDefinitions;
 import eu.europeana.api.iiif.model.WebResource;
+import eu.europeana.api.iiif.model.info.FulltextSummaryAnnoPage;
+import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
 import eu.europeana.api.iiif.service.WebResourceSorter;
 import eu.europeana.api.iiif.utils.EdmManifestUtils;
+import eu.europeana.api.iiif.utils.GenerateUtils;
 import eu.europeana.api.iiif.utils.LanguageMapUtils;
 import eu.europeana.api.iiif.v3.model.*;
 import eu.europeana.api.iiif.v3.model.content.*;
@@ -17,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -40,15 +44,107 @@ import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
  */
 // ignore sonarqube rule: we return null on purpose in this class
 // ignore pmd rule:  we want to make a clear which objects are v2 and which v3
-public final class EdmManifestMappingV3 {
+public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
     private static final Logger LOG = LogManager.getLogger(EdmManifestMappingV3.class);
 
+    //@TODO: Why is this static?
     private static String thumbnailApiUrl;
 
-    private EdmManifestMappingV3() {
+    private ManifestSettings     settings;
+    private MediaTypes       mediaTypes;
+
+    public EdmManifestMappingV3(ManifestSettings settings
+                              , MediaTypes mediaTypes) {
+        this.settings   = settings;
+        this.mediaTypes = mediaTypes;
+        thumbnailApiUrl = settings.getThumbnailApiUrl();
     }
 
+    /**
+     * Generates a IIIF v3 manifest based on the provided (parsed) json document
+     * @param jsonDoc parsed json document
+     * @return IIIF Manifest v3 object
+     */
+    public Manifest generateManifest(Object jsonDoc) {
+        String europeanaId = EdmManifestUtils.getEuropeanaId(jsonDoc);
+        String isShownBy = EdmManifestUtils.getValueFromDataProviderAggregation(jsonDoc, europeanaId, "edmIsShownBy");
+
+        // if Item is EU screen then get the mediaTypevalue and the isShownBy value is replaced with isShownAt if empty
+        MediaType euScreenTypeHack = ifEuScreenGetMediaType(mediaTypes, jsonDoc, europeanaId, isShownBy);
+        Manifest manifest = new Manifest(settings.getManifestId(europeanaId));
+        manifest.getServices().add(getServiceDescriptionV3(settings, europeanaId));
+        // EA-3325
+//        manifest.setPartOf(getWithinV3(jsonDoc));
+        manifest.setLabel(getLabels(jsonDoc));
+        manifest.setSummary(getDescription(jsonDoc));
+        manifest.getMetadata().addAll(getMetaDataV3(jsonDoc));
+        manifest.getThumbnail().add(getThumbnailImageV3(europeanaId, jsonDoc));
+        manifest.setNavDate(EdmManifestUtils.getNavDate(europeanaId, jsonDoc));
+        manifest.getHomepage().add(EdmManifestUtils.getHomePage(europeanaId, jsonDoc));
+        manifest.setRequiredStatement(getAttributionV3Root(europeanaId, isShownBy, jsonDoc));
+        manifest.setRights(getRights(europeanaId, jsonDoc));
+        manifest.setSeeAlso(getDataSetsV3(settings, europeanaId));
+        // get the canvas items and if present add to manifest
+        List<Canvas> items = getItems(settings, mediaTypes, europeanaId, isShownBy, jsonDoc, euScreenTypeHack);
+        if (items != null && items.size() > 0) {
+            manifest.getItems().addAll(items);
+            // TODO get missing fields - c.getStartCanvasAnnotation().getBody().getId()
+           // manifest.setStart(getStartCanvasV3(manifest.getItems(), isShownBy));
+        } else {
+            LOG.debug("No Canvas generated for europeanaId {}", europeanaId);
+        }
+        return manifest;
+    }
+
+    /**
+     * We generate all full text links in one place, so we can raise a timeout if retrieving the necessary
+     * data for all full texts is too slow.
+     * From EA-2604 on, originalLanguage is available on the FulltextSummaryCanvas and copied to the AnnotationBody if
+     * motivation = 'painting'
+     */
+    public void fillWithFullText(Manifest manifest, Map<String, FulltextSummaryCanvas> summary) {
+        if ( summary == null ) { return; }
+
+        if ( !manifest.hasItems() ) { return; }
+
+        for (Canvas canvas : manifest.getItems()) {
+            // we need to generate the same annopageId hash based on imageId
+            String apHash = GenerateUtils.derivePageId(canvas.getStartCanvasAnnotation().getBody().getID());
+            FulltextSummaryCanvas ftCanvas = summary.get(apHash);
+            if (ftCanvas == null) {
+                // This warning can be logged for empty pages that do not have a fulltext, but if we get a lot
+                // then Record API and Fulltext API are not in sync (or the hashing algorithm changed).
+                LOG.warn("Inconsistent data! No fulltext annopage found for record {} page {}. Generated hash = {}",
+                        manifest.getID(), canvas.getID(), apHash);
+            } else {
+                addFulltextLinkToCanvas(canvas, ftCanvas);
+            }
+        }
+    }
+
+    private void addFulltextLinkToCanvas(eu.europeana.api.iiif.v3.model.Canvas canvas, FulltextSummaryCanvas summaryCanvas) {
+        List<AnnotationPage> summaryAnnoPages = new ArrayList<>();
+        createFTSummaryAnnoPages(summaryAnnoPages, summaryCanvas);
+        canvas.getAnnotations().addAll(summaryAnnoPages);
+        for (eu.europeana.api.iiif.v3.model.AnnotationPage ap : canvas.getItems()) {
+            for (eu.europeana.api.iiif.v3.model.Annotation ann : ap.getItems()) {
+                // for translations originalLanguage will be null
+                if (StringUtils.equalsAnyIgnoreCase(ann.getMotivation(), "painting") && summaryCanvas.getOriginalLanguage() != null) {
+                    ann.getBody().setLanguage(summaryCanvas.getOriginalLanguage());
+                }
+            }
+        }
+    }
+
+    private void createFTSummaryAnnoPages(List<AnnotationPage> summaryAnnoPages, FulltextSummaryCanvas summaryCanvas) {
+        for (FulltextSummaryAnnoPage sap : summaryCanvas.getFTSummaryAnnoPages()) {
+            AnnotationPage page = new AnnotationPage(sap.getID());
+            summaryAnnoPages.add(page);
+            // TODO language source and text graulraity field in AnnotationPage class
+            //summaryAnnoPages.add(new AnnotationPage(sap.getId(), sap.getLanguage(), sap.getTextGranularity(), sap.getSource()));
+        }
+    }
 
     /**
      * Eu screen items are only checked in format/ iiif version 3
@@ -100,47 +196,11 @@ public final class EdmManifestMappingV3 {
                         isShownAtOrBy.startsWith("https://www.euscreen.eu/item.html")));
     }
 
-    /**
-     * Generates a IIIF v3 manifest based on the provided (parsed) json document
-     * @param jsonDoc parsed json document
-     * @return IIIF Manifest v3 object
-     */
-    public static Manifest getManifestV3(IIIfSettings ms, MediaTypes mediaTypes, Object jsonDoc) {
-        thumbnailApiUrl = ms.getThumbnailApiUrl();
-        String europeanaId = EdmManifestUtils.getEuropeanaId(jsonDoc);
-        String isShownBy = EdmManifestUtils.getValueFromDataProviderAggregation(jsonDoc, europeanaId, "edmIsShownBy");
-
-        // if Item is EU screen then get the mediaTypevalue and the isShownBy value is replaced with isShownAt if empty
-        MediaType euScreenTypeHack = ifEuScreenGetMediaType(mediaTypes, jsonDoc, europeanaId, isShownBy);
-        Manifest manifest = new Manifest(europeanaId, ms.getManifestId(europeanaId), isShownBy);
-        manifest.getServices().add(getServiceDescriptionV3(ms, europeanaId));
-        // EA-3325
-//        manifest.setPartOf(getWithinV3(jsonDoc));
-        manifest.setLabel(getLabelsV3(jsonDoc));
-        manifest.setSummary(getDescriptionV3(jsonDoc));
-        manifest.getMetadata().addAll(getMetaDataV3(jsonDoc));
-        manifest.getThumbnail().add(getThumbnailImageV3(europeanaId, jsonDoc));
-        manifest.setNavDate(EdmManifestUtils.getNavDate(europeanaId, jsonDoc));
-        manifest.getHomepage().add(EdmManifestUtils.getHomePage(europeanaId, jsonDoc));
-        manifest.setRequiredStatement(getAttributionV3Root(europeanaId, isShownBy, jsonDoc));
-        manifest.setRights(getRights(europeanaId, jsonDoc));
-        manifest.setSeeAlso(getDataSetsV3(ms, europeanaId));
-        // get the canvas items and if present add to manifest
-        List<Canvas> items = getItems(ms, mediaTypes, europeanaId, isShownBy, jsonDoc, euScreenTypeHack);
-        if (items != null && items.size() > 0) {
-            manifest.getItems().addAll(items);
-            // TODO get missing fields - c.getStartCanvasAnnotation().getBody().getId()
-           // manifest.setStart(getStartCanvasV3(manifest.getItems(), isShownBy));
-        } else {
-            LOG.debug("No Canvas generated for europeanaId {}", europeanaId);
-        }
-        return manifest;
-    }
 
     /**
      * Generates Service descriptions for the manifest
      */
-    private static Service getServiceDescriptionV3(IIIfSettings ms, String europeanaId) {
+    private static Service getServiceDescriptionV3(ManifestSettings ms, String europeanaId) {
         Service service = new Service(ms.getContentSearchURL(europeanaId), null);
         service.setContext(ManifestDefinitions.SEARCH_CONTEXT_VALUE);
         service.setProfile(ManifestDefinitions.SEARCH_PROFILE_VALUE);
@@ -170,7 +230,7 @@ public final class EdmManifestMappingV3 {
      * @param jsonDoc parsed json document
      * @return
      */
-    static LanguageMap getLabelsV3(Object jsonDoc)  {
+    protected static LanguageMap getLabels(Object jsonDoc)  {
         LanguageMap[] maps = JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcTitle", LanguageMap[].class);
         if (maps == null || maps.length == 0) {
             maps = JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcDescription", LanguageMap[].class);
@@ -184,7 +244,7 @@ public final class EdmManifestMappingV3 {
      * @param jsonDoc parsed json document
      * @return
      */
-    static LanguageMap getDescriptionV3(Object jsonDoc) {
+    protected static LanguageMap getDescription(Object jsonDoc) {
         if (JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcTitle", LanguageMap[].class).length > 0) {
             return LanguageMapUtils.mergeLanguageMaps(JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcDescription", LanguageMap[].class));
         }
@@ -372,7 +432,7 @@ public final class EdmManifestMappingV3 {
      * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
      * @return array of 3 datasets
      */
-    static List<Dataset> getDataSetsV3(IIIfSettings settings, String europeanaId) {
+    static List<Dataset> getDataSetsV3(ManifestSettings settings, String europeanaId) {
         List<Dataset> result = new ArrayList<>(3);
         result.add(new Dataset(settings.getDatasetId(europeanaId, ".json-ld"), AcceptUtils.MEDIA_TYPE_JSONLD));
         result.add(new Dataset(settings.getDatasetId(europeanaId, ".json"), org.springframework.http.MediaType.APPLICATION_JSON_VALUE));
@@ -417,7 +477,7 @@ public final class EdmManifestMappingV3 {
      * @param jsonDoc
      * @return array of Canvases
      */
-    static List<Canvas> getItems(IIIfSettings settings, MediaTypes mediaTypes, String europeanaId, String isShownBy, Object jsonDoc, MediaType euScreenTypeHack) {
+    static List<Canvas> getItems(ManifestSettings settings, MediaTypes mediaTypes, String europeanaId, String isShownBy, Object jsonDoc, MediaType euScreenTypeHack) {
         // generate canvases in a same order as the web resources
         List<WebResource> sortedResources = EdmManifestUtils.getSortedWebResources(europeanaId, isShownBy, jsonDoc);
         if (sortedResources.isEmpty()) {
@@ -442,7 +502,7 @@ public final class EdmManifestMappingV3 {
     /**
      * Generates a new canvas, but note that we do not fill the otherContent (Full-Text) here. That's done later.
      */
-    private static Canvas getCanvasV3(IIIfSettings settings,
+    private static Canvas getCanvasV3(ManifestSettings settings,
                                                                  MediaTypes mediaTypes,
                                                                  String europeanaId,
                                                                  int order,
@@ -532,7 +592,7 @@ public final class EdmManifestMappingV3 {
         return c;
     }
 
-    private static Canvas createCanvas(IIIfSettings settings, String europeanaId, int order) {
+    private static Canvas createCanvas(ManifestSettings settings, String europeanaId, int order) {
         Canvas c = new Canvas(settings.getCanvasId(europeanaId, order));
         c.setLabel(new LanguageMap(null, "p. "+ order));
         return c;

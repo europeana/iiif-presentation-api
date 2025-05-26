@@ -8,11 +8,11 @@ import eu.europeana.api.iiif.connection.HttpConnection;
 
 public class BaseService {
 
-    protected final HttpConnection httpConnection;
-    protected final ObjectMapper mapper;
+    protected final HttpConnection conn;
+    protected final ObjectMapper   mapper;
 
     public BaseService() {
-        httpConnection = new HttpConnection();
+        conn = new HttpConnection();
         mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);

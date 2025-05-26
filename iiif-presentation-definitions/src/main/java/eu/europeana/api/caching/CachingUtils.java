@@ -5,8 +5,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -38,6 +42,15 @@ public class CachingUtils {
      */
     private static Pattern MULTI_ETAG = Pattern.compile("(?:\\s*,\\s*)?(?:[wW]/)?\"(([^\"]|\\\\\")*)\"");
 
+    public static ETag parseETag(String txt) {
+        return WeakETag.parseAsWeakEtag(txt);
+    }
+
+    public static ZonedDateTime getLastModified(long timestamp) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp)
+                                     , ZoneId.systemDefault());
+    }
+
     public static <E extends ETag> List<E> getIfNoneMatch(HttpServletRequest request, E molde) {
         String ifNoneMatch = request.getHeader(IF_NONE_MATCH);
         if ( StringUtils.isBlank(ifNoneMatch) ) { return null; }
@@ -56,13 +69,12 @@ public class CachingUtils {
         String ifModifiedSince = request.getHeader(IF_MODIFIED_SINCE);
         if (StringUtils.isEmpty(ifModifiedSince)) { return null; }
 
-        // Note that Apache DateUtils can parse all 3 date format patterns allowed by RFC 2616
+        // Latest RFC7232 https://www.rfc-editor.org/rfc/rfc7232.txt
         try {
-            Date headerDate = DateUtils.parseDate(ifModifiedSince);
-            return headerDate.toInstant().atOffset(ZoneOffset.UTC).toZonedDateTime();
+            return ZonedDateTime.parse(ifModifiedSince
+                                     , DateTimeFormatter.RFC_1123_DATE_TIME);
         }
-        catch (ParseException e) {
-            //LogManager.getLogger(CachingUtils.class).error("Error parsing request header Date string: {}", dateString);
+        catch (DateTimeParseException e) {
             return null;
         }
     }

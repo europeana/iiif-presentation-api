@@ -61,7 +61,7 @@ public final class ValidateUtils {
      * @return true if it has a valid format
      * @throws IllegalArgumentException thrown when the provided string doesn't adhere to the expected format
      */
-    public static final boolean validateApiUrlFormat(URL apiUrl) throws IllegalArgumentException {
+    public static final boolean validateApiUrlFormat(String apiUrl) throws IllegalArgumentException {
         if (!API_BASEURL.matcher(apiUrl.toString()).matches()) {
             throw new IllegalArgumentException("Illegal API url "+ apiUrl);
         }

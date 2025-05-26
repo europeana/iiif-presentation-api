@@ -32,40 +32,33 @@ public class AuthorizationService {
      * @return
      * @throws AuthorizationException when no authentication is provided
      */
-    public static AuthenticationHandler getAuthorization(HttpServletRequest request) throws AuthorizationException {
+    public static AuthenticationHandler getAuthorization(
+            HttpServletRequest request, AuthenticationHandler fallback) throws AuthorizationException {
+        
         String apikey = extractApikey(request);
-        if ( apikey != null) {
-            return new ApikeyBasedAuthentication(apikey);
-        } else {
-            String token = extractToken(request);
-            if (token != null) {
-                return new StaticTokenAuthentication(token);
-            } else {
-                throw new AuthorizationException("No authentication information provided, Authorization header or Api key should be provided !!!");
-            }
-        }
+        if ( apikey != null) { return new ApikeyBasedAuthentication(apikey); }
+
+        String token = extractToken(request);
+        if (token != null) { return new StaticTokenAuthentication(token); }
+
+        if ( fallback != null ) { return fallback; }
+
+        throw new AuthorizationException("No authentication information provided, Authorization header or Api key should be provided !!!");
     }
 
     private static String extractApikey(HttpServletRequest request) throws AuthorizationException {
-        String wskeyParam = request.getParameter("wskey");
-        if (wskeyParam != null) {
-            return wskeyParam;
-        } else {
-            String xApiKeyHeader = request.getHeader("X-Api-Key");
-            if (xApiKeyHeader != null) {
-                return xApiKeyHeader;
-            } else {
-                String apikey = extractPayloadFromAuthorizationHeader(request, APIKEY);
-                return apikey;
-            }
-        }
+        String apikey = request.getParameter("wskey");
+        if (apikey != null) { return apikey; }
+
+        apikey = request.getHeader("X-Api-Key");
+        if (apikey != null) { return apikey; }
+
+        return extractPayloadFromAuthorizationHeader(request, APIKEY);
     }
 
     private static  String extractToken(HttpServletRequest request) throws AuthorizationException {
         return extractPayloadFromAuthorizationHeader(request, Bearer);
     }
-
-
 
     private static String extractPayloadFromAuthorizationHeader(HttpServletRequest request, String authorizationType) throws AuthorizationException {
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -74,12 +67,11 @@ public class AuthorizationService {
 
 
     private static String extractPayloadFromHeaderValue(String authorizationType, String authorization) throws AuthorizationException {
-        if (authorization == null) {
-            throw new AuthorizationException("No authentication information provided, Authorization header not submitted with the request! ");
-        } else if (!authorization.startsWith(Bearer) && !authorization.startsWith(APIKEY)) {
-            throw new AuthorizationException("Unsupported type in Auhtorization header: " + authorization);
-        } else {
+        if (authorization == null) { return null; }
+        
+        if (authorization.startsWith(Bearer) || authorization.startsWith(APIKEY)) {
             return authorization.startsWith(authorizationType) ? authorization.substring(authorizationType.length()).trim() : null;
         }
+        throw new AuthorizationException("Unsupported type in Auhtorization header: " + authorization);
     }
 }

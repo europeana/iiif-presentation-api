@@ -1,30 +1,42 @@
 package eu.europeana.api.iiif.web;
 
-import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
+import eu.europeana.api.caching.CachingUtils;
+import eu.europeana.api.caching.ResourceCaching;
+import eu.europeana.api.caching.WeakETag;
+import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons.auth.apikey.ApikeyBasedAuthentication;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.iiif.config.BuildInfo;
 import eu.europeana.api.iiif.exceptions.InvalidIIIFVersionException;
 import eu.europeana.api.iiif.exceptions.ManifestInvalidUrlException;
+import eu.europeana.api.iiif.generator.ManifestGenerator;
+import eu.europeana.api.iiif.generator.ManifestSettings;
+import eu.europeana.api.iiif.model.IIIFResource;
+import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
+import eu.europeana.api.iiif.service.AbsChainCachingStrategy;
+import eu.europeana.api.iiif.service.FulltextService;
+import eu.europeana.api.iiif.service.IIIFVersionSupport;
+import eu.europeana.api.iiif.service.IIIFVersionSupportHandler;
+import eu.europeana.api.iiif.service.ManifestCachingStrategy;
 import eu.europeana.api.iiif.service.ManifestService;
-
-import eu.europeana.api.iiif.utils.CacheUtils;
-import eu.europeana.api.iiif.utils.EdmManifestUtils;
+import eu.europeana.api.iiif.service.RecordService;
 import eu.europeana.api.iiif.utils.ValidateUtils;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import java.net.URL;
-import java.time.ZonedDateTime;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Map;
 
-import static eu.europeana.api.iiif.utils.IIIFConstants.ACCEPT_HEADER_JSON;
-import static eu.europeana.api.iiif.utils.IIIFConstants.ACCEPT_HEADER_JSONLD;
-import static eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils.ACCEPT_VERSION_INVALID;
-
+import static eu.europeana.api.iiif.utils.IIIFConstants.*;
+import static eu.europeana.api.iiif.oauth.AuthorizationService.*;
 
 /**
  * Rest controller that handles manifest requests
@@ -38,10 +50,33 @@ public class ManifestController {
 
     private static final Logger LOG = LogManager.getLogger(ManifestController.class);
 
-    private ManifestService manifestService;
+    private static final ManifestCachingStrategy cachingStrategy 
+        = new ManifestCachingStrategy();
 
-    public ManifestController(ManifestService manifestService) {
+    private ManifestService           manifestService;
+    private RecordService             recordService;
+    private FulltextService           fulltextService;
+    private IIIFVersionSupportHandler versionHandler;
+    private final BuildInfo           buildInfo;
+    private ManifestSettings          settings;
+    private AuthenticationHandler     authFallback;
+
+    public ManifestController(BuildInfo buildInfo
+                            , ManifestSettings settings
+                            , ManifestService manifestService
+                            , RecordService recordService
+                            , FulltextService fulltextService
+                            , @Qualifier(value = BEAN_IIIF_VERSION_SUPPORT) 
+                              IIIFVersionSupportHandler versionHandler
+                            , @Qualifier(value = BEAN_FALLBACK_AUTHORIZATION) 
+                              AuthenticationHandler authFallback) {
+        this.settings        = settings;
         this.manifestService = manifestService;
+        this.recordService   = recordService;
+        this.fulltextService = fulltextService;
+        this.versionHandler  = versionHandler;
+        this.buildInfo       = buildInfo;
+        this.authFallback    = authFallback;
     }
 
     /**
@@ -51,15 +86,16 @@ public class ManifestController {
      * @return
      * @throws ManifestInvalidUrlException
      */
-    @GetMapping(value = {"/{collectionId}/{recordId}", "/{Id}/manifest", "/manifest"})
-    public ResponseEntity<String> invalidMappingUrls() throws ManifestInvalidUrlException {
-        throw new ManifestInvalidUrlException("Either recordId or collectionId is missing. Correct url is /{collectionId}/{recordId}/manifest");
+    @GetMapping(value = {"/{datasetId}/{recordId}", "/{Id}/manifest", "/manifest"})
+    public ResponseEntity<String> invalidMappingUrls() 
+            throws ManifestInvalidUrlException {
+        throw new ManifestInvalidUrlException("Either recordId or datasetId is missing. Correct url is /{datasetId}/{recordId}/manifest");
     }
 
     /**
      * Handles manifest requests
      *
-     * @param collectionId (required field)
+     * @param datasetId    (required field)
      * @param recordId     (required field)
      * @param wskey        apikey (required field)
      * @param version      (optional) indicates which IIIF version to generate, either '2' or '3'
@@ -71,17 +107,16 @@ public class ManifestController {
      */
     @SuppressWarnings("squid:S00107") // too many parameters -> we cannot avoid it.
 
-    @GetMapping(value = "/{collectionId}/{recordId}/manifest", headers = ACCEPT_HEADER_JSON)
-    public ResponseEntity<String> manifestRequestJson(
-            @PathVariable String collectionId,
+    @GetMapping(value = "/{datasetId}/{recordId}/manifest"
+              , headers = ACCEPT_HEADER_JSON)
+    public ResponseEntity<StreamingResponseBody> manifestRequestJson(
+            @PathVariable String datasetId,
             @PathVariable String recordId,
-            @RequestParam(value = "wskey", required = true) String wskey,
-            @RequestParam(value = "format", required = false) String version,
-            @RequestParam(value = "recordApi", required = false) URL recordApi,
+            @RequestParam(value = "recordApi", required = false) String recordApi,
             @RequestParam(value = "fullText", required = false, defaultValue = "true") Boolean addFullText,
-            @RequestParam(value = "fullTextApi", required = false) URL fullTextApi,
+            @RequestParam(value = "fullTextApi", required = false) String fullTextApi,
             HttpServletRequest request) throws EuropeanaApiException {
-        return handleRequest(collectionId, recordId, wskey, version, recordApi, addFullText, fullTextApi, true, request);
+        return handleRequest(datasetId, recordId, recordApi, addFullText, fullTextApi, request);
     }
 
     @GetMapping(value = "/test/error")
@@ -89,30 +124,26 @@ public class ManifestController {
         throw new InvalidIIIFVersionException("This is a test");
     }
 
-    @GetMapping(value = "/{colId}/{recordId}/manifest", headers = ACCEPT_HEADER_JSONLD)
-    public ResponseEntity<String> manifestRequestJsonLd(
-            @PathVariable String colId,
+    @GetMapping(value = "/{datasetId}/{recordId}/manifest"
+              , headers = ACCEPT_HEADER_JSONLD)
+    public ResponseEntity<StreamingResponseBody> manifestRequestJsonLd(
+            @PathVariable String datasetId,
             @PathVariable String recordId,
-            @RequestParam(value = "wskey", required = true) String wskey,
-            @RequestParam(value = "format", required = false) String version,
-            @RequestParam(value = "recordApi", required = false) URL recordApi,
+            @RequestParam(value = "recordApi", required = false) String recordApi,
             @RequestParam(value = "fullText", required = false, defaultValue = "true") Boolean addFullText,
-            @RequestParam(value = "fullTextApi", required = false) URL fullTextApi,
+            @RequestParam(value = "fullTextApi", required = false) String fullTextApi,
             HttpServletRequest request) throws EuropeanaApiException {
-        return handleRequest(colId, recordId, wskey, version, recordApi, addFullText, fullTextApi, false, request);
+        return handleRequest(datasetId, recordId, recordApi, addFullText, fullTextApi, request);
     }
 
-    private ResponseEntity<String> handleRequest( String collectionId,
+    private ResponseEntity<StreamingResponseBody> handleRequest( String datasetId,
             String recordId,
-            String wskey,
-            String version,
-            URL recordApi,
+            String recordApi,
             boolean addFullText,
-            URL fullTextApi,
-            boolean isJson,
+            String fullTextApi,
             HttpServletRequest request) throws EuropeanaApiException {
-        String id = "/" + collectionId + "/" + recordId;
-        ValidateUtils.validateWskeyFormat(wskey);
+
+        String id = "/" + datasetId + "/" + recordId;
         ValidateUtils.validateRecordIdFormat(id);
 
         if (recordApi != null) {
@@ -122,43 +153,69 @@ public class ManifestController {
             ValidateUtils.validateApiUrlFormat(fullTextApi);
         }
 
-        String iiifVersion = AcceptUtils.getRequestVersion(request, version);
-        if (StringUtils.isEmpty(iiifVersion)) {
-            throw new InvalidIIIFVersionException(ACCEPT_VERSION_INVALID);
-        }
+        AuthenticationHandler auth       = getAuthorization(request, authFallback);
+        IIIFVersionSupport    version    = versionHandler.getVersionSupport(request);
+        HttpHeaders           rspHeaders = new HttpHeaders();
+        ResourceCaching       baseCache  = getBaseCache(version);
 
-        String json = manifestService.getRecordJson(recordApi, id, wskey);
-        ZonedDateTime lastModified = EdmManifestUtils.getRecordTimestampUpdate(json);
-        String eTag = generateETag(id, lastModified, iiifVersion);
-        HttpHeaders headers = CacheUtils.generateCacheHeaders("no-cache", eTag, lastModified, org.springframework.http.HttpHeaders.ACCEPT);
-        ResponseEntity cached = CacheUtils.checkCached(request, headers, lastModified, eTag);
-        if (cached != null) {
-            LOG.debug("Returning 304 response");
-            return cached;
-        }
+        final SourceData data = new SourceData();
 
-        Object manifest;
-        if ("3".equalsIgnoreCase(iiifVersion)) {
-            if (addFullText){
-                manifest = manifestService.generateManifestV3(json, fullTextApi);
-            } else {
-                manifest = manifestService.generateManifestV3(json);
+        ResponseEntity<StreamingResponseBody> rsp = 
+                cachingStrategy.applyForReadAccess(baseCache, request, rspHeaders,
+            new AbsChainCachingStrategy.Service() {
+
+                @Override
+                public boolean request(HttpHeaders reqHeaders
+                                  , ResourceCaching caching) throws EuropeanaApiException {
+                    String endpoint 
+                        = ( recordApi == null ? settings.getRecordApiEndpoint() 
+                                              : recordApi + settings.getRecordApiPath());
+                    data.record = recordService.getRecordJson(endpoint, id, auth, reqHeaders, caching);
+                    return true;
+                }
+            },
+            new AbsChainCachingStrategy.Service() {
+
+                @Override
+                public boolean request(HttpHeaders reqHeaders
+                                  , ResourceCaching caching) throws EuropeanaApiException {
+                    if (!addFullText) { return false; }
+
+                    data.fulltext = fulltextService.getFulltextSummary(id, fullTextApi, auth, reqHeaders, caching);
+                    return (data.fulltext != null);
+                }
             }
-        } else {
-            if (addFullText){
-                manifest = manifestService.generateManifestV2(json, fullTextApi); // fallback option
-            } else {
-                manifest = manifestService.generateManifestV2(json); // fallback option
+        );
+        if ( rsp != null ) { return rsp; }
+
+
+        ManifestGenerator<IIIFResource> generator = version.getManifestGenerator();
+        IIIFResource manifest = generator.generateManifest(data.record);
+        generator.fillWithFullText(manifest, data.fulltext);
+
+        rspHeaders.add(HttpHeaders.CONTENT_TYPE, version.getContentType());        
+        StreamingResponseBody responseBody = new StreamingResponseBody() {
+            @Override
+            public void writeTo(OutputStream out) throws IOException {
+                manifestService.serializeManifest(manifest, out);
+                out.flush();
             }
-        }
-        AcceptUtils.addContentTypeToResponseHeader(headers, iiifVersion, isJson);
-        return new ResponseEntity<>(manifestService.serializeManifest(manifest), headers, HttpStatus.OK);
+        };
+        return new ResponseEntity<>(responseBody, rspHeaders, HttpStatus.OK);
     }
 
+    private static class SourceData {
+        public Object                             record   = null;
+        public Map<String, FulltextSummaryCanvas> fulltext = null;
+    }
 
-    private String generateETag(String recordId, ZonedDateTime recordUpdated, String iiifVersion) {
-        String hashData = recordId + recordUpdated + manifestService.getSettings().getAppVersion() + iiifVersion;
-        return CacheUtils.generateETag(hashData, true);
+    private ResourceCaching getBaseCache(IIIFVersionSupport version) {
+        
+        return new ResourceCaching(
+                null
+              , CachingUtils.genWeakEtag(version.getVersionNr()
+                                       , buildInfo.getAppVersion())
+              , this.buildInfo.getBuildDateTime());
     }
 
 }
