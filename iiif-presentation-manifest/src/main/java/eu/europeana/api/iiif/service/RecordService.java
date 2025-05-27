@@ -1,7 +1,7 @@
 package eu.europeana.api.iiif.service;
 
-import eu.europeana.api.caching.CachingHeaders;
-import eu.europeana.api.caching.ResourceCaching;
+import eu.europeana.api.commons_sb3.definitions.caching.CachingHeaders;
+import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
