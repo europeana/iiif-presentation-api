@@ -1,8 +1,9 @@
 package eu.europeana.api.iiif.service;
 
-import eu.europeana.api.caching.CachingHeaders;
-import eu.europeana.api.caching.ResourceCaching;
+import eu.europeana.api.commons.http.HttpResponseHandler;
+import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.exceptions.FullTextCheckException;
 import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
@@ -10,15 +11,9 @@ import eu.europeana.api.iiif.generator.ManifestSettings;
 import eu.europeana.api.iiif.model.ManifestDefinitions;
 import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
 import eu.europeana.api.iiif.model.info.FulltextSummaryManifest;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.util.IOUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -40,33 +35,32 @@ public class FulltextService extends BaseService {
     /**
      * Fetch the Fulltext Summary response
      * ex - {fulltext-baseurl}/presentation/{dsid}/{lcID}/annopage
-     * @param fulltextUrl
+     * @param url
      * @return
      * @throws EuropeanaApiException
      */
     public FulltextSummaryManifest getFullTextSummary(
             String url, AuthenticationHandler auth
           , HttpHeaders reqHeaders, ResourceCaching caching) throws EuropeanaApiException{
-
-        
-        try ( CloseableHttpResponse rsp = conn.get(url, null, reqHeaders, auth) ) {
-            int code = rsp.getCode();
+        try {
+            HttpResponseHandler rsp = conn.get(url, null, getHeaderMap(reqHeaders), auth);
+            int code = rsp.getStatus();
+            String responseBody = rsp.getResponse();
             if (code == HttpStatus.SC_OK) {
-                caching.getHeaders(getHeaders(rsp));
-                HttpEntity entity = rsp.getEntity();
-                String jsonV = EntityUtils.toString(entity);
-                return mapper.readValue(jsonV, FulltextSummaryManifest.class);
+                caching.getHeaders(getHeaders(rsp.getCachingHeaders()));
+                return mapper.readValue(responseBody, FulltextSummaryManifest.class);
             }
-            if (code == HttpStatus.SC_NOT_MODIFIED) {
+            else if (code == HttpStatus.SC_NOT_MODIFIED) {
                 throw new ResourceNotChangedException(url);
             }
-            if (code == HttpStatus.SC_NOT_FOUND) {
+            else if (code == HttpStatus.SC_NOT_FOUND) {
                 return null;
+            } else {
+                EuropeanaApiErrorResponse errorResponse = mapper.readValue(responseBody, EuropeanaApiErrorResponse.class);
+                LOG.error("Error retrieving fulltext summary {}, reason {}", url, errorResponse.getMessage());
+                throw new FullTextCheckException("Error retrieving fulltext summary - " + errorResponse.getMessage());
             }
-            LOG.error("Error retrieving fulltext summary {}, reason {}", url, rsp.getReasonPhrase());
-            throw new FullTextCheckException("Error retrieving fulltext summary - " + rsp.getReasonPhrase());
-
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new FullTextCheckException("Error retrieving fulltext summary - " + e.getMessage(), e);
         }
     }
@@ -119,21 +113,6 @@ public class FulltextService extends BaseService {
         }
         return map;
 
-    }
-
-    private HttpHeaders getHeaders(CloseableHttpResponse rsp) {
-        HttpHeaders headers = new HttpHeaders();
-        Header header = null;
-
-        header = rsp.getFirstHeader(CachingHeaders.ETAG);
-        if ( header != null ) { headers.setETag(header.getValue()); }
-
-        header = rsp.getFirstHeader(CachingHeaders.CACHE_CONTROL);
-        if ( header != null ) { headers.setCacheControl(header.getValue()); }
-
-        header = rsp.getFirstHeader(CachingHeaders.LAST_MODIFIED);
-        if ( header != null ) { headers.set(CachingHeaders.LAST_MODIFIED, header.getValue()); }
-        return headers;
     }
 
     /**

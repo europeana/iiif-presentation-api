@@ -100,13 +100,13 @@
         <dependency>
             <groupId>eu.europeana.api</groupId>
             <artifactId>commons-sb3-error</artifactId>
-            <version>${api-commons-sb3}</version>
+            <version>${api-commons-sb3.version}</version>
         </dependency>
 
         <dependency>
             <groupId>eu.europeana.api</groupId>
             <artifactId>commons-sb3-web</artifactId>
-            <version>${api-commons-sb3}</version>
+            <version>${api-commons-sb3.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
@@ -119,7 +119,7 @@
         <dependency>
             <groupId>eu.europeana.api.commons</groupId>
             <artifactId>commons-clientutils</artifactId>
-            <version>0.4.5-SNAPSHOT</version>
+            <version>${api.commons.version}</version>
         </dependency>
 
     </dependencies>
