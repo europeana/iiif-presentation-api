@@ -45,8 +45,13 @@
         <swagger.version>3.0.0</swagger.version>
 
         <!-- Other api versions-->
-        <api-commons-sb3>0.1.2-SNAPSHOT</api-commons-sb3>
-        <set.api.version>0.13</set.api.version>
+        <api-commons-sb3.version>0.1.2-SNAPSHOT</api-commons-sb3.version>
+
+        <!-- The set api uses api-commons hence we need the client-utils module of api-commons
+         Set api will be upgraded to spring boot 3 and then we can remove this -->
+        <api.commons.version>0.4.7-SNAPSHOT</api.commons.version>
+
+        <set.api.version>0.14-SNAPSHOT</set.api.version>
         <fulltext.api.version>0.9.7</fulltext.api.version>
 
         <maven-surefire.version>2.22.2</maven-surefire.version>

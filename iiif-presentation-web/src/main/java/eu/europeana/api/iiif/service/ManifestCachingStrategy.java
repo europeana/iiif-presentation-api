@@ -6,8 +6,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import eu.europeana.api.caching.ETag;
-import eu.europeana.api.caching.ResourceCaching;
+import eu.europeana.api.commons_sb3.definitions.caching.ETag;
+import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
 

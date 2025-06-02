@@ -1,8 +1,8 @@
 package eu.europeana.api.iiif.service;
 
-import eu.europeana.api.caching.CachingUtils;
-import eu.europeana.api.caching.ResourceCaching;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.definitions.caching.CachingUtils;
+import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.iiif.config.BuildInfo;
 import eu.europeana.api.iiif.exceptions.CollectionException;
 import eu.europeana.api.iiif.model.IIIFResource;
@@ -21,6 +21,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static eu.europeana.api.iiif.utils.IIIFConstants.*;
 
@@ -86,13 +87,18 @@ public class CollectionService {
      */
     public <T extends IIIFResource> T getGalleryCollection(
             IIIFVersionSupport version, String setId, AuthenticationHandler auth
-          , ResourceCaching caching) 
+          , ResourceCaching caching)
                     throws CollectionException {
         try {
             setClient.setAuthenticationHandler(auth);
-            UserSet set = setClient.getWebUserSetApi().getUserSet(setId, null);
+            Optional<UserSet> fetched = setClient.getWebUserSetApi().getUserSet(setId, Optional.empty(), Optional.of(caching));
+            // 304 response
+            if (!fetched.isPresent()) {
+                return null;
+            }
 
-            // TODO The Set API must return the modified date as part of 
+            UserSet set = fetched.get();
+            // TODO The Set API must return the modified date as part of
             // the pagination requests so that it can be used for caching
             // another option is the methods receive a resource cache object
             List<RecordPreview> items = setClient.getWebUserSetApi().getPaginationUserSet(
@@ -102,7 +108,7 @@ public class CollectionService {
             return (T)version.getCollectionGenerator().generateGallery(set, items);
         }
         catch (SetApiClientException e) {
-            throw new CollectionException(e.getLocalizedMessage(), e);
+            throw new CollectionException(e.getLocalizedMessage(), e.getRemoteStatusCode(), e);
         }
     }
 

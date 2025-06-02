@@ -31,7 +31,7 @@ public final class ValidateUtils {
      * @return true if it has a valid format
      * @throws IllegalArgumentException thrown when the provided recordId doesn't adhere to the expected format
      */
-    public static final boolean validateRecordIdFormat(String europeanaId) throws IllegalArgumentException {
+    public static boolean validateRecordIdFormat(String europeanaId) throws IllegalArgumentException {
         if (!RECORD_ID.matcher(europeanaId).matches()) {
             throw new IllegalArgumentException("Illegal recordId "+ europeanaId);
         }

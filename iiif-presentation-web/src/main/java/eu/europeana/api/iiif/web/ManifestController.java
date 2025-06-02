@@ -1,10 +1,8 @@
 package eu.europeana.api.iiif.web;
 
-import eu.europeana.api.caching.CachingUtils;
-import eu.europeana.api.caching.ResourceCaching;
-import eu.europeana.api.caching.WeakETag;
+import eu.europeana.api.commons_sb3.definitions.caching.CachingUtils;
+import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
-import eu.europeana.api.commons.auth.apikey.ApikeyBasedAuthentication;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.config.BuildInfo;
 import eu.europeana.api.iiif.exceptions.InvalidIIIFVersionException;

@@ -3,16 +3,15 @@ package eu.europeana.api.iiif.service;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import eu.europeana.api.commons_sb3.definitions.caching.CachingHeaders;
+import eu.europeana.api.commons_sb3.definitions.caching.ETag;
+import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-
-import eu.europeana.api.caching.CachingHeaders;
-import eu.europeana.api.caching.ETag;
-import eu.europeana.api.caching.ResourceCaching;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 
-import static eu.europeana.api.caching.CachingUtils.*;
+import static eu.europeana.api.commons_sb3.definitions.caching.CachingUtils.*;
 
 /**
  * @author Hugo
