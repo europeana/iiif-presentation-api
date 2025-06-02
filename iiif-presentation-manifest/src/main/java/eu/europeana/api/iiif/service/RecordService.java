@@ -1,6 +1,6 @@
 package eu.europeana.api.iiif.service;
 
-import eu.europeana.api.commons_sb3.definitions.caching.CachingHeaders;
+import eu.europeana.api.commons.http.HttpResponseHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
@@ -10,8 +10,6 @@ import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
 import eu.europeana.api.iiif.exceptions.RecordNotFoundException;
 import eu.europeana.api.iiif.exceptions.RecordRetrievalException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -22,9 +20,9 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
@@ -51,35 +49,30 @@ public class RecordService extends BaseService {
     public Object getRecordJson(String recordApiUrl, String recordId
                               , AuthenticationHandler auth, HttpHeaders reqHeaders
                               , ResourceCaching caching) throws EuropeanaApiException {
-        try ( CloseableHttpResponse rsp = conn.get(
-                buildRecordApiUrl(recordApiUrl, recordId), null
-              , reqHeaders, auth) ) {
-                
-            int responseCode = rsp.getCode();
+        try {
+            HttpResponseHandler rsp = conn.get(buildRecordApiUrl(recordApiUrl, recordId), null, getHeaderMap(reqHeaders), auth);
+            int responseCode = rsp.getStatus();
+            String responseBody = rsp.getResponse();
             if (responseCode == HttpStatus.SC_OK) {
-                caching.getHeaders(getHeaders(rsp));
-                return parseResponse(rsp);
+                caching.getHeaders(getHeaders(rsp.getCachingHeaders()));
+                return parseResponse(responseBody);
             }
-            if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
+            else if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
                 throw new ResourceNotChangedException(recordId);
             }
+            else {
+                EuropeanaApiErrorResponse errorResponse = mapper.readValue(responseBody, EuropeanaApiErrorResponse.class);
+                if (responseCode == HttpStatus.SC_UNAUTHORIZED || responseCode == HttpStatus.SC_FORBIDDEN) {
+                    throw new RecordRetrievalException(errorResponse, rsp.getStatus());
+                }
+                if (responseCode == HttpStatus.SC_NOT_FOUND) {
+                    throw new RecordNotFoundException("Record with id '" + recordId + "' not found");
+                }
 
-            if (responseCode == HttpStatus.SC_UNAUTHORIZED 
-             || responseCode == HttpStatus.SC_FORBIDDEN) {
-
-                //TODO: change the constructor when the Record API returns the http code
-                throw new RecordRetrievalException(parseErrorResponse(rsp)
-                                                 , rsp.getCode());
+                LOG.error("Error retrieving record {}, reason {}", recordId, errorResponse.getMessage());
+                throw new RecordRetrievalException("Error retrieving record: " + errorResponse.getMessage(),
+                        errorResponse.getError(), errorResponse.getCode(), errorResponse.getStatus());
             }
-            if (responseCode == HttpStatus.SC_NOT_FOUND) {
-                throw new RecordNotFoundException("Record with id '" + recordId + "' not found");
-
-                //TODO: uncomment code when the Record API implements the new error spec
-                //throw new RecordRetrievalException(parseErrorResponse(response), response.getCode());
-            }
-            LOG.error("Error retrieving record {}, reason {}", recordId, rsp.getReasonPhrase());
-            throw new RecordRetrievalException("Error retrieving record: " + rsp.getReasonPhrase());
-
         }
         catch (InvalidArgumentException | IOException e) {
             throw new RecordRetrievalException(" Error retrieving the record : " + e.getMessage());
@@ -90,7 +83,6 @@ public class RecordService extends BaseService {
      * Build the record api retrieval url with record id
      * @param recordApiUrl record api base url
      * @param recordId id
-     * @param wskey key for authorisation
      * @return URL
      * @throws InvalidArgumentException
      */
@@ -111,31 +103,12 @@ public class RecordService extends BaseService {
         }
     }
 
-    private HttpHeaders getHeaders(CloseableHttpResponse rsp) {
-        HttpHeaders headers = new HttpHeaders();
-        Header header = null;
-
-        header = rsp.getFirstHeader(CachingHeaders.ETAG);
-        if ( header != null ) { headers.setETag(header.getValue()); }
-
-        header = rsp.getFirstHeader(CachingHeaders.CACHE_CONTROL);
-        if ( header != null ) { headers.setCacheControl(header.getValue()); }
-
-        header = rsp.getFirstHeader(CachingHeaders.LAST_MODIFIED);
-        if ( header != null ) { headers.set(CachingHeaders.LAST_MODIFIED, header.getValue()); }
-        return headers;
-    }
-
-    private Object parseResponse(CloseableHttpResponse httpResponse) 
-            throws IOException {
-        InputStream in = httpResponse.getEntity().getContent();
-        JsonProvider jsonProvider = defaultConfiguration().jsonProvider();
-        return jsonProvider.parse(in, StandardCharsets.UTF_8.name());
-    }
-
-    private EuropeanaApiErrorResponse parseErrorResponse(
-            CloseableHttpResponse httpResponse) throws IOException {
-        InputStream in = httpResponse.getEntity().getContent();
-        return mapper.readValue(in, EuropeanaApiErrorResponse.class);
+    private Object parseResponse(String responseBody) throws RecordRetrievalException {
+        try (InputStream in = new ByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8))) {
+            JsonProvider jsonProvider = defaultConfiguration().jsonProvider();
+            return jsonProvider.parse(in, StandardCharsets.UTF_8.name());
+        } catch (IOException e) {
+            throw new RecordRetrievalException(" Error parsing the record response: " + e.getMessage());
+        }
     }
 }
