@@ -28,6 +28,7 @@ public class BaseService {
     }
 
     public Map<String, String> getHeaderMap(HttpHeaders headers) {
+        if (headers == null)  return null ;
         Map<String, String> headerMap = new HashMap<>();
         for (String key : headers.keySet() ) {
             headerMap.put(key, headers.getFirst(key));
