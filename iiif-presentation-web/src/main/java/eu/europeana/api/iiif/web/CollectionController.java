@@ -1,11 +1,10 @@
 package eu.europeana.api.iiif.web;
 
-
-import eu.europeana.api.caching.CachingStrategy;
-import eu.europeana.api.caching.CachingUtils;
-import eu.europeana.api.caching.DefaultCachingStrategy;
-import eu.europeana.api.caching.ResourceCaching;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.definitions.caching.CachingStrategy;
+import eu.europeana.api.commons_sb3.definitions.caching.CachingUtils;
+import eu.europeana.api.commons_sb3.definitions.caching.DefaultCachingStrategy;
+import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
@@ -95,8 +94,6 @@ public class CollectionController {
 
     public ResponseEntity<StreamingResponseBody> getRootCollection(
             HttpServletRequest request) throws EuropeanaApiException {
-        // TODO there should be either no authentication in this method as we don't need it OR should be checked by readAccess
-        // AuthenticationHandler auth = getAuthorization(request, authFallback);
         IIIFVersionSupport version = versionHandler.getVersionSupport(request);
         RdfFormat          format  = getFormatFromHeader(request, RdfFormat.JSONLD);
         if (LOGGER.isDebugEnabled()) {
@@ -110,8 +107,7 @@ public class CollectionController {
                 defaultCaching.applyForReadAccess(caching, request, headers);
         if ( rsp != null ) { return rsp; }
 
-        IIIFResource resource 
-            = collectionService.getCollectionRoot(version, caching);
+        IIIFResource resource = collectionService.getCollectionRoot(version, caching);
 
         headers.add(HttpHeaders.CONTENT_TYPE, version.getContentType());
         StreamingResponseBody responseBody = new StreamingResponseBody() {
@@ -228,7 +224,7 @@ public class CollectionController {
                                      , ResourceCaching caching) throws EuropeanaApiException {
                     data.col = collectionService.getGalleryCollection(version, setId
                                                                , auth, caching);
-                    return true;
+                    return (data.col != null);
                 }
             }
         );

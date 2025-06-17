@@ -7,14 +7,8 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 
-import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.exceptions.RecordParseException;
 import eu.europeana.api.iiif.generator.ManifestSettings;
-import eu.europeana.api.iiif.media.MediaTypes;
-import eu.europeana.api.iiif.model.IIIFResource;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -34,16 +28,11 @@ public class ManifestService {
 
     private final ObjectMapper mapper;
 
-
     /**
      * Creates an instance of the ManifestService bean with provided settings
      *  @param settings   read from properties file
-     * @param mediaTypes
-     * @param fulltextService
-     * @param recordService
      */
-    public ManifestService(ManifestSettings settings, MediaTypes mediaTypes
-                         , RecordService recordService) {
+    public ManifestService(ManifestSettings settings) {
         mapper = new ObjectMapper();
 
         // configure jsonpath: we use jsonpath in combination with Jackson because that makes it easier to know what

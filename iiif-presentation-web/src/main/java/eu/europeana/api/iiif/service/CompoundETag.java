@@ -3,8 +3,8 @@
  */
 package eu.europeana.api.iiif.service;
 
-import eu.europeana.api.caching.ETag;
-import eu.europeana.api.caching.WeakETag;
+import eu.europeana.api.commons_sb3.definitions.caching.ETag;
+import eu.europeana.api.commons_sb3.definitions.caching.WeakETag;
 
 /**
  * @author Hugo
