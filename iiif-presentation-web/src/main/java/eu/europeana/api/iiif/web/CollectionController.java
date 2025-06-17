@@ -108,16 +108,7 @@ public class CollectionController {
         if ( rsp != null ) { return rsp; }
 
         IIIFResource resource = collectionService.getCollectionRoot(version, caching);
-
-        headers.add(HttpHeaders.CONTENT_TYPE, version.getContentType());
-        StreamingResponseBody responseBody = new StreamingResponseBody() {
-            @Override
-            public void writeTo(OutputStream out) throws IOException {
-                iiifJsonHandler.write(resource, out);
-                out.flush();
-            }
-        };
-        return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
+        return getResponse(headers, version, resource);
     }
 
 
@@ -161,19 +152,8 @@ public class CollectionController {
         ResponseEntity<StreamingResponseBody> rsp = 
                 defaultCaching.applyForReadAccess(caching, req, headers);
         if ( rsp != null ) { return rsp; }
-
-
-        headers.add(HttpHeaders.CONTENT_TYPE, version.getContentType());
-        StreamingResponseBody responseBody = new StreamingResponseBody() {
-            @Override
-            public void writeTo(OutputStream out) throws IOException {
-              iiifJsonHandler.write(resource, out);
-              out.flush();
-            }
-        };
-        return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
+        return getResponse(headers, version, resource);
     }
-
 
     /**
      * Endpoint to serve a collection generated from a set/gallery
@@ -229,12 +209,17 @@ public class CollectionController {
             }
         );
         if ( rsp != null ) { return rsp; }
+        return getResponse(rspHeaders, version, data.col);
+    }
 
+    private ResponseEntity<StreamingResponseBody> getResponse(
+            HttpHeaders rspHeaders,
+            IIIFVersionSupport version, IIIFResource iiifResource) {
         rspHeaders.add(HttpHeaders.CONTENT_TYPE, version.getContentType());
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
-                iiifJsonHandler.write(data.col, out);
+                iiifJsonHandler.write(iiifResource, out);
                 out.flush();
             }
         };
