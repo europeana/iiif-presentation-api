@@ -13,24 +13,25 @@ import java.util.List;
 import static eu.europeana.api.iiif.generator.GeneratorUtils.*;
 
 /**
+ *  * Collection  Generator class for V3
  * @author Hugo
  * @since 14 Oct 2024
  */
 public class CollectionV3Generator implements CollectionGenerator<Collection>
                                             , GeneratorConstants {
 
-    private static LanguageMap ROOT_LABEL 
+    private static LanguageMap rootLabel
         = new LanguageMap(LANG_META, GeneratorConstants.ROOT_LABEL);
-    private static LanguageMap ROOT_SUMMARY 
+    private static LanguageMap rootSummary
         = new LanguageMap(LANG_META, ROOT_DESCRIPTION);
-    private static LanguageMap ROOT_GALLERY_LABEL 
+    private static LanguageMap rootGalleryLabel
         = new LanguageMap(LANG_META, GeneratorConstants.ROOT_GALLERY_LABEL);
-    private static LanguageMap ROOT_GALLERY_SUMMARY 
+    private static LanguageMap rootGallerySummary
         = new LanguageMap(LANG_META, ROOT_GALLERY_DESCRIPTION);
-    private static LanguageMap WEBSITE_TITLE_GALLERY 
+    private static LanguageMap websiteTitleGallery
         = new LanguageMap(LANG_META, GeneratorConstants.WEBSITE_TITLE_GALLERY);
 
-    private static Agent EUROPEANA = newEuropeanaProvider();
+    private static Agent europeana = newEuropeanaProvider();
 
     @Resource
     private CollectionSettings settings;
@@ -42,10 +43,10 @@ public class CollectionV3Generator implements CollectionGenerator<Collection>
     @Override
     public Collection generateRoot() {
         Collection col = new Collection(settings.getCollectionRootURI());
-        col.setLabel(ROOT_LABEL);
-        col.setSummary(ROOT_SUMMARY);
+        col.setLabel(rootLabel);
+        col.setSummary(rootSummary);
         col.setViewingDirection(ViewingDirection.ltr);
-        col.getProvider().add(EUROPEANA);
+        col.getProvider().add(europeana);
         col.getBehavior().add(Behavior.unordered);
         col.getItems().add(new Collection(settings.getGalleryRootURI()));
         return col;
@@ -54,10 +55,10 @@ public class CollectionV3Generator implements CollectionGenerator<Collection>
     @Override
     public Collection generateGalleryRoot(java.util.Collection<? extends UserSet> sets) {
         Collection col = new Collection(settings.getGalleryRootURI());
-        col.setLabel(ROOT_GALLERY_LABEL);
-        col.setSummary(ROOT_GALLERY_SUMMARY);
+        col.setLabel(rootGalleryLabel);
+        col.setSummary(rootGallerySummary);
         col.setViewingDirection(ViewingDirection.ltr);
-        col.getProvider().add(EUROPEANA);
+        col.getProvider().add(europeana);
         col.getBehavior().add(Behavior.unordered);
         for (UserSet set : sets) {
             Collection child = new Collection(
@@ -80,11 +81,11 @@ public class CollectionV3Generator implements CollectionGenerator<Collection>
             col.setSummary(getLanguageMap(set.getDescription()));
         }
         col.setViewingDirection(ViewingDirection.ltr);
-        col.getProvider().add(EUROPEANA);
+        col.getProvider().add(europeana);
         col.getHomepage().add(newReference(set));
         col.getSeeAlso().add(newDataset(set));
         col.getBehavior().add(Behavior.unordered);
-        if (items != null && items.size() > 0) {
+        if (!items.isEmpty()) {
             for (RecordPreview item : items) {
                 col.getItems().add(getManifest(item));
             }
@@ -131,7 +132,7 @@ public class CollectionV3Generator implements CollectionGenerator<Collection>
     protected Text newReference(UserSet set) {
         Text ref = new Text(buildUrlWithSetId(settings.getGalleryLandingPage()
                                             , set.getIdentifier()));
-        ref.setLabel(WEBSITE_TITLE_GALLERY);
+        ref.setLabel(websiteTitleGallery);
         ref.setFormat(MIMETYPE_HTML);
         return ref;
     }

@@ -11,6 +11,10 @@ import java.util.Map;
  */
 public class GeneratorUtils implements GeneratorConstants {
 
+    private GeneratorUtils() {
+        //private to hide implicit one
+    }
+
     public static String buildUrlWithSetId(String uri, String setId) {
         if (StringUtils.endsWith(uri, "/")) {
             return uri + setId;

@@ -4,6 +4,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+/**
+ * Configuration class for Collection generation
+ * Mostly used to generate urls for the response
+ *
+ * @author srishti singh
+ * @since 04 Dec 2024
+ */
 @Configuration
 @PropertySource("classpath:iiif.properties")
 @PropertySource(value = "classpath:iiif.user.properties", ignoreResourceNotFound = true)

@@ -18,21 +18,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Collection  Generator class for V2
  * @author Hugo
  * @since 14 Oct 2024
  */
 public class CollectionV2Generator implements CollectionGenerator<Collection>
                                             , GeneratorConstants {
 
-    private static LanguageValue ROOT_LABEL               
+    private static LanguageValue rootLabel
         = new LanguageValue(GeneratorConstants.ROOT_LABEL, LANG_META);
-    private static LanguageValue ROOT_DESCRIPTION         
+    private static LanguageValue rootDescription
         = new LanguageValue(GeneratorConstants.ROOT_DESCRIPTION, LANG_META);
-    private static LanguageValue ROOT_GALLERY_LABEL       
+    private static LanguageValue rootGallerylabel
         = new LanguageValue(GeneratorConstants.ROOT_GALLERY_LABEL, LANG_META);
-    private static LanguageValue ROOT_GALLERY_DESCRIPTION 
+    private static LanguageValue rootGalleryDescription
         = new LanguageValue(GeneratorConstants.ROOT_GALLERY_DESCRIPTION, LANG_META);
-    private static Image         EUROPEANA_LOGO        
+    private static Image         europeanaLogo
         = new Image(GeneratorConstants.EUROPEANA_LOGO);
 
     @Resource
@@ -45,10 +46,10 @@ public class CollectionV2Generator implements CollectionGenerator<Collection>
     @Override
     public Collection generateRoot() {
         Collection col = new Collection(settings.getCollectionRootURI());
-        col.setLabel(ROOT_LABEL);
-        col.setDescription(ROOT_DESCRIPTION);
+        col.setLabel(rootLabel);
+        col.setDescription(rootDescription);
         col.setViewingHint(ViewingHint.individuals);
-        col.setLogo(EUROPEANA_LOGO);
+        col.setLogo(europeanaLogo);
         col.getCollections().add(new Collection(settings.getGalleryRootURI()));
         return col;
     }
@@ -56,17 +57,17 @@ public class CollectionV2Generator implements CollectionGenerator<Collection>
     @Override
     public Collection generateGalleryRoot(java.util.Collection<? extends UserSet> sets) {
         Collection col = new Collection(settings.getGalleryRootURI());
-        col.setLabel(ROOT_GALLERY_LABEL);
-        col.setDescription(ROOT_GALLERY_DESCRIPTION);
+        col.setLabel(rootGallerylabel);
+        col.setDescription(rootGalleryDescription);
         col.setViewingHint(ViewingHint.individuals);
-        col.setLogo(EUROPEANA_LOGO);
+        col.setLogo(europeanaLogo);
         for (UserSet set : sets) {
             Collection child = new Collection(buildUrlWithSetId(
                     settings.getGalleryRootURI(), set.getIdentifier()));
             // get the first title for v2
             for (Map.Entry<String, String> entry : set.getTitle().entrySet()) {
                 child.setLabel(new LanguageValue(entry.getKey(), entry.getValue()));
-                break;
+                if (child.getLabel().getLang() != null) break;
             }
             col.getCollections().add(child);
         }
@@ -81,10 +82,10 @@ public class CollectionV2Generator implements CollectionGenerator<Collection>
             col.setLabel(newValue(set.getTitle().values().iterator().next()));
         }
         col.setViewingHint(ViewingHint.individuals);
-        col.setLogo(EUROPEANA_LOGO);
+        col.setLogo(europeanaLogo);
         col.getRelated().add(newReference(set));
         col.getSeeAlso().add(newDataset(set));
-        if (items != null && items.size() > 0) {
+        if (!items.isEmpty()) {
             for (RecordPreview item : items) {
                 col.getManifests().add(getManifest(item));
             }
