@@ -8,10 +8,8 @@ import eu.europeana.api.commons.http.HttpConnection;
 import eu.europeana.api.commons_sb3.definitions.caching.CachingHeaders;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.config.ConnectionConfig;
-import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.pool.PoolReusePolicy;
 import org.apache.hc.core5.util.Timeout;
@@ -30,9 +28,6 @@ public class BaseService {
 
     private static final int MAX_TOTAL_CONNECTIONS    = 200;
     private static final int DEFAULT_MAX_PER_ROUTE    = 100;
-    private static final int MAX_CACHED_ENTRIES       = 1000;
-    private static final int MAX_CACHED_OBJECT_SIZE   = 65536;
-
     private static final int RECORD_CONNECT_TIMEOUT = 10_000;
     protected static final int RECORD_SOCKET_TIMEOUT  = 30_000;
     private static final int FULLTEXT_CONNECT_TIMEOUT = 8_000;
