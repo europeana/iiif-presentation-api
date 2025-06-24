@@ -50,7 +50,7 @@ public class RecordService extends BaseService {
                               , AuthenticationHandler auth, HttpHeaders reqHeaders
                               , ResourceCaching caching) throws EuropeanaApiException {
         try {
-            HttpResponseHandler rsp = conn.get(buildRecordApiUrl(recordApiUrl, recordId), null, getHeaderMap(reqHeaders), auth);
+            HttpResponseHandler rsp = recordClient.get(buildRecordApiUrl(recordApiUrl, recordId), null, getHeaderMap(reqHeaders), auth);
             int responseCode = rsp.getStatus();
             String responseBody = rsp.getResponse();
             if (responseCode == HttpStatus.SC_OK) {
