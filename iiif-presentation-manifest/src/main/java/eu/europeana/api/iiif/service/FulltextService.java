@@ -43,7 +43,7 @@ public class FulltextService extends BaseService {
             String url, AuthenticationHandler auth
           , HttpHeaders reqHeaders, ResourceCaching caching) throws EuropeanaApiException{
         try {
-            HttpResponseHandler rsp = conn.get(url, null, getHeaderMap(reqHeaders), auth);
+            HttpResponseHandler rsp = fulltextClient.get(url, null, getHeaderMap(reqHeaders), auth);
             int code = rsp.getStatus();
             String responseBody = rsp.getResponse();
             if (code == HttpStatus.SC_OK) {
