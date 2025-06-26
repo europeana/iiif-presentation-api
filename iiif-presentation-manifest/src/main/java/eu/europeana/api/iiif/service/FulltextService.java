@@ -66,7 +66,7 @@ public class FulltextService extends BaseService {
     }
 
 
-    public Map<String, FulltextSummaryCanvas> getFulltextSummary(
+    public Map<String, FulltextSummaryCanvas> getCanvasMap(
             String fulltextUrl, AuthenticationHandler auth
           , HttpHeaders reqHeaders, ResourceCaching caching) throws EuropeanaApiException {
         return createCanvasMap(getFullTextSummary(fulltextUrl, auth, reqHeaders, caching));
@@ -77,7 +77,7 @@ public class FulltextService extends BaseService {
           , HttpHeaders reqHeaders, ResourceCaching caching) 
                     throws EuropeanaApiException {
         String fullTextSummaryUrl = generateFullTextSummaryUrl(recordId, fullTextApi);
-        return getFulltextSummary(fullTextSummaryUrl, auth, reqHeaders, caching);
+        return getCanvasMap(fullTextSummaryUrl, auth, reqHeaders, caching);
     }
 
     /**

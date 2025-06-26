@@ -33,7 +33,7 @@ public class RecordService extends BaseService {
 
     private static final Logger LOG = LogManager.getLogger(RecordService.class);
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper recordMapper = new ObjectMapper();
 
     /**
      * Return record information in Json format using the Record API base URL defined in the iiif.properties
@@ -61,7 +61,7 @@ public class RecordService extends BaseService {
                 throw new ResourceNotChangedException(recordId);
             }
             else {
-                EuropeanaApiErrorResponse errorResponse = mapper.readValue(responseBody, EuropeanaApiErrorResponse.class);
+                EuropeanaApiErrorResponse errorResponse = recordMapper.readValue(responseBody, EuropeanaApiErrorResponse.class);
                 if (responseCode == HttpStatus.SC_UNAUTHORIZED || responseCode == HttpStatus.SC_FORBIDDEN) {
                     throw new RecordRetrievalException(errorResponse, rsp.getStatus());
                 }
