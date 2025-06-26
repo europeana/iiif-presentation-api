@@ -7,12 +7,11 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
 
 /**
+ * Serializer class for @context
  * @author Hugo
  * @since 12 Sep 2023
  */
 public class ContextSerializer extends JsonSerializer<ResourceContext> {
-
-    public static final ContextSerializer INSTANCE = new ContextSerializer();
 
     @Override
     public void serialize(ResourceContext context, JsonGenerator jgen,
@@ -20,7 +19,9 @@ public class ContextSerializer extends JsonSerializer<ResourceContext> {
 
         if ( !context.hasBase() ) {
 
-            if ( !context.hasImportURIs() ) { return; }
+            if ( !context.hasImportURIs() ) {
+                return;
+            }
 
             String[] imports = context.getImportURIs();
             if ( imports.length == 1 ) {

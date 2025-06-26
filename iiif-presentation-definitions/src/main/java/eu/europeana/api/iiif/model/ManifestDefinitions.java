@@ -64,8 +64,8 @@ public final class ManifestDefinitions {
 
     /**
      * /presentation/{europeanaID}/annopage/
-     * @param europeanaId
-     * @return
+     * @param europeanaId europeana id
+     * @return fulltext summary path
      */
     public static String getFulltextSummaryPath(String europeanaId) {
         return IIIFDefinitions.PRESENTATION_PATH + europeanaId + IIIFDefinitions.FULLTEXT_SUMMARY_PATH +
