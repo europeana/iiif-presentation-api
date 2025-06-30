@@ -22,8 +22,7 @@ import java.util.Map;
  * @author Hugo
  * @since 14 Oct 2024
  */
-public class CollectionV2Generator implements CollectionGenerator<Collection>
-                                            , GeneratorConstants {
+public class CollectionV2Generator extends GeneratorConstants implements CollectionGenerator<Collection> {
 
     private static LanguageValue rootLabel
         = new LanguageValue(GeneratorConstants.ROOT_LABEL, LANG_META);

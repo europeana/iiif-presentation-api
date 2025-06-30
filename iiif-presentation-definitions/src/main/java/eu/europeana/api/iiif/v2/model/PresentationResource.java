@@ -30,7 +30,7 @@ import eu.europeana.api.iiif.v2.io.JsonConstants;
   , @JsonSubTypes.Type(value = Sequence.class  , name = Sequence) 
   , @JsonSubTypes.Type(value = Canvas.class    , name = Canvas) 
 })
-
+@SuppressWarnings("javaarchitecture:S7027")
 public abstract class PresentationResource extends IIIFv2Resource {
 
     @JsonProperty(JsonConstants.label)
@@ -82,7 +82,7 @@ public abstract class PresentationResource extends IIIFv2Resource {
     private List<Image> rendering;
 
 
-    public PresentationResource(String id) {
+    protected PresentationResource(String id) {
         super(id);
     }
 
@@ -98,7 +98,6 @@ public abstract class PresentationResource extends IIIFv2Resource {
     public void setLabel(LanguageValue value) {
         this.label = value;
     }
-
 
     public LanguageValue getDescription() {
         return this.description;

@@ -28,6 +28,7 @@ import eu.europeana.api.iiif.v3.model.content.Text;
 , @JsonSubTypes.Type(value = Collection.class, name = Collection) 
 , @JsonSubTypes.Type(value = Canvas.class    , name = Canvas) 
 })
+@SuppressWarnings("javaarchitecture:S7027")
 public abstract class PresentationResource extends IIIFv3Resource {
 
     @JsonProperty(JsonConstants.label)

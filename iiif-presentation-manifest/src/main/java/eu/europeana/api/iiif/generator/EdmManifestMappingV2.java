@@ -3,15 +3,12 @@ package eu.europeana.api.iiif.generator;
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
 
-import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
-import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.media.MediaTypes;
 import eu.europeana.api.iiif.model.ManifestDefinitions;
 import eu.europeana.api.iiif.model.WebResource;
 import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
-import eu.europeana.api.iiif.service.FulltextService;
 import eu.europeana.api.iiif.utils.EdmManifestUtils;
 import eu.europeana.api.iiif.utils.GenerateUtils;
 import eu.europeana.api.iiif.utils.LanguageMapUtils;
@@ -22,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -48,11 +44,8 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     private static final Logger LOG = LogManager.getLogger(EdmManifestMappingV2.class);
 
-    //@TODO: Why is this static?
-    private static String THUMBNAIL_API_URL;
-
-    private ManifestSettings     settings;
-    private MediaTypes       mediaTypes;
+    private ManifestSettings    settings;
+    private MediaTypes          mediaTypes;
 
     public EdmManifestMappingV2(ManifestSettings settings
                               , MediaTypes mediaTypes) {
@@ -66,7 +59,6 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @return IIIF Manifest v2 object
      */
     public Manifest generateManifest(Object jsonDoc) {
-        THUMBNAIL_API_URL = settings.getThumbnailApiUrl();
         String europeanaId = EdmManifestUtils.getEuropeanaId(jsonDoc);
         String isShownBy = EdmManifestUtils.getValueFromDataProviderAggregation(jsonDoc, europeanaId, "edmIsShownBy");
         Manifest manifest = new Manifest(settings.getManifestId(europeanaId));
@@ -101,7 +93,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
     public void fillWithFullText(Manifest manifest
                                , Map<String, FulltextSummaryCanvas> summary) {
 
-        if (manifest.getSequences() == null || manifest.getSequences().size() == 0) {
+        if (manifest.getSequences() == null || manifest.getSequences().isEmpty()) {
             LOG.debug("Not checking for fulltext because record doesn't have any sequences");
             return;
         }
@@ -153,20 +145,6 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
             LOG.debug("Not checking for fulltext because record doesn't have any sequences");
         }
         */
-    }
-
-    /**
-     * Generates a url to a full text resource
-     *
-     * @param fullTextApiUrl optional, if not specified then the default Full-Text API specified in .properties is used
-     * @param europeanaId    identifier to include in the path
-     */
-    private String generateFullTextSummaryUrl(String europeanaId, URL fullTextApiUrl) {
-        if (fullTextApiUrl == null) {
-            return settings.getFullTextApiBaseUrl() + ManifestDefinitions.getFulltextSummaryPath(europeanaId);
-        } else {
-            return fullTextApiUrl + ManifestDefinitions.getFulltextSummaryPath(europeanaId);
-        }
     }
 
     private void addFulltextLinkToCanvasV2(Canvas canvas, FulltextSummaryCanvas summaryCanvas) {
@@ -307,11 +285,11 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @param webresourceId hasview image ID
      * @return Image object, or null if either provided String was null
      */
-    static Image getCanvasThumbnailImageV2(String webresourceId, String ThumbnailApiUrl) {
-        if (StringUtils.isAnyEmpty(ThumbnailApiUrl, webresourceId)) {
+    static Image getCanvasThumbnailImageV2(String webresourceId, String thumbnailApiUrl) {
+        if (StringUtils.isAnyEmpty(thumbnailApiUrl, webresourceId)) {
             return null;
         }
-        return new Image(ThumbnailApiUrl + webresourceId + CANVAS_THUMBNAIL_POSTFIX);
+        return new Image(thumbnailApiUrl + webresourceId + CANVAS_THUMBNAIL_POSTFIX);
     }
 
     /**
@@ -515,13 +493,18 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
         // body can have a service
         String serviceId = EdmManifestUtils.getServiceId(webResource, europeanaId);
+        annoBody.setService(getService(serviceId, services, europeanaId));
+        c.getImages().get(0).setBody(annoBody);
+        return c;
+    }
+
+    private static Service getService(String serviceId, Map<String, Object>[] services, String europeanaId) {
         if (serviceId != null) {
             Service service = new Service(serviceId, ManifestDefinitions.IMAGE_CONTEXT_VALUE);
             service.setProfile(EdmManifestUtils.lookupServiceDoapImplements(services, serviceId, europeanaId));
-            annoBody.setService(service);
+            return service;
         }
-        c.getImages().get(0).setBody(annoBody);
-        return c;
+        return null;
     }
 
     /**

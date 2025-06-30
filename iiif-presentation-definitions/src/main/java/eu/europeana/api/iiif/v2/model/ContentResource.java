@@ -19,6 +19,7 @@ import eu.europeana.api.iiif.v2.io.JsonConstants;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonPropertyOrder({ id, type, label, format, service })
+@SuppressWarnings("javaarchitecture:S7091")
 public abstract class ContentResource extends IIIFv2Resource {
 
     @JsonProperty(JsonConstants.label)

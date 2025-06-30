@@ -24,8 +24,6 @@ public class MediaTypes {
 
         private Map<String, MediaType> map = new HashMap<>();
 
-        public MediaTypes() {}
-
          /**
          * Map contains all the suppoerted media types except EU Screen entries
          * @return

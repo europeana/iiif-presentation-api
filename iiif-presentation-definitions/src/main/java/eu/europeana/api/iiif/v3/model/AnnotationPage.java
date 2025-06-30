@@ -30,6 +30,7 @@ import eu.europeana.api.iiif.v3.model.fulltext.FullTextAnnotationPage;
    @JsonSubTypes.Type(FullTextAnnotationPage.class)
 })
 @JsonPropertyOrder({ id, type, items })
+@SuppressWarnings("javaarchitecture:S7027")
 public class AnnotationPage extends IIIFv3Resource {
 
     @JsonProperty(JsonConstants.items)

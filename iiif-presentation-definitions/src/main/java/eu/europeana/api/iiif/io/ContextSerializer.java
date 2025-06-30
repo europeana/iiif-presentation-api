@@ -11,6 +11,7 @@ import java.io.IOException;
  * @author Hugo
  * @since 12 Sep 2023
  */
+@SuppressWarnings("javaarchitecture:S7027")
 public class ContextSerializer extends JsonSerializer<ResourceContext> {
 
     @Override

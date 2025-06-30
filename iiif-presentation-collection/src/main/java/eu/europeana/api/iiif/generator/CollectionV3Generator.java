@@ -17,8 +17,7 @@ import static eu.europeana.api.iiif.generator.GeneratorUtils.*;
  * @author Hugo
  * @since 14 Oct 2024
  */
-public class CollectionV3Generator implements CollectionGenerator<Collection>
-                                            , GeneratorConstants {
+public class CollectionV3Generator extends GeneratorConstants implements CollectionGenerator<Collection> {
 
     private static LanguageMap rootLabel
         = new LanguageMap(LANG_META, GeneratorConstants.ROOT_LABEL);

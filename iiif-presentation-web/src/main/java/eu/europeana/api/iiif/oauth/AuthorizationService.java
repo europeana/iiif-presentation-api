@@ -18,11 +18,15 @@ import org.apache.hc.core5.http.HttpHeaders;
  * @author Srishti Singh
  * @since 5 march 2025
  */
+@SuppressWarnings("java:S115")
 public class AuthorizationService {
 
     private static  final String Bearer = "Bearer";
     private static  final String APIKEY = "APIKEY";
 
+    private AuthorizationService() {
+        //to hide implicit one
+    }
     /**
      * TODO - temp method to fetch the apikey or token (if provided).
      *        This doesn't validates the apikey or token. Will be replaced by oauth functionality developed by Shweta

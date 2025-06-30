@@ -42,7 +42,7 @@ public class IIIFVersionSupport {
         return (ManifestGenerator<IIIFResource>)manifestGenerator;
     }
 
-    public CollectionGenerator<?> getCollectionGenerator() {
-        return collectionGenerator;
+    public CollectionGenerator<IIIFResource> getCollectionGenerator() {
+        return (CollectionGenerator<IIIFResource>) collectionGenerator;
     }
 }

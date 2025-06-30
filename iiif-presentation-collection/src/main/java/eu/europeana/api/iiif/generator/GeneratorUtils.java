@@ -10,7 +10,7 @@ import java.util.Map;
  * @author Srishti
  * @since 03 December 2024
  */
-public class GeneratorUtils implements GeneratorConstants {
+public class GeneratorUtils extends GeneratorConstants {
 
     private GeneratorUtils() {
         //private to hide implicit one
