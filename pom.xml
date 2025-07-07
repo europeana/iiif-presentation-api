@@ -43,6 +43,8 @@
         <spring-framework.version>6.0.11</spring-framework.version>
         <springdoc.version>2.3.0</springdoc.version>
         <swagger.version>3.0.0</swagger.version>
+        <!--  Sonar cloud properties -->
+        <sonar.organization>europeana</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar-plugin.version>3.7.0.1746</sonar-plugin.version>
 
