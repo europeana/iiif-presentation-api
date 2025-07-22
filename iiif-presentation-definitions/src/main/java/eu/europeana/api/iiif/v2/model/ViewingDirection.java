@@ -1,6 +1,3 @@
-/**
- * 
- */
 package eu.europeana.api.iiif.v2.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Hugo
  * @since 19 Nov 2024
  */
+@SuppressWarnings("java:S115")
 public enum ViewingDirection {
 
     @JsonProperty("left-to-right") ltr

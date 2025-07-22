@@ -1,13 +1,18 @@
-/**
- * 
- */
 package eu.europeana.api.iiif.v2.io;
 
 /**
  * @author Hugo
  * @since 14 Oct 2024
+ *
+ * Srishti - Suppressing sonar rule - java:S115
+ *           constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'
  */
-public interface JsonConstants {
+@java.lang.SuppressWarnings("java:S115")
+public class JsonConstants {
+
+    private JsonConstants() {
+        //to hide implicit one
+    }
 
     public static final String CONTEXT_URI = "http://iiif.io/api/presentation/2/context.json";
 

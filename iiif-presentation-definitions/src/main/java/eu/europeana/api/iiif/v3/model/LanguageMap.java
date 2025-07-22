@@ -26,7 +26,7 @@ public class LanguageMap extends LinkedHashMap<String, List<String>> {
     @JsonCreator
     public LanguageMap(String value) {
         super();
-        this.add(NO_LANGUAGE_KEY, value);
+        addValue(NO_LANGUAGE_KEY, value);
     }
 
     /**
@@ -37,8 +37,13 @@ public class LanguageMap extends LinkedHashMap<String, List<String>> {
      */
     public LanguageMap(String language, String value) {
         super(1);
+        addValue(language, value);
+    }
+
+    public final void addValue(String language, String value) {
         this.add(language, value);
     }
+
 
     /**
      * Adds language and list of values in the map

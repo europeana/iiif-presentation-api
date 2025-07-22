@@ -19,9 +19,6 @@ public class CollectionCachingStrategy extends AbsChainCachingStrategy {
 
     private static CompoundETag molde = new CompoundETag(new ETag[2]);
 
-    public CollectionCachingStrategy() {
-    }
-
     protected CompoundETag getMolde() {
         return molde;
     }

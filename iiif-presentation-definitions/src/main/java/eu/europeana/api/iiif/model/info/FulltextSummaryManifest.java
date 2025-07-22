@@ -3,7 +3,6 @@ package eu.europeana.api.iiif.model.info;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonValue;
 import static eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions.*;
 
 import java.io.Serializable;

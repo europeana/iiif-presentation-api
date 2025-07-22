@@ -15,6 +15,7 @@ import org.apache.hc.core5.pool.PoolReusePolicy;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.http.HttpHeaders;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class BaseService {
 
 
     public Map<String, String> getHeaderMap(HttpHeaders headers) {
-        if (headers == null)  return null ;
+        if (headers == null)  return Collections.emptyMap() ;
         Map<String, String> headerMap = new HashMap<>();
         for (String key : headers.keySet() ) {
             headerMap.put(key, headers.getFirst(key));
@@ -83,10 +84,9 @@ public class BaseService {
             }
             if (StringUtils.equals(h.getName(), CachingHeaders.LAST_MODIFIED)) {
                 headers.set(CachingHeaders.LAST_MODIFIED, h.getValue());
-
-            } if (StringUtils.equals(h.getName(), CachingHeaders.CACHE_CONTROL)) {
+            }
+            if (StringUtils.equals(h.getName(), CachingHeaders.CACHE_CONTROL)) {
                 headers.setCacheControl(h.getValue());
-
             }
         }
         return headers;

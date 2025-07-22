@@ -1,10 +1,11 @@
 package eu.europeana.api.iiif.generator;
 
 /**
+ * Constants for Generator
  * @author Hugo
  * @since 14 Oct 2024
  */
-public interface GeneratorConstants {
+public class GeneratorConstants {
 
     public static final String LANG_META = "en";
 

@@ -2,15 +2,16 @@ package eu.europeana.api.iiif.model.info;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.europeana.api.iiif.model.ManifestDefinitions;
 import eu.europeana.api.iiif.v3.io.JsonConstants;
 import eu.europeana.api.iiif.v3.model.IIIFv3Resource;
+
+import java.io.Serializable;
 
 /**
  * Created by luthien on 15/04/2021.
  * Srishti - TODO create definitions module in Fulltext and use the same class
  */
-public class FulltextSummaryAnnoPage extends IIIFv3Resource {
+public class FulltextSummaryAnnoPage extends IIIFv3Resource implements Serializable {
 
     private static final long serialVersionUID = -670619785903826924L;
 

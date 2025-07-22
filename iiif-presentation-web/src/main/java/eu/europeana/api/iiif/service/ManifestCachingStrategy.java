@@ -19,9 +19,6 @@ public class ManifestCachingStrategy extends AbsChainCachingStrategy {
 
     private static CompoundETag molde = new CompoundETag(new ETag[3]);
 
-    public ManifestCachingStrategy() {
-    }
-
     protected CompoundETag getMolde() {
         return molde;
     }
