@@ -1,5 +1,7 @@
 package eu.europeana.api.iiif.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import eu.europeana.api.commons.http.HttpResponseHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
@@ -27,6 +29,8 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
 import static com.jayway.jsonpath.Configuration.defaultConfiguration;
+import static eu.europeana.api.commons_sb3.error.EuropeanaErrorConstants.*;
+import static eu.europeana.api.commons_sb3.error.EuropeanaErrorConstants.code;
 
 @Service
 public class RecordService extends BaseService {
@@ -61,7 +65,10 @@ public class RecordService extends BaseService {
                 throw new ResourceNotChangedException(recordId);
             }
             else {
-                EuropeanaApiErrorResponse errorResponse = recordMapper.readValue(responseBody, EuropeanaApiErrorResponse.class);
+                EuropeanaApiErrorResponse errorResponse = constructErrorResponse(responseCode, responseBody);
+                //TODO replace it once we start using record api v3
+                // recordMapper.readValue(responseBody, EuropeanaApiErrorResponse.class);
+
                 if (responseCode == HttpStatus.SC_UNAUTHORIZED || responseCode == HttpStatus.SC_FORBIDDEN) {
                     throw new RecordRetrievalException(errorResponse, rsp.getStatus());
                 }
@@ -111,4 +118,25 @@ public class RecordService extends BaseService {
             throw new RecordRetrievalException(" Error parsing the record response: " + e.getMessage());
         }
     }
+    /**
+     * TODO Should be removed once we start using record api v3
+     * as Current SR API uses different model of error response
+     * @param json
+     * @return
+     */
+    private EuropeanaApiErrorResponse constructErrorResponse(int responseCode, String json) throws RecordRetrievalException {
+        try {
+            JsonNode node = recordMapper.readTree(json);
+            return new EuropeanaApiErrorResponse(
+                    responseCode,
+                    node.has(error) ? node.get(error).asText() : "",
+                    node.has(message) ? node.get(message).asText() : "Error retrieving record",
+                    null,
+                    null,
+                    node.has(code) ? node.get(code).asText() : "");
+        } catch (JsonProcessingException e) {
+            throw new RecordRetrievalException(" Error parsing the record response: " + e.getMessage());
+        }
+    }
+
 }
