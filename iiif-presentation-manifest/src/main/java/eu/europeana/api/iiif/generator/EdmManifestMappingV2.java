@@ -235,7 +235,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         }
 
         if (result.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
         return result;
     }
