@@ -5,6 +5,7 @@ package eu.europeana.api.iiif.v3.model.content;
 
 import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -29,8 +30,14 @@ public class Text extends ContentResource {
 
     protected Text() {}
 
-
-    @JsonProperty(JsonConstants.type)
+    /**
+     * Added JsonIgnore -
+     *   EA-4232 creates duplicate type value after parsing.
+     *   We already get the type value from the ContentResource @JsonTypeInfo
+     * @return
+     */
+    @JsonIgnore
+    //@JsonProperty(JsonConstants.type)
     public String getType() {
         return JsonConstants.Text;
     }
