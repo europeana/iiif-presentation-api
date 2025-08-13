@@ -5,10 +5,7 @@ package eu.europeana.api.iiif.v3.model.content;
 
 import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.*;
 
 import eu.europeana.api.iiif.v3.io.JsonConstants;
 import eu.europeana.api.iiif.v3.model.ContentResource;
@@ -36,7 +33,8 @@ public class Dataset extends ContentResource {
 
     protected Dataset() {}
 
-    @JsonProperty(JsonConstants.type)
+
+    @JsonIgnore
     public String getType() {
         return JsonConstants.Dataset;
     }

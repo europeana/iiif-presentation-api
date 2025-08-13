@@ -13,10 +13,10 @@ public class InvalidIIIFVersionException extends EuropeanaApiException {
     /**
      * Initialise a new exception for which there is no root cause
      *
-     * @param msg error message
+     * @param version invalid version
      */
-    public InvalidIIIFVersionException(String msg) {
-        super(msg);
+    public InvalidIIIFVersionException(String version) {
+        super("Invalid IIIF Version : " + version);
     }
 
     /**

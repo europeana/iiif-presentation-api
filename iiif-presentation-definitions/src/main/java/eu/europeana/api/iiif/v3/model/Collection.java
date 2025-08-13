@@ -3,10 +3,7 @@
  */
 package eu.europeana.api.iiif.v3.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.*;
 
 import eu.europeana.api.iiif.v3.io.JsonConstants;
 
@@ -42,7 +39,14 @@ public class Collection extends PresentationResource {
 
     protected Collection() {}
 
-    @JsonProperty(JsonConstants.type)
+    /**
+     * Added JsonIgnore -
+     *   EA-4232 creates duplicate type value after parsing.
+     *   We already get the type value from the PresentationResource @JsonTypeInfo
+     * @return
+     */
+    @JsonIgnore
+    //@JsonProperty(JsonConstants.type)
     public String getType() {
         return JsonConstants.Collection;
     }

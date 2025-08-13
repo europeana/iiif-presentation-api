@@ -49,7 +49,7 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <!-- Other api versions-->
-        <api-commons-sb3.version>0.1.2-SNAPSHOT</api-commons-sb3.version>
+        <api-commons-sb3.version>0.1.3-SNAPSHOT</api-commons-sb3.version>
 
         <!-- The set api uses api-commons hence we need the client-utils module of api-commons
          Set api will be upgraded to spring boot 3 and then we can remove this -->

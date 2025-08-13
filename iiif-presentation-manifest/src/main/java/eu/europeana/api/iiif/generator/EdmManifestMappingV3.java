@@ -268,7 +268,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         if (!metaData.isEmpty()) {
             return metaData;
         }
-        return null;
+        return Collections.emptyList();
     }
 
 
