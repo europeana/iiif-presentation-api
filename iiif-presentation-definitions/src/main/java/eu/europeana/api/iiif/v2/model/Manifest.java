@@ -41,7 +41,9 @@ public class Manifest extends PresentationResource {
 
     protected Manifest() {}
 
-    @JsonProperty(JsonConstants.type)
+    // Added JsonIgnore - fetches type value from the parent class @JsonTypeInfo
+    // EA-4232 creates duplicate type value after parsing.
+    @JsonIgnore
     public String getType() {
         return JsonConstants.Manifest;
     }

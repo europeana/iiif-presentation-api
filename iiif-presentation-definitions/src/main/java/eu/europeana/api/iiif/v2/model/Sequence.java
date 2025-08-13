@@ -8,11 +8,7 @@ import static eu.europeana.api.iiif.v2.io.JsonConstants.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.*;
 
 import eu.europeana.api.iiif.v2.io.JsonConstants;
 
@@ -44,7 +40,9 @@ public class Sequence extends PresentationResource {
 
     public Sequence() {}
 
-    @JsonProperty(JsonConstants.type)
+    // Added JsonIgnore - fetches type value from the parent class @JsonTypeInfo
+    // EA-4232 creates duplicate type value after parsing.
+    @JsonIgnore
     public String getType() {
         return JsonConstants.Sequence;
     }

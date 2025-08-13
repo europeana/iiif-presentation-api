@@ -33,14 +33,9 @@ public class Image extends ContentResource {
     public Image() {}
 
 
-    /**
-     * Added JsonIgnore -
-     *   EA-4232 creates duplicate type value after parsing.
-     *   We already get the type value from the ContentResource @JsonTypeInfo
-     * @return
-     */
+    // Added JsonIgnore - fetches type value from the parent class @JsonTypeInfo
+    // EA-4232 creates duplicate type value after parsing.
     @JsonIgnore
-    //@JsonProperty(JsonConstants.type)
     public String getType() {
         return JsonConstants.Image;
     }

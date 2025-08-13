@@ -5,6 +5,7 @@ package eu.europeana.api.iiif.v3.model.content;
 
 import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -28,8 +29,7 @@ public class Sound extends ContentResource {
 
     protected Sound() {}
 
-
-    @JsonProperty(JsonConstants.type)
+    @JsonIgnore
     public String getType() {
         return JsonConstants.Sound;
     }
