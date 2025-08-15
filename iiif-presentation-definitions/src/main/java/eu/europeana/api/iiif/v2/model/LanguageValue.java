@@ -1,9 +1,4 @@
-/**
- * 
- */
 package eu.europeana.api.iiif.v2.model;
-
-import static eu.europeana.api.iiif.v2.io.JsonConstants.*;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,7 +14,7 @@ import eu.europeana.api.iiif.v2.io.JsonConstants;
  */
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ lang, value })
+@JsonPropertyOrder({ JsonConstants.lang, JsonConstants.value })
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class LanguageValue {
 

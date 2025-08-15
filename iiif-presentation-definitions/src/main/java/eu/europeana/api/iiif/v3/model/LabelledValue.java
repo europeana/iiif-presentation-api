@@ -1,9 +1,4 @@
-/**
- * 
- */
 package eu.europeana.api.iiif.v3.model;
-
-import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -18,7 +13,7 @@ import eu.europeana.api.iiif.v3.io.JsonConstants;
  */
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ label, value })
+@JsonPropertyOrder({ JsonConstants.label, JsonConstants.value })
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class LabelledValue {
 

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package eu.europeana.api.iiif.v3.io;
 
 /**

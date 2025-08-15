@@ -41,13 +41,7 @@ public class Collection extends PresentationResource {
 
     protected Collection() {}
 
-    /**
-     * Added JsonIgnore -
-     *   EA-4232 creates duplicate type value after parsing.
-     *   We already get the type value from the PresentationResource @JsonTypeInfo
-     * @return
-     */
-    @JsonIgnore
+    @JsonProperty(JsonConstants.type)
     public String getType() {
         return JsonConstants.Collection;
     }

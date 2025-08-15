@@ -29,9 +29,10 @@ public class JsonConstants {
     public static final String id          = "@id";
     public static final String type        = "@type";
     public static final String lang        = "@language";
+    public static final String value       = "@value";
 
     public static final String label       = "label";
-    public static final String value       = "value";
+    public static final String labelValue  = "value";
     public static final String description = "description";
     public static final String metadata    = "metadata";
     public static final String navDate     = "navDate";

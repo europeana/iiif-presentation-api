@@ -3,8 +3,6 @@
  */
 package eu.europeana.api.iiif.v2.model;
 
-import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
-
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -12,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 import eu.europeana.api.iiif.v2.io.JsonConstants;
 
 /**
@@ -21,14 +18,14 @@ import eu.europeana.api.iiif.v2.io.JsonConstants;
  */
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ label, value })
+@JsonPropertyOrder({ JsonConstants.label, JsonConstants.labelValue })
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class LabelledValue {
 
     @JsonProperty(JsonConstants.label)
     private String label;
 
-    @JsonProperty(JsonConstants.value)
+    @JsonProperty(JsonConstants.labelValue)
     @JsonFormat(with = { JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY
                        , JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED } )
     private List<LanguageValue> value;

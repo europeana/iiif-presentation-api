@@ -65,8 +65,8 @@ public class CollectionV2Generator extends GeneratorConstants implements Collect
                     settings.getGalleryRootURI(), set.getIdentifier()));
             // get the first title for v2
             for (Map.Entry<String, String> entry : set.getTitle().entrySet()) {
-                child.setLabel(new LanguageValue(entry.getKey(), entry.getValue()));
-                if (child.getLabel().getLang() != null) break;
+                child.setLabel(new LanguageValue(entry.getValue(), entry.getKey()));
+                break;
             }
             col.getCollections().add(child);
         }
