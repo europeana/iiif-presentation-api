@@ -373,7 +373,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         if (StringUtils.isEmpty(licenseText)) {
             return null;
         }
-        return new Text(licenseText);
+        return new Text(licenseText, null, "text/html");
     }
 
     /**
@@ -537,7 +537,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
         LinkedHashMap<String, ArrayList<String>> license = (LinkedHashMap<String, ArrayList<String>>) webResource.get("webResourceEdmRights");
         if (license != null && !license.values().isEmpty()) {
-            c.setRights(new Text(license.values().iterator().next().get(0)));
+            c.setRights(new Text(license.values().iterator().next().get(0), null, "text/html"));
         }
 
         //EA-3325: check if the webResource has a "svcsHasService"; if not, add a thumbnail
