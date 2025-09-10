@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+
 
 /**
  * Service that loads record data, uses that to generate a Manifest object and 
@@ -34,6 +36,13 @@ public class ManifestService {
      */
     public ManifestService(ManifestSettings settings) {
         mapper = new ObjectMapper();
+        mapper.setVisibility(
+                mapper.getVisibilityChecker()
+                        .withCreatorVisibility(NONE)
+                        .withFieldVisibility(NONE)
+                        .withGetterVisibility(NONE)
+                        .withIsGetterVisibility(NONE)
+                        .withSetterVisibility(NONE));
 
         // configure jsonpath: we use jsonpath in combination with Jackson because that makes it easier to know what
         // type of objects are returned (see also https://stackoverflow.com/a/40963445)
