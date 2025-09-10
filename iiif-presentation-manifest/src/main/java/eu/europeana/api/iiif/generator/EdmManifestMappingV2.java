@@ -264,7 +264,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         } else {
             langObjects = metaData.get(fieldName);
         }
-        langObjects.add(new LanguageValue(language, value));
+        langObjects.add(new LanguageValue(value, language));
     }
 
     /**
