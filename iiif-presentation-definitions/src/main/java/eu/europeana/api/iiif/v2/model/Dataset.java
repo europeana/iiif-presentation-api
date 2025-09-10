@@ -23,7 +23,7 @@ import eu.europeana.api.iiif.v2.io.JsonConstants;
 public class Dataset extends ContentResource {
 
     @JsonProperty(JsonConstants.profile)
-    private String profile = ManifestDefinitions.EDM_SCHEMA_URL;
+    private String profile;
 
     public Dataset(String id) {
         super(id);
@@ -31,6 +31,7 @@ public class Dataset extends ContentResource {
 
     public Dataset(String id, String format) {
         super(id, format);
+        this.profile = ManifestDefinitions.EDM_SCHEMA_URL;
     }
 
     protected Dataset() {}
