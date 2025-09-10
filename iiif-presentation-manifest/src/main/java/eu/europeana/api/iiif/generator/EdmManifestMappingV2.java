@@ -77,8 +77,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         List<Sequence> sequences = getSequencesV2(settings, mediaTypes, europeanaId, isShownBy, jsonDoc);
         if (sequences != null) {
             manifest.setSequences(sequences);
-            // TODO find missing fields
-            //manifest.setStartCanvasPageNr(getStartCanvasV2(manifest.getSequences()[0].getCanvases(), isShownBy));
+
         } else {
             LOG.debug("No Canvas generated for europeanaId {}", europeanaId);
         }
@@ -352,6 +351,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
             Sequence sequence = new Sequence();
             sequence.setStartCanvas(settings.getCanvasId(europeanaId, 1));
             sequence.setCanvases(canvases);
+            sequence.setLabel(new LanguageValue("Current Page Order"));
             result.add(sequence);
             return result;
         }
