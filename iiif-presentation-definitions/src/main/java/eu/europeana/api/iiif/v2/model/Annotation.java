@@ -35,6 +35,11 @@ public class Annotation extends IIIFv2Resource {
         super(id);
     }
 
+    public Annotation(String id, String motivation) {
+        super(id);
+        this.motivation = motivation;
+    }
+
     protected Annotation() {}
 
     @Override

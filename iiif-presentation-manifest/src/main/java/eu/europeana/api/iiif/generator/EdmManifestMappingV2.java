@@ -439,7 +439,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         }
 
         // canvas has 1 annotation (image field)
-        Annotation annotation = new Annotation(c.getID());
+        Annotation annotation = new Annotation(c.getID(), "sc:painting");
         annotation.setOn(c.getID());
         c.setImages(Collections.singletonList(annotation));
 //        c.setImages(new eu.europeana.iiif.model.v2.Annotation[1]);
