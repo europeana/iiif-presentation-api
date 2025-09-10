@@ -120,7 +120,7 @@ public final class EdmManifestUtils {
         if (landingPage == null) {
             return null;
         }
-        return new Text(landingPage, new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana"), null);
+        return new Text(landingPage, new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana"), "text/html");
     }
 
 
