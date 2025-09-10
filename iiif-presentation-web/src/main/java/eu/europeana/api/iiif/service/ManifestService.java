@@ -1,6 +1,7 @@
 package eu.europeana.api.iiif.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.cfg.ContextAttributes;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonNodeJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonProvider;
@@ -16,6 +17,10 @@ import java.io.OutputStream;
 import java.util.*;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+import static eu.europeana.api.iiif.v3.io.JsonConstants.context;
+import static eu.europeana.api.iiif.v3.io.JsonConstants.CONTEXT_URI;
+import static eu.europeana.api.iiif.v3.io.JsonConstants.CONTEXT_URI_ANNO;
+import static eu.europeana.api.iiif.v3.io.JsonConstants.CONTEXT_URI_TEXT;
 
 
 /**
@@ -28,22 +33,11 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 @Service
 public class ManifestService {
 
-    private final ObjectMapper mapper;
-
     /**
      * Creates an instance of the ManifestService bean with provided settings
      *  @param settings   read from properties file
      */
     public ManifestService(ManifestSettings settings) {
-        mapper = new ObjectMapper();
-        mapper.setVisibility(
-                mapper.getVisibilityChecker()
-                        .withCreatorVisibility(NONE)
-                        .withFieldVisibility(NONE)
-                        .withGetterVisibility(NONE)
-                        .withIsGetterVisibility(NONE)
-                        .withSetterVisibility(NONE));
-
         // configure jsonpath: we use jsonpath in combination with Jackson because that makes it easier to know what
         // type of objects are returned (see also https://stackoverflow.com/a/40963445)
         com.jayway.jsonpath.Configuration.setDefaults(new com.jayway.jsonpath.Configuration.Defaults() {
@@ -71,17 +65,5 @@ public class ManifestService {
                 }
             }
         });
-    }
-
-
-    /**
-     * Serialize manifest to JSON-LD
-     *
-     * @param m manifest
-     * @return JSON-LD string
-     * @throws RecordParseException when there is a problem parsing
-     */
-    public void serializeManifest(Object m, OutputStream out) throws IOException {
-        mapper.writerWithDefaultPrettyPrinter().writeValue(out, m);
     }
 }

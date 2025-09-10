@@ -11,17 +11,12 @@ import eu.europeana.api.iiif.generator.ManifestGenerator;
 import eu.europeana.api.iiif.generator.ManifestSettings;
 import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
-import eu.europeana.api.iiif.service.AbsChainCachingStrategy;
-import eu.europeana.api.iiif.service.FulltextService;
-import eu.europeana.api.iiif.service.IIIFVersionSupport;
-import eu.europeana.api.iiif.service.IIIFVersionSupportHandler;
-import eu.europeana.api.iiif.service.ManifestCachingStrategy;
-import eu.europeana.api.iiif.service.ManifestService;
-import eu.europeana.api.iiif.service.RecordService;
+import eu.europeana.api.iiif.service.*;
 import eu.europeana.api.iiif.utils.ValidateUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -51,30 +46,31 @@ public class ManifestController {
     private static final ManifestCachingStrategy cachingStrategy 
         = new ManifestCachingStrategy();
 
-    private ManifestService           manifestService;
     private RecordService             recordService;
     private FulltextService           fulltextService;
     private IIIFVersionSupportHandler versionHandler;
     private final BuildInfo           buildInfo;
     private ManifestSettings          settings;
     private AuthenticationHandler     authFallback;
+    private IIIFJsonHandler iiifJsonHandler;
 
+    @Autowired
     public ManifestController(BuildInfo buildInfo
                             , ManifestSettings settings
-                            , ManifestService manifestService
                             , RecordService recordService
                             , FulltextService fulltextService
                             , @Qualifier(value = BEAN_IIIF_VERSION_SUPPORT) 
                               IIIFVersionSupportHandler versionHandler
                             , @Qualifier(value = BEAN_FALLBACK_AUTHORIZATION) 
-                              AuthenticationHandler authFallback) {
+                              AuthenticationHandler authFallback,
+                              IIIFJsonHandler iiifJsonHandler) {
         this.settings        = settings;
-        this.manifestService = manifestService;
         this.recordService   = recordService;
         this.fulltextService = fulltextService;
         this.versionHandler  = versionHandler;
         this.buildInfo       = buildInfo;
         this.authFallback    = authFallback;
+        this.iiifJsonHandler = iiifJsonHandler;
     }
 
     /**
@@ -195,7 +191,7 @@ public class ManifestController {
         StreamingResponseBody responseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream out) throws IOException {
-                manifestService.serializeManifest(manifest, out);
+                iiifJsonHandler.write(manifest, out);
                 out.flush();
             }
         };
