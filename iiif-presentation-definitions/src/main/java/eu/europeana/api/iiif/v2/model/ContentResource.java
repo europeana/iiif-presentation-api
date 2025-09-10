@@ -36,6 +36,11 @@ public abstract class ContentResource extends IIIFv2Resource {
         super(id);
     }
 
+    public ContentResource(String id, String format) {
+        super(id);
+        this.format = format;
+    }
+
     protected ContentResource() {}
 
 

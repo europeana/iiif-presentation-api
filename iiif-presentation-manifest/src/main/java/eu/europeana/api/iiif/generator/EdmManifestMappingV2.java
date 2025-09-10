@@ -72,6 +72,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         manifest.setNavDate(EdmManifestUtils.getNavDate(europeanaId, jsonDoc));
         manifest.setAttribution(getAttributionV2(europeanaId, isShownBy, jsonDoc));
         manifest.setLicense(getLicense(europeanaId, jsonDoc));
+        manifest.setLogo(new Image(ManifestDefinitions.EUROPEANA_LOGO_URL));
         manifest.setSeeAlso(getDataSetsV2(settings, europeanaId));
         List<Sequence> sequences = getSequencesV2(settings, mediaTypes, europeanaId, isShownBy, jsonDoc);
         if (sequences != null) {
