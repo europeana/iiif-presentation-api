@@ -89,8 +89,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         List<Canvas> items = getItems(settings, mediaTypes, europeanaId, isShownBy, jsonDoc, euScreenTypeHack);
         if (items != null && items.size() > 0) {
             manifest.getItems().addAll(items);
-            // TODO get missing fields - c.getStartCanvasAnnotation().getBody().getId()
-           // manifest.setStart(getStartCanvasV3(manifest.getItems(), isShownBy));
+            manifest.setStart(getStartCanvasV3(manifest.getItems(), isShownBy));
         } else {
             LOG.debug("No Canvas generated for europeanaId {}", europeanaId);
         }
@@ -441,33 +440,32 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
     }
 
 
-    // TODO get missing fields
-
     /**
-     * @return the {@link eu.europeana.iiif.model.v3.Canvas} that refers to edmIsShownBy, or else just the first Canvas
+     * @return the {@link  eu.europeana.api.iiif.v3.model.Canvas} that refers to edmIsShownBy, or else just the first Canvas
      */
-//    static Canvas getStartCanvasV3(List<Canvas> items, String edmIsShownBy) {
-//        if (items == null) {
-//            LOG.trace("Start canvas = null (no canvases present)");
-//            return null;
-//        }
-//
-//        Canvas result = null;
-//        for (Canvas c : items) {
-//            String annotationBodyId = c.getStartCanvasAnnotation().getBody().getId();
-//            if (!StringUtils.isEmpty(edmIsShownBy) && edmIsShownBy.equals(annotationBodyId)) {
-//                result = c;
-//                LOG.trace("Start canvas = {} (matches with edmIsShownBy)", result.getPageNr());
-//                break;
-//            }
-//        }
-//        // nothing found, return first canvas
-//        if (result == null) {
-//            result = items[0];
-//            LOG.trace("Start canvas = {} (no match with edmIsShownBy, select first)", result.getPageNr());
-//        }
-//        return new eu.europeana.iiif.model.v3.Canvas(result.getId(), result.getPageNr());
-//    }
+    static Canvas getStartCanvasV3(List<Canvas> items, String edmIsShownBy) {
+        if (items == null) {
+            LOG.trace("Start canvas = null (no canvases present)");
+            return null;
+        }
+
+        Canvas result = null;
+        for (Canvas c : items) {
+            String annotationBodyId = c.getStartCanvasAnnotation().getBody().getID();
+            if (!StringUtils.isEmpty(edmIsShownBy) && edmIsShownBy.equals(annotationBodyId)) {
+                result = c;
+                LOG.trace("Start canvas = {} (matches with edmIsShownBy)", result.getPageNr());
+                break;
+            }
+        }
+        // nothing found, return first canvas
+        if (result == null) {
+            result = items.get(0);
+            LOG.trace("Start canvas = {} (no match with edmIsShownBy, select first)", result.getPageNr());
+        }
+
+        return new Canvas(result.getID());
+    }
 
     /**
      * Generates an ordered array of {@link Canvas}es referring to edmIsShownBy and hasView {@link WebResource}s.
@@ -509,7 +507,6 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
                                                                  WebResource webResource,
                                                                  Map<String, Object>[] services,
                                                                  MediaType euScreenTypeHack){
-        // Canvas c = new Canvas(settings.getCanvasId(europeanaId, order), order);
         Canvas c = new Canvas(settings.getCanvasId(europeanaId, order));
 
         c.setLabel(new LanguageMap(null, "p. "+order));
