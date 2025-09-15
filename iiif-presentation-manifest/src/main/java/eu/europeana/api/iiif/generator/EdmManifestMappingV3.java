@@ -48,9 +48,6 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
     private static final Logger LOG = LogManager.getLogger(EdmManifestMappingV3.class);
 
-    //@TODO: Why is this static?
-    private static String thumbnailApiUrl;
-
     private ManifestSettings     settings;
     private MediaTypes       mediaTypes;
 
@@ -58,7 +55,6 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
                               , MediaTypes mediaTypes) {
         this.settings   = settings;
         this.mediaTypes = mediaTypes;
-        thumbnailApiUrl = settings.getThumbnailApiUrl();
     }
 
     /**
@@ -376,7 +372,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
      * @param webresourceId hasview image ID
      * @return Image object, or null if either provided String was null
      */
-    static Image getCanvasThumbnailImageV3(String webresourceId) {
+    static Image getCanvasThumbnailImageV3(String webresourceId, String thumbnailApiUrl) {
         if (StringUtils.isAnyEmpty(thumbnailApiUrl, webresourceId)) {
             return new Image();
         }
@@ -521,7 +517,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
         //EA-3325: check if the webResource has a "svcsHasService"; if not, add a thumbnail
         if (Objects.isNull(webResource.get(EdmManifestUtils.SVCS_HAS_SERVICE))){
-            c.getThumbnail().add(getCanvasThumbnailImageV3(URLEncoder.encode(webResource.getId(), StandardCharsets.UTF_8)));
+            c.getThumbnail().add(getCanvasThumbnailImageV3(URLEncoder.encode(webResource.getId(), StandardCharsets.UTF_8), settings.getThumbnailApiUrl()));
         }
 
         // a canvas has 1 annotation page by default (an extra annotation page is added later if there is a full text available)

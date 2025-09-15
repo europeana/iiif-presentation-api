@@ -34,7 +34,6 @@ import static eu.europeana.api.iiif.model.ManifestDefinitions.CANVAS_THUMBNAIL_P
  * Created on 08-02-2018
  *
  * Updated By Srishti Singh to adjust with the new model class
- * TODO - look into todo comments in the class
  *
  */
 // ignore sonarqube rule: we return null on purpose in this class
@@ -161,7 +160,6 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * Generates a service description for the manifest
      */
     private static Service getServiceDescriptionV2(ManifestSettings settings, String europeanaId) {
-        // TODO need to know the type value
         Service service = new Service(settings.getContentSearchURL(europeanaId), null);
         service.setContext(ManifestDefinitions.SEARCH_CONTEXT_VALUE);
         service.setProfile(ManifestDefinitions.SEARCH_PROFILE_VALUE);
@@ -369,35 +367,6 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
     static String getLicense(String europeanaId, Object jsonDoc) {
         return EdmManifestUtils.getLicenseText(europeanaId, jsonDoc);
     }
-
-    /**
-     * @return Integer containing the page number of the canvas that refers to the edmIsShownBy, or else just the first
-     *  Canvas. Null if there are no canvases
-     *  TODO see usage of this in the new model there is no field
-     *   private Integer startCanvasPageNr; // for internal use only, similar to 'start' field in v3
-     */
-//    static Integer getStartCanvasV2(Canvas[] items, String edmIsShownBy) {
-//        if (items == null) {
-//            LOG.trace("Start canvas = null (no canvases present)");
-//            return null;
-//        }
-//
-//        Canvas result = null;
-//        for (Canvas c : items) {
-//            String annotationBodyId = c.getStartImageAnnotation().getResource().getId();
-//            if (!StringUtils.isEmpty(edmIsShownBy) && edmIsShownBy.equals(annotationBodyId)) {
-//                result = c;
-//                LOG.trace("Start canvas = {} (matches with edmIsShownBy)", result.getPageNr());
-//                break;
-//            }
-//        }
-//        // nothing found, return first canvas
-//        if (result == null) {
-//            result = items[0];
-//            LOG.trace("Start canvas = {} (no match with edmIsShownBy, select first)", result.getPageNr());
-//        }
-//        return result.getPageNr();
-//    }
 
     /**
      * Generates a new canvas, but note that we do not fill the otherContent (Full-Text) here. That is done later

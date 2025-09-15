@@ -22,7 +22,6 @@ import eu.europeana.api.iiif.v2.io.JsonConstants;
                    , attribution, license, logo, seeAlso, service
                    , within, related, navDate, viewingHint, viewingDirection
                    , thumbnail, rendering, sequences })
-// TODO needs to have europeana ID field for internal use
 public class Manifest extends PresentationResource {
 
     @JsonProperty(JsonConstants.navDate)
