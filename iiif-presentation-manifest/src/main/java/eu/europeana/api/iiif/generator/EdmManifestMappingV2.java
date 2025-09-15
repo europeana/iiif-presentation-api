@@ -478,14 +478,14 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     /**
      * If media type is present and
-     * is either browser or rendered supported but has type video or sound
+     * is either browser but has type video or sound
      * return true
      *
      * @param mediaType
      * @return
      */
     private static boolean ifSupportedMediaTypeIsVideoOrSound(MediaType mediaType) {
-        return mediaType != null && ((mediaType.isRendered() || mediaType.isBrowserSupported()) && mediaType.isVideoOrSound());
+        return mediaType != null && (mediaType.isBrowserSupported() && mediaType.isVideoOrSound());
     }
 
     /**
