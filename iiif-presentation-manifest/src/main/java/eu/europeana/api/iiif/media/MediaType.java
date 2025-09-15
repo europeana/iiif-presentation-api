@@ -13,6 +13,7 @@ public class MediaType {
     private static final String BROWSER = "Browser";
     private static final String RENDERED = "Rendered";
     private static final String EU_SCREEN = "EUScreen";
+    private static final String O_EMBED = "oEmbed";
 
     public static final String  VIDEO    = "Video";
     public static final String  SOUND    = "Sound";
@@ -59,6 +60,10 @@ public class MediaType {
 
     public boolean isEuScreen() {
         return EU_SCREEN.equals(getSupport());
+    }
+
+    public boolean isOEmbed() {
+        return O_EMBED.equals(getLabel());
     }
 }
 

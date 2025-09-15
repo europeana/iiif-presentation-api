@@ -567,15 +567,17 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         // annotation has 1 annotationBody
         anno.setBody(annoBody);
         // body can have a service
-        setServiceIdForAnnotation(europeanaId, webResource, services, annoBody);
+        // EA-3475 Do not add service for specialized formats
+        if (!mediaType.isRendered()) {
+            setServiceIdForAnnotation(europeanaId, webResource, services, annoBody);
+        }
         return c;
     }
 
     private static ContentResource getAnnotationBody(WebResource webResource, MediaType mediaType,
         Annotation anno, Canvas c) {
 
-        ContentResource annoBody = instantiateBodyWithType(mediaType,(String) webResource.get(EdmManifestUtils.ABOUT));
-        //ContentResource annoBody = new ContentResource((String) webResource.get(EdmManifestUtils.ABOUT), mediaType.getType());
+        ContentResource annoBody = new Image((String) webResource.get(EdmManifestUtils.ABOUT));
 
         // case 2 - browser supported
         if (mediaType.isBrowserSupported() ) {
@@ -595,8 +597,8 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
             // update the width and height
             setHeightWidthForRendered(c);
            //EA-3745 - use media type 'service' for oembed mimeTypes who do not have type configured in 'mediacategories.xml'
-            String mediaTypeValue = StringUtils.isEmpty(mediaType.getType()) && EdmManifestUtils.EMBEDED_RESOURCE_MIME_TYPES.contains(
-                mediaType.getMimeType()) ? EdmManifestUtils.SERVICE: mediaType.getType();
+            //EA-3745 - use media type 'service' for oembed mimeTypes
+            String mediaTypeValue= mediaType.isOEmbed() ? EdmManifestUtils.SERVICE: mediaType.getType();
             // add rendered Image
             Rendering renderingImage = new Rendering((String) webResource.get(EdmManifestUtils.ABOUT), mediaTypeValue);
             renderingImage.setFormat(mediaType.getMimeType());
@@ -675,13 +677,13 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         }
     }
 
-    private static ContentResource instantiateBodyWithType(MediaType mediaType, String id) {
-        switch (mediaType.getType()) {
-            case Image: return new Image(id);
-            case Sound: return new Sound(id);
-            case Text: return new Text(id);
-            case Video: return new Video(id);
-            default: return new Other(id);
-        }
-    }
+//    private static ContentResource instantiateBodyWithType(MediaType mediaType, String id) {
+//        switch (mediaType.getType()) {
+//            case Image: return new Image(id);
+//            case Sound: return new Sound(id);
+//            case Text: return new Text(id);
+//            case Video: return new Video(id);
+//            default: return new Other(id);
+//        }
+//    }
 }
