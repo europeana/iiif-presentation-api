@@ -488,7 +488,6 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
             renderingImage.setFormat(mediaType.getMimeType());
             renderingImage.setLabel(new LanguageValue(mediaType.getLabel()));
             c.getRendering().add(renderingImage);
-            //c.setRendering(new Rendering((String) webResource.get(EdmManifestUtils.ABOUT), mediaType.getMimeType(), mediaType.getLabel()));
             addTechnicalMetadata(c, annoBody);
         }
 

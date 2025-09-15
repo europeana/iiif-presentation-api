@@ -619,14 +619,13 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
             // update the width and height
             setHeightWidthForRendered(c);
            //EA-3745 - use media type 'service' for oembed mimeTypes who do not have type configured in 'mediacategories.xml'
-            String mediaTypeValue=StringUtils.isEmpty(mediaType.getType()) && EdmManifestUtils.EMBEDED_RESOURCE_MIME_TYPES.contains(
-                mediaType.getMimeType()) ?
-                EdmManifestUtils.SERVICE: mediaType.getType();
-            // TODO check the field (right now string) add rendering in canvas for original web resource url
-//            c.setRendering(new Rendering((String) webResource.get(EdmManifestUtils.ABOUT),
-//                    mediaTypeValue,
-//                    mediaType.getMimeType(),
-//                    new LanguageMap(EdmManifestUtils.LINGUISTIC, mediaType.getLabel())));
+            String mediaTypeValue = StringUtils.isEmpty(mediaType.getType()) && EdmManifestUtils.EMBEDED_RESOURCE_MIME_TYPES.contains(
+                mediaType.getMimeType()) ? EdmManifestUtils.SERVICE: mediaType.getType();
+            // add rendered Image
+            Rendering renderingImage = new Rendering((String) webResource.get(EdmManifestUtils.ABOUT), mediaTypeValue);
+            renderingImage.setFormat(mediaType.getMimeType());
+            renderingImage.setLabel(new LanguageMap(EdmManifestUtils.LINGUISTIC, mediaType.getLabel()));
+            c.getRendering().add(renderingImage);
             addTechnicalMetadata(c, annoBody);
         }
         return annoBody;
@@ -702,11 +701,19 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
      * @param canvas
      * @param body
      */
-    // TODO see how to set these values based on type of content resource
     private static void addTechnicalMetadata(Canvas canvas, ContentResource body) {
-//        body.setHeight(canvas.getHeight());
-//        body.setWidth(canvas.getWidth());
-//        body.setDuration(canvas.getDuration());
+        if (body instanceof Image) {
+            ((Image)body).setHeight(canvas.getHeight());
+            ((Image)body).setWidth(canvas.getWidth());
+        }
+        if (body instanceof Video) {
+            ((Video)body).setHeight(canvas.getHeight());
+            ((Video)body).setWidth(canvas.getWidth());
+            ((Video)body).setDuration(canvas.getDuration());
+        }
+        if (body instanceof Sound) {
+            ((Sound)body).setDuration(canvas.getDuration());
+        }
     }
 
     /**
@@ -734,9 +741,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
     private static ContentResource instantiateBodyWithType(MediaType mediaType, String id) {
         switch (mediaType.getType()) {
-            case Dataset: return new Dataset(id);
             case Image: return new Image(id);
-            case Model: return new Model(id);
             case Sound: return new Sound(id);
             case Text: return new Text(id);
             case Video: return new Video(id);
