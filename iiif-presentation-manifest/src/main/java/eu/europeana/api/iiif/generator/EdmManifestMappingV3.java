@@ -206,24 +206,6 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         return service;
     }
 
-    // TODO used in testing
-    /**
-     * Create a collection for all proxy.dctermsIsPartOf that start with "http://data.theeuropeanlibrary.org/
-     * @param jsonDoc parsed json document
-     * @return
-     */
-//    static Collection[] getWithinV3(Object jsonDoc) {
-//        List<String> collections = EdmManifestUtils.getEuropeanaLibraryCollections(jsonDoc);
-//        if (collections.isEmpty()) {
-//            return null;
-//        }
-//        List<Collection> result = new ArrayList<>(collections.size());
-//        for (String collection : collections) {
-//            result.add(new Collection(collection));
-//        }
-//        return result.toArray(new Collection[0]);
-//    }
-
     /**
      * We first check all proxies for a title. If there are no titles, then we check the description fields
      * @param jsonDoc parsed json document
@@ -589,12 +571,6 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         return c;
     }
 
-    private static Canvas createCanvas(ManifestSettings settings, String europeanaId, int order) {
-        Canvas c = new Canvas(settings.getCanvasId(europeanaId, order));
-        c.setLabel(new LanguageMap(null, "p. "+ order));
-        return c;
-    }
-
     private static ContentResource getAnnotationBody(WebResource webResource, MediaType mediaType,
         Annotation anno, Canvas c) {
 
@@ -639,46 +615,6 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
             service.setProfile(EdmManifestUtils.lookupServiceDoapImplements(services, serviceId,
                 europeanaId));
             annoBody.getServices().add(service);
-        }
-    }
-
-    private static void setThumbnailIfRequired(WebResource webResource, Canvas c) {
-        //EA-3325: check if the webResource has a "svcsHasService"; if not, add a thumbnail
-        if (Objects.isNull(webResource.get(EdmManifestUtils.SVCS_HAS_SERVICE))){
-            c.getThumbnail().add(getCanvasThumbnailImageV3(webResource.getId()));
-        }
-    }
-
-    private static void setRightsForCanvas(WebResource webResource, Canvas c) {
-        LinkedHashMap<String, ArrayList<String>> license = (LinkedHashMap<String, ArrayList<String>>) webResource.get("webResourceEdmRights");
-        if (license != null && !license.values().isEmpty()) {
-            c.setRights(new Text(license.values().iterator().next().get(0)));
-        }
-    }
-
-    private static void setRequiredStatementForCanvas(WebResource webResource, Canvas c) {
-        String attributionText = (String) webResource.get(EdmManifestUtils.HTML_ATTRIB_SNIPPET);
-        if (!StringUtils.isEmpty(attributionText)){
-            c.setRequiredStatement(createRequiredStatementMap(attributionText));
-        }
-    }
-
-    private static void setDurationForCanvas(WebResource webResource, Canvas c) {
-        String durationText = (String) webResource.get(EdmManifestUtils.EBUCORE_DURATION);
-        if (durationText != null) {
-            Long durationInMs = Long.valueOf(durationText);
-            c.setDuration(durationInMs / 1000D);
-        }
-    }
-
-    private static void setHeightAndWidthForCanvas(WebResource webResource, Canvas c) {
-        Object obj = webResource.get(EdmManifestUtils.EBUCORE_HEIGHT);
-        if (obj instanceof Integer val){
-            c.setHeight(val);
-        }
-        obj = webResource.get(EdmManifestUtils.EBUCORE_WIDTH);
-        if (obj instanceof Integer val){
-            c.setWidth(val);
         }
     }
 

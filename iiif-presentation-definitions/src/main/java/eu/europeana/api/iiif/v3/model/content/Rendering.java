@@ -18,4 +18,9 @@ public class Rendering extends Image {
         super(id);
         this.type = type;
     }
+
+    @Override
+    public String getType() {
+        return type;
+    }
 }
