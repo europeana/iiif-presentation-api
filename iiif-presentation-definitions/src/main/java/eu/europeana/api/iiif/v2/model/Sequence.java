@@ -21,7 +21,7 @@ import eu.europeana.api.iiif.v2.io.JsonConstants;
 @JsonPropertyOrder({ id, type, label, description, metadata
                    , attribution, license, logo, seeAlso, service
                    , within, related, viewingHint, viewingDirection
-                   , thumbnail, rendering, startCanvas, canvases })
+                   , thumbnail, startCanvas, canvases, rendering })
 public class Sequence extends PresentationResource {
 
     @JsonProperty(JsonConstants.viewingDirection)

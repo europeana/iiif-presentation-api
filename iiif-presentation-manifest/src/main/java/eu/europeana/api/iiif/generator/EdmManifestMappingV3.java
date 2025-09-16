@@ -89,6 +89,10 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         } else {
             LOG.debug("No Canvas generated for europeanaId {}", europeanaId);
         }
+        manifest.getProvider().add(new Agent("https://www.europeana.eu/en/about-us",
+                new Image(ManifestDefinitions.EUROPEANA_LOGO_URL),
+                new Text("https://www.europeana.eu",
+                        new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana"), "text/html")));
         return manifest;
     }
 
@@ -559,7 +563,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
         // Now create the annotation body with webresource url and media type
         // EA- 3436 add technical metadata for case 2 and 3
-        ContentResource annoBody = getAnnotationBody(webResource, mediaType, anno,c);
+        ContentResource annoBody = getAnnotationBody(webResource, mediaType, anno, c, settings);
         // annotation has 1 annotationBody
         anno.setBody(annoBody);
         // body can have a service
@@ -571,7 +575,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
     }
 
     private static ContentResource getAnnotationBody(WebResource webResource, MediaType mediaType,
-        Annotation anno, Canvas c) {
+        Annotation anno, Canvas c, ManifestSettings settings) {
 
         ContentResource annoBody = new Image((String) webResource.get(EdmManifestUtils.ABOUT));
 
@@ -586,10 +590,16 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         }
         // case 3 - rendered - No time mode added as we paint an image here
         if(mediaType.isRendered()) {
+            //EA-3745 rendered ones are specialized formats.Generate the image url (which is actually a thumbnail url) based on the media type
+            String idForAnnotation = EdmManifestUtils.getIdForAnnotation((String) webResource.get(EdmManifestUtils.ABOUT),mediaType,
+                    settings.getThumbnailApiUrl());
+            annoBody = new Image(idForAnnotation);
+
             // Use the URL of the thumbnail for the respective WebResource as id of the Annotation Body
-            if(c.hasThumbnail()) {
+            if (c.getThumbnail() != null && c.getThumbnail().size() > 0) {
                 annoBody = new Image(c.getThumbnail().get(0).getID());
             }
+
             // update the width and height
             setHeightWidthForRendered(c);
            //EA-3745 - use media type 'service' for oembed mimeTypes who do not have type configured in 'mediacategories.xml'

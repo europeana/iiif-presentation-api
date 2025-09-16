@@ -446,8 +446,12 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
          }
 
          // case 3
-        if (mediaType.isRendered() && !mediaType.isVideoOrSound()) {
-            if(c.getThumbnail()!=null) {
+        if (mediaType.isRendered()) {
+            //EA-3745 For specialized formats, generate the image url (which is actually a thumbnail url) based on the media type
+            annoBody = new AnnotationBody(
+                    EdmManifestUtils.getIdForAnnotation((String) webResource.get(EdmManifestUtils.ABOUT), mediaType, settings.getThumbnailApiUrl()));
+
+            if (c.getThumbnail() != null) {
                 annoBody = new AnnotationBody(c.getThumbnail().getID());
             }
             // update height and width
@@ -461,8 +465,11 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         }
 
         // body can have a service
-        String serviceId = EdmManifestUtils.getServiceId(webResource, europeanaId);
-        annoBody.setService(getService(serviceId, services, europeanaId));
+        // body can have a service. EA-3475 Do not add service for specialized formats
+        if (!mediaType.isRendered()) {
+            String serviceId = EdmManifestUtils.getServiceId(webResource, europeanaId);
+            annoBody.setService(getService(serviceId, services, europeanaId));
+        }
         c.getImages().get(0).setBody(annoBody);
         return c;
     }

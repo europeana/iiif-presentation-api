@@ -2,6 +2,7 @@ package eu.europeana.api.iiif.utils;
 
 import com.jayway.jsonpath.JsonPath;
 import eu.europeana.api.iiif.exceptions.DataInconsistentException;
+import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.model.WebResource;
 import eu.europeana.api.iiif.service.WebResourceSorter;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
@@ -18,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This class contains all the common methods for mapping EDM record data to IIIF Manifest data for IIIF v2 and v3
@@ -306,5 +308,19 @@ public final class EdmManifestUtils {
             return null;
         }
         return EdmDateUtils.recordTimestampToDateTime(date);
+    }
+
+    /**EA-3745  Generate ID for annotation based on associated webResource.
+     * For specialized formats i.e. the ones which are rendered the thumbnail URL is used as id.
+     * @param annotationID
+     * @param mediaType
+     * @param thumbnailURL
+     * @return String
+     */
+    public static String getIdForAnnotation(String annotationID, MediaType mediaType, String thumbnailURL) {
+        return thumbnailURL + annotationID +
+                Optional.ofNullable(mediaType.getType()).map(String::toUpperCase)
+                        .map(type -> "&type=" + type).orElse("");
+
     }
 }
