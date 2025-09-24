@@ -6,10 +6,7 @@ import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 
 import eu.europeana.api.iiif.v3.io.JsonConstants;
 import eu.europeana.api.iiif.v3.model.content.Dataset;
@@ -20,6 +17,8 @@ import eu.europeana.api.iiif.v3.model.content.Text;
  * @author Hugo
  * @since 24 Oct 2024
  */
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = type )
 @JsonSubTypes({
   @JsonSubTypes.Type(value = Manifest.class  , name = Manifest)

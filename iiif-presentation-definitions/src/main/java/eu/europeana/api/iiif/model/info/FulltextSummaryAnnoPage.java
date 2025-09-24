@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.europeana.api.iiif.v3.io.JsonConstants;
 import eu.europeana.api.iiif.v3.model.IIIFv3Resource;
+import eu.europeana.api.iiif.v3.model.fulltext.TextGranularity;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by luthien on 15/04/2021.
@@ -18,7 +20,7 @@ public class FulltextSummaryAnnoPage extends IIIFv3Resource implements Serializa
     @JsonProperty("language")
     private String language;
 
-    private String[] textGranularity;
+    private List<TextGranularity> textGranularity;
 
     private String type;
 
@@ -58,11 +60,11 @@ public class FulltextSummaryAnnoPage extends IIIFv3Resource implements Serializa
         this.language = language;
     }
 
-    public String[] getTextGranularity() {
+    public List<TextGranularity> getTextGranularity() {
         return textGranularity;
     }
 
-    public void setTextGranularity(String[] textGranularity) {
+    public void setTextGranularity(List<TextGranularity> textGranularity) {
         this.textGranularity = textGranularity;
     }
 

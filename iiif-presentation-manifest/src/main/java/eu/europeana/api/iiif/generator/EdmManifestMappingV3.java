@@ -16,6 +16,7 @@ import eu.europeana.api.iiif.utils.GenerateUtils;
 import eu.europeana.api.iiif.utils.LanguageMapUtils;
 import eu.europeana.api.iiif.v3.model.*;
 import eu.europeana.api.iiif.v3.model.content.*;
+import eu.europeana.api.iiif.v3.model.fulltext.FullTextAnnotationPage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -138,10 +139,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
     private void createFTSummaryAnnoPages(List<AnnotationPage> summaryAnnoPages, FulltextSummaryCanvas summaryCanvas) {
         for (FulltextSummaryAnnoPage sap : summaryCanvas.getFTSummaryAnnoPages()) {
-            AnnotationPage page = new AnnotationPage(sap.getID());
-            summaryAnnoPages.add(page);
-            // TODO language source and text graulraity field in AnnotationPage class
-            //summaryAnnoPages.add(new AnnotationPage(sap.getId(), sap.getLanguage(), sap.getTextGranularity(), sap.getSource()));
+            summaryAnnoPages.add(new FullTextAnnotationPage(sap.getID(), sap.getLanguage(), sap.getTextGranularity(), sap.getSource()));
         }
     }
 
@@ -365,7 +363,6 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
     static Image getThumbnailImageV3(String europeanaId, Object jsonDoc) {
         String thumbnailId = EdmManifestUtils.getThumbnailId(europeanaId, jsonDoc);
         if (StringUtils.isEmpty(thumbnailId)) {
-//            return new eu.europeana.iiif.model.v3.Image[] {};
             return null;
         }
         return new Image(thumbnailId);
