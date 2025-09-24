@@ -27,8 +27,6 @@ public class Image extends ContentResource {
     @JsonProperty(JsonConstants.width)
     private Integer width;
 
-
-
     public Image(String id) {
         super(id);
     }

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package eu.europeana.api.iiif.v3.model;
 
 
@@ -9,9 +6,7 @@ import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 
 import eu.europeana.api.iiif.v3.io.JsonConstants;
 import eu.europeana.api.iiif.v3.model.content.Dataset;
@@ -22,6 +17,8 @@ import eu.europeana.api.iiif.v3.model.content.Text;
  * @author Hugo
  * @since 24 Oct 2024
  */
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = type )
 @JsonSubTypes({
   @JsonSubTypes.Type(value = Manifest.class  , name = Manifest)
@@ -67,9 +64,10 @@ public abstract class PresentationResource extends IIIFv3Resource {
     @JsonProperty(JsonConstants.thumbnail)
     private List<Image> thumbnail;
 
-    // TODO are we sure this is string ???
     @JsonProperty(JsonConstants.rendering)
-    private List<String> rendering;
+    @JsonFormat(with = { JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY
+            , JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED } )
+    private List<Image> rendering;
 
     @JsonProperty(JsonConstants.placeholderCanvas)
     private Canvas placeholderCanvas;
@@ -207,5 +205,14 @@ public abstract class PresentationResource extends IIIFv3Resource {
 
     public void setPlaceholderCanvas(Canvas canvas) {
         this.placeholderCanvas = canvas;
+    }
+
+    public boolean hasRendering() {
+        return ( this.rendering != null && !this.rendering.isEmpty() );
+    }
+
+    public List<Image> getRendering() {
+        return ( this.rendering != null ? this.rendering
+                : (this.rendering = new ArrayList<>()));
     }
 }

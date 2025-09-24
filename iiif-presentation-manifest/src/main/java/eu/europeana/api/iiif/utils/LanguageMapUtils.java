@@ -48,7 +48,7 @@ public final class LanguageMapUtils {
             String language = entry.getKey();
             List<String> values = entry.getValue();
             for (String value: values) {
-                result.add(new LanguageValue(language, value));
+                result.add(new LanguageValue(value, language));
             }
         }
         if (result.isEmpty()) {

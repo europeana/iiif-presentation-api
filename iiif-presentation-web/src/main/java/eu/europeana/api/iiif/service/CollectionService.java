@@ -5,6 +5,7 @@ import eu.europeana.api.commons_sb3.definitions.caching.CachingUtils;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.iiif.config.BuildInfo;
 import eu.europeana.api.iiif.exceptions.CollectionException;
+import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
 import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.utils.IIIFConstants;
 import eu.europeana.set.client.UserSetApiClient;
@@ -88,15 +89,14 @@ public class CollectionService {
     public <T extends IIIFResource> T getGalleryCollection(
             IIIFVersionSupport version, String setId, AuthenticationHandler auth
           , ResourceCaching caching)
-                    throws CollectionException {
+            throws CollectionException, ResourceNotChangedException {
         try {
             setClient.setAuthenticationHandler(auth);
             Optional<UserSet> fetched = setClient.getWebUserSetApi().getUserSet(setId, Optional.empty(), Optional.of(caching));
             // 304 response
             if (!fetched.isPresent()) {
-                return null;
+                throw new ResourceNotChangedException(setId);
             }
-
             UserSet set = fetched.get();
             // TODO The Set API must return the modified date as part of
             // the pagination requests so that it can be used for caching

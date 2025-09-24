@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import eu.europeana.api.iiif.v2.io.JsonConstants;
+import eu.europeana.api.iiif.v3.model.LanguageMap;
 
 /**
  * @author Hugo
@@ -33,7 +34,10 @@ public class LanguageValue {
 
     public LanguageValue(String value, String lang) {
         this.value = value;
-        this.lang  = lang;
+        // if no specific language is defined (def or @none), then don't set language at all
+        if (!"def".equalsIgnoreCase(lang) && !LanguageMap.NO_LANGUAGE_KEY.equalsIgnoreCase(lang)) {
+            this.lang = lang;
+        }
     }
 
     public LanguageValue() {}

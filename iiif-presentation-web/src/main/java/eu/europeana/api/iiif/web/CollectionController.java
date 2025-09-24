@@ -202,8 +202,7 @@ public class CollectionController {
                 @Override
                 public boolean request(HttpHeaders reqHeaders
                                      , ResourceCaching caching) throws EuropeanaApiException {
-                    data.col = collectionService.getGalleryCollection(version, setId
-                                                               , auth, caching);
+                    data.col = collectionService.getGalleryCollection(version, setId, auth, caching);
                     return (data.col != null);
                 }
             }

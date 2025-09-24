@@ -11,6 +11,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.*;
 
 import eu.europeana.api.iiif.v3.io.JsonConstants;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Hugo
@@ -51,9 +52,6 @@ public class Canvas extends PresentationResource {
     protected Canvas() {}
 
     @Override
-    // Added JsonIgnore - fetches type value from the parent class @JsonTypeInfo
-    // EA-4232 creates duplicate type value after parsing.
-    @JsonIgnore
     public String getType() {
         return JsonConstants.Canvas;
     }
@@ -114,12 +112,14 @@ public class Canvas extends PresentationResource {
                                   : (this.annotations = new ArrayList<>()));
     }
 
-    //TODO: Check against iiiif spec
-    @JsonIgnore
     public Annotation getStartCanvasAnnotation() {
         if (items == null || items.size() == 0) {
             return null;
         }
         return items.get(0).getItems().get(0);
+    }
+
+    public int getPageNr() {
+        return Integer.parseInt(StringUtils.substringAfter(getID(), "/canvas/p"));
     }
 }

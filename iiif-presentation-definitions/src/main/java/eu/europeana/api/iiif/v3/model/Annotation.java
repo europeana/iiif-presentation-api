@@ -36,6 +36,7 @@ public class Annotation extends IIIFv3Resource {
 
     public Annotation(String id) {
         super(id);
+        this.motivation = "painting";
     }
 
     protected Annotation() {}

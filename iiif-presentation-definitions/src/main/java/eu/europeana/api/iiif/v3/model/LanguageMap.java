@@ -1,6 +1,7 @@
 package eu.europeana.api.iiif.v3.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -119,14 +120,11 @@ public class LanguageMap extends LinkedHashMap<String, List<String>> {
         String storeKey = checkKey(key);
         List<String> storeValues = values;
         // check if key already exists, if so we have to re-insert the values with the new value(s) added
-        // TODO this doesn't take duplicate values into account, but for now we ignore that
         if (this.containsKey(storeKey)) {
-            // Srishti TODo check if everything is added
             storeValues.addAll(this.get(storeKey));
-//            List<String> newValues = new ArrayList<>();
-//            newValues.addAll(this.get(storeKey));
-//            newValues.addAll(values);
-//            storeValues = newValues;
+            Set<String> newValues = new TreeSet<>(storeValues);
+            storeValues.clear();
+            storeValues.addAll(newValues);
         }
         return super.put(storeKey, storeValues);
     }
@@ -166,6 +164,6 @@ public class LanguageMap extends LinkedHashMap<String, List<String>> {
      * @return key that should be used for storing values
      */
     private String checkKey(String key) {
-        return (key == null || key.isEmpty() ? NO_LANGUAGE_KEY : key);
+        return (key == null || key.isEmpty() || StringUtils.equalsIgnoreCase(key, "def") ? NO_LANGUAGE_KEY : key);
     }
 }

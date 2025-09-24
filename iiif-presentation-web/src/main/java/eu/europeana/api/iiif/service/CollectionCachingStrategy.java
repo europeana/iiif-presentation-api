@@ -63,6 +63,8 @@ public class CollectionCachingStrategy extends AbsChainCachingStrategy {
         
         HttpHeaders headers = new HttpHeaders();
         setIfNoneMatch(headers, etag.getEtag(1));
+        // Set Api handles the request headers via ResourceCaching object, hence set the caching with reqHeaders
+        setCaching.setETag(etag.getEtag(1));
         try {
             setService.request(headers, setCaching);
 
@@ -70,7 +72,7 @@ public class CollectionCachingStrategy extends AbsChainCachingStrategy {
             newCaching(apiCaching, setCaching).setHeaders(rspHeaders);
             return null;
         }
-        catch(ResourceNotChangedException e) {
+        catch (ResourceNotChangedException e) {
             return new ResponseEntity<>(headers, HttpStatus.NOT_MODIFIED);
         }
     }

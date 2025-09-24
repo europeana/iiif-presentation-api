@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import eu.europeana.api.iiif.model.ManifestDefinitions;
 import eu.europeana.api.iiif.v2.io.JsonConstants;
 
 /**
@@ -28,13 +29,12 @@ public class Dataset extends ContentResource {
         super(id);
     }
 
-    public Dataset(String id, String profile) {
-        super(id);
-        this.profile = profile;
+    public Dataset(String id, String format) {
+        super(id, format);
+        this.profile = ManifestDefinitions.EDM_SCHEMA_URL;
     }
 
     protected Dataset() {}
-
 
     @Override
     public String getType() {
