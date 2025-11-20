@@ -19,7 +19,8 @@ import eu.europeana.api.iiif.v3.model.content.Text;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = type )
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = type )
 @JsonSubTypes({
   @JsonSubTypes.Type(value = Manifest.class  , name = Manifest)
 , @JsonSubTypes.Type(value = Collection.class, name = Collection) 

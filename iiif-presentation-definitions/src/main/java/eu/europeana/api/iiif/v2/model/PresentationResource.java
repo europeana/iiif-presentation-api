@@ -23,7 +23,8 @@ import eu.europeana.api.iiif.v2.io.JsonConstants;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = type )
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = type )
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Collection.class, name = Collection) 
   , @JsonSubTypes.Type(value = Manifest.class  , name = Manifest)

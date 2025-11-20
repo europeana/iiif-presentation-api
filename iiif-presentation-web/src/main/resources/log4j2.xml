@@ -16,8 +16,5 @@
         <Logger name="org.apache.http" level="INFO"/>
         <Logger name="eu.europeana.api.iiif.web.CollectionController" level="DEBUG"/>
 
-        <!-- Log only error. suppress warn messages - specially "Found more than one class mapped to collection"-->
-        <Logger name="dev.morphia.mapping.Mapper" level="ERROR"/>
-
     </Loggers>
 </Configuration>

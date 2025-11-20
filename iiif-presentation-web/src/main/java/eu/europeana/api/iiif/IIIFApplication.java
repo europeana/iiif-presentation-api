@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
 
@@ -20,8 +21,8 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
                 // Remove these exclusions to re-enable security
                 SecurityAutoConfiguration.class,
                 ManagementWebSecurityAutoConfiguration.class,
-                // DataSources are manually configured (for EM and batch DBs)
-                DataSourceAutoConfiguration.class
+                DataSourceAutoConfiguration.class,
+                MongoAutoConfiguration.class
         })
 public class IIIFApplication extends SpringBootServletInitializer {
 

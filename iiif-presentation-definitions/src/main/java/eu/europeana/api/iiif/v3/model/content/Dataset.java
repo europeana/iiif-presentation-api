@@ -35,7 +35,7 @@ public class Dataset extends ContentResource {
     protected Dataset() {}
 
 
-    @JsonIgnore
+    @JsonProperty(JsonConstants.type)
     public String getType() {
         return JsonConstants.Dataset;
     }

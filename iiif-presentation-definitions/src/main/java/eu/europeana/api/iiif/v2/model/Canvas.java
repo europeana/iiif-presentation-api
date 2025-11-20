@@ -44,9 +44,7 @@ public class Canvas extends PresentationResource {
 
     protected Canvas() {}
 
-    // Added JsonIgnore - fetches type value from the parent class @JsonTypeInfo
-    // EA-4232 creates duplicate type value after parsing.
-    @JsonIgnore
+    @JsonProperty(eu.europeana.api.iiif.v3.io.JsonConstants.type)
     public String getType() {
         return JsonConstants.Canvas;
     }

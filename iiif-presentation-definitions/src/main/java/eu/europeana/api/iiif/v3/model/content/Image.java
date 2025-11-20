@@ -32,6 +32,7 @@ public class Image extends ContentResource {
 
     public Image() {}
 
+    @JsonProperty(JsonConstants.type)
     public String getType() {
         return JsonConstants.Image;
     }
