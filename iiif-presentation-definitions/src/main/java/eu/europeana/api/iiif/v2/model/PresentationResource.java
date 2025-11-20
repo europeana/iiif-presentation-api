@@ -37,7 +37,9 @@ public abstract class PresentationResource extends IIIFv2Resource {
     private LanguageValue label;
     
     @JsonProperty(JsonConstants.description)
-    private LanguageValue description;
+    @JsonFormat(with = { JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY
+            , JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED } )
+    private List<LanguageValue> description;
 
     @JsonProperty(JsonConstants.metadata)
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
@@ -99,12 +101,13 @@ public abstract class PresentationResource extends IIIFv2Resource {
         this.label = value;
     }
 
-    public LanguageValue getDescription() {
-        return this.description;
+    public List<LanguageValue> getDescription() {
+        return ( this.description != null ? this.description
+                : (this.description = new ArrayList<>()));
     }
 
-    public void setDescription(LanguageValue value) {
-        this.description = value;
+    public boolean hasDescription() {
+        return ( this.description != null && !this.description.isEmpty() );
     }
 
 

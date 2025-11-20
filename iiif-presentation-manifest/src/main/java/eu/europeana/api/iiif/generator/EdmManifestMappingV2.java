@@ -65,7 +65,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         // EA-3325
 //        manifest.setWithin(getWithinV2(jsonDoc));
         manifest.setLabel(getLabelsV2(jsonDoc));
-        manifest.setDescription(getDescriptionV2(jsonDoc));
+        manifest.getDescription().addAll(getDescriptionV2(jsonDoc));
         manifest.getMetadata().addAll(getMetaDataV2(jsonDoc));
         manifest.setThumbnail(getThumbnailImageV2(europeanaId, jsonDoc));
         manifest.setNavDate(EdmManifestUtils.getNavDate(europeanaId, jsonDoc));
@@ -160,7 +160,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * Generates a service description for the manifest
      */
     private static Service getServiceDescriptionV2(ManifestSettings settings, String europeanaId) {
-        Service service = new Service(settings.getContentSearchURL(europeanaId), null);
+        Service service = new Service(settings.getContentSearchURL(europeanaId));
         service.setContext(ManifestDefinitions.SEARCH_CONTEXT_VALUE);
         service.setProfile(ManifestDefinitions.SEARCH_PROFILE_VALUE);
         return service;
@@ -192,7 +192,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         if (labelsV3 == null) {
             return null;
         }
-        return LanguageMapUtils.langMapToObjects(labelsV3);
+        return LanguageMapUtils.langMapToObject(labelsV3);
     }
 
     /**
@@ -200,7 +200,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @param jsonDoc parsed json document
      * @return
      */
-    static LanguageValue getDescriptionV2(Object jsonDoc) {
+    static List<LanguageValue> getDescriptionV2(Object jsonDoc) {
         // we read everything in as LanguageMap[] because that best matches the EDM implementation, then we convert to LanguageObjects[]
         LanguageMap descriptionsV3 = EdmManifestMappingV3.getDescription(jsonDoc);
         if (descriptionsV3 == null) {
@@ -408,7 +408,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         }
 
         // canvas has 1 annotation (image field)
-        Annotation annotation = new Annotation(c.getID(), "sc:painting");
+        Annotation annotation = new Annotation(null,"sc:painting");
         annotation.setOn(c.getID());
         c.setImages(Collections.singletonList(annotation));
 //        c.setImages(new eu.europeana.iiif.model.v2.Annotation[1]);

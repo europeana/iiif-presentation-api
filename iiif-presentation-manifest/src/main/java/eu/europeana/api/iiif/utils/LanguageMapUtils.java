@@ -3,6 +3,7 @@ package eu.europeana.api.iiif.utils;
 import eu.europeana.api.iiif.v2.model.LanguageValue;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -39,9 +40,9 @@ public final class LanguageMapUtils {
      * @param map language map to change into language object
      * @return array of language objects
      */
-    public static LanguageValue langMapToObjects(LanguageMap map) {
+    public static List<LanguageValue> langMapToObjects(LanguageMap map) {
         if (map == null) {
-            return new LanguageValue();
+            return Collections.emptyList();
         }
         List<LanguageValue> result = new ArrayList<>();
         for (Map.Entry<String, List<String>> entry : map.entrySet()) {
@@ -52,7 +53,21 @@ public final class LanguageMapUtils {
             }
         }
         if (result.isEmpty()) {
-            return new LanguageValue();
+            return Collections.emptyList();
+        }
+        return result;
+    }
+
+    /**
+     * This converts a LanguageMap array (v3) to a LanguageObject array (v2).
+     * and returns only the first value
+     * @param map language map to change into language object
+     * @return first language object
+     */
+    public static LanguageValue langMapToObject(LanguageMap map) {
+        List<LanguageValue> result = langMapToObjects(map);
+        if (result.isEmpty()) {
+            return  new LanguageValue();
         }
         return result.get(0);
     }
