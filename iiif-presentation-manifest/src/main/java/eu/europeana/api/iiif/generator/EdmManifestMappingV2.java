@@ -204,7 +204,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         // we read everything in as LanguageMap[] because that best matches the EDM implementation, then we convert to LanguageObjects[]
         LanguageMap descriptionsV3 = EdmManifestMappingV3.getDescription(jsonDoc);
         if (descriptionsV3 == null) {
-            return null;
+            return Collections.emptyList();
         }
         return LanguageMapUtils.langMapToObjects(EdmManifestMappingV3.getDescription(jsonDoc));
     }

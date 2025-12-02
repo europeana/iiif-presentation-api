@@ -44,7 +44,7 @@ public class Canvas extends PresentationResource {
 
     protected Canvas() {}
 
-    @JsonProperty(eu.europeana.api.iiif.v3.io.JsonConstants.type)
+    @JsonProperty(type)
     public String getType() {
         return JsonConstants.Canvas;
     }
