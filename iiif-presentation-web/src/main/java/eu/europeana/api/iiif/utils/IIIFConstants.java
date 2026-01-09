@@ -1,7 +1,6 @@
 package eu.europeana.api.iiif.utils;
 
-import eu.europeana.api.commons_sb3.web.http.HttpHeaders;
-import org.springframework.context.annotation.Bean;
+import eu.europeana.api.commons_sb3.definitions.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 public class IIIFConstants {
@@ -12,17 +11,15 @@ public class IIIFConstants {
     public static final String V3 = "3";
 
     // beans
-    public static final String BEAN_FALLBACK_AUTHORIZATION = "fallbackAuth";
-    public static final String BEAN_USER_SET_API_CLIENT = "userSetApiClient";
-    public static final String BEAN_IIIF_VERSION_SUPPORT = "iiifVersionSupport";    
-    public static final String BEAN_IIIF_JSON_HANDLER = "iifJsonHandler";
-    public static final String BEAN_MEDIA_TYPES = "mediaTypes";
-    public static final String BEAN_XML_MAPPER = "xmlMapper";
-
-
-    public static final String BEAN_V2_JSON_MAPPER = "v2JsonMapper";
-    public static final String BEAN_V3_JSON_MAPPER = "v3JsonMapper";
-
+    public static final String BEAN_FALLBACK_AUTHORIZATION  = "fallbackAuth";
+    public static final String BEAN_USER_SET_API_CLIENT     = "userSetApiClient";
+    public static final String BEAN_IIIF_VERSION_SUPPORT    = "iiifVersionSupport";
+    public static final String BEAN_IIIF_JSON_HANDLER       = "iifJsonHandler";
+    public static final String BEAN_MEDIA_TYPES             = "mediaTypes";
+    public static final String BEAN_XML_MAPPER              = "xmlMapper";
+    public static final String BEAN_V2_JSON_MAPPER          = "v2JsonMapper";
+    public static final String BEAN_V3_JSON_MAPPER          = "v3JsonMapper";
+    public static final String CLIENT_DETAILS_SERVICE       = "clientServiceDetails";
 
     public static final String ACCEPT  = "Accept=";
 

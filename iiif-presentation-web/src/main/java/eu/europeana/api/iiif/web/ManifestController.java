@@ -1,8 +1,8 @@
 package eu.europeana.api.iiif.web;
 
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.CachingUtils;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
-import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.config.BuildInfo;
 import eu.europeana.api.iiif.exceptions.InvalidIIIFVersionException;
@@ -11,6 +11,7 @@ import eu.europeana.api.iiif.generator.ManifestGenerator;
 import eu.europeana.api.iiif.generator.ManifestSettings;
 import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
+import eu.europeana.api.iiif.oauth.IIIFAuthorizationService;
 import eu.europeana.api.iiif.service.*;
 import eu.europeana.api.iiif.utils.ValidateUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +30,6 @@ import java.io.OutputStream;
 import java.util.Map;
 
 import static eu.europeana.api.iiif.utils.IIIFConstants.*;
-import static eu.europeana.api.iiif.oauth.AuthorizationService.*;
 
 /**
  * Rest controller that handles manifest requests
@@ -51,7 +51,7 @@ public class ManifestController {
     private IIIFVersionSupportHandler versionHandler;
     private final BuildInfo           buildInfo;
     private ManifestSettings          settings;
-    private AuthenticationHandler     authFallback;
+    private IIIFAuthorizationService  authService;
     private IIIFJsonHandler iiifJsonHandler;
 
     @Autowired
@@ -61,15 +61,14 @@ public class ManifestController {
                             , FulltextService fulltextService
                             , @Qualifier(value = BEAN_IIIF_VERSION_SUPPORT) 
                               IIIFVersionSupportHandler versionHandler
-                            , @Qualifier(value = BEAN_FALLBACK_AUTHORIZATION) 
-                              AuthenticationHandler authFallback,
+                            , IIIFAuthorizationService authService,
                               IIIFJsonHandler iiifJsonHandler) {
         this.settings        = settings;
         this.recordService   = recordService;
         this.fulltextService = fulltextService;
         this.versionHandler  = versionHandler;
         this.buildInfo       = buildInfo;
-        this.authFallback    = authFallback;
+        this.authService     = authService;
         this.iiifJsonHandler = iiifJsonHandler;
     }
 
@@ -147,7 +146,7 @@ public class ManifestController {
             ValidateUtils.validateApiUrlFormat(fullTextApi);
         }
 
-        AuthenticationHandler auth       = getAuthorization(request, authFallback);
+        AuthenticationHandler auth       = authService.getAuthorization(request);
         IIIFVersionSupport    version    = versionHandler.getVersionSupport(request);
         HttpHeaders           rspHeaders = new HttpHeaders();
         ResourceCaching       baseCache  = getBaseCache(version);

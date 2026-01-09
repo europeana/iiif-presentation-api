@@ -38,6 +38,13 @@
         </dependency>
 
         <dependency>
+            <groupId>eu.europeana.api</groupId>
+            <artifactId>commons-sb3-clientutils</artifactId>
+            <version>${api-commons-sb3.version}</version>
+        </dependency>
+
+
+        <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
             <version>${jackson.version}</version>
@@ -69,13 +76,6 @@
                     <groupId>org.slf4j</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-
-        <!-- for authentication -->
-        <dependency>
-            <groupId>eu.europeana.api.commons</groupId>
-            <artifactId>commons-clientutils</artifactId>
-            <version>${api.commons.version}</version>
         </dependency>
 
     </dependencies>

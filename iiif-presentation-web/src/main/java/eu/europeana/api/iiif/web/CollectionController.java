@@ -1,12 +1,13 @@
 package eu.europeana.api.iiif.web;
 
-import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.CachingStrategy;
 import eu.europeana.api.commons_sb3.definitions.caching.CachingUtils;
 import eu.europeana.api.commons_sb3.definitions.caching.DefaultCachingStrategy;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons_sb3.definitions.format.RdfFormat;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.iiif.oauth.IIIFAuthorizationService;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
 import eu.europeana.api.iiif.service.IIIFVersionSupport;
 import eu.europeana.api.iiif.service.IIIFVersionSupportHandler;
@@ -36,7 +37,6 @@ import java.io.OutputStream;
 
 import static eu.europeana.api.iiif.utils.IIIFConstants.*;
 import static eu.europeana.api.iiif.utils.IIIFUtils.*;
-import static eu.europeana.api.iiif.oauth.AuthorizationService.*;
 
 
 @Tag(
@@ -51,7 +51,7 @@ public class CollectionController {
     private final IIIFJsonHandler           iiifJsonHandler;
     private final IIIFVersionSupportHandler versionHandler;
     private final BuildInfo                 buildInfo;
-    private AuthenticationHandler           authFallback;
+    private IIIFAuthorizationService        authService;
 
     private static final CachingStrategy defaultCaching = new DefaultCachingStrategy();
     private static final CollectionCachingStrategy colCaching = new CollectionCachingStrategy();
@@ -61,12 +61,12 @@ public class CollectionController {
                               , CollectionService collectionService
                               , IIIFJsonHandler iiifJsonHandler
                               , @Qualifier(value = BEAN_IIIF_VERSION_SUPPORT) IIIFVersionSupportHandler versionHandler
-                              , @Qualifier(value = BEAN_FALLBACK_AUTHORIZATION) AuthenticationHandler authFallback) {
+                              , IIIFAuthorizationService authService) {
         this.collectionService = collectionService;
         this.iiifJsonHandler = iiifJsonHandler;
         this.versionHandler  = versionHandler;
         this.buildInfo       = buildInfo;
-        this.authFallback    = authFallback;
+        this.authService     = authService;
     }
 
 
@@ -135,7 +135,7 @@ public class CollectionController {
     public ResponseEntity<StreamingResponseBody> getCollectionOfGalleries(
             HttpServletRequest req) throws EuropeanaApiException {
 
-        AuthenticationHandler auth    = getAuthorization(req, authFallback);
+        AuthenticationHandler auth    = authService.getAuthorization(req);
         IIIFVersionSupport    version = versionHandler.getVersionSupport(req);
         RdfFormat             format  = getFormatFromHeader(req, RdfFormat.JSONLD);
 
@@ -181,7 +181,7 @@ public class CollectionController {
             @PathVariable String path,
             HttpServletRequest req) throws EuropeanaApiException {
 
-        AuthenticationHandler auth    = getAuthorization(req, authFallback);
+        AuthenticationHandler auth    = authService.getAuthorization(req);
         IIIFVersionSupport    version = versionHandler.getVersionSupport(req);
         RdfFormat             format = getFormat(req);
         String                setId  = getId(path);

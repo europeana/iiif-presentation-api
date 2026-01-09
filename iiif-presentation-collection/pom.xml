@@ -36,6 +36,11 @@
                     <groupId>org.mongodb</groupId>
                     <artifactId>mongodb-driver-legacy</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>eu.europeana.api.commons</groupId>
+                    <artifactId>commons-clientutils</artifactId>
+                </exclusion>
+
             </exclusions>
         </dependency>
 
