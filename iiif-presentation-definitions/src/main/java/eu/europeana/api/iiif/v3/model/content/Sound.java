@@ -29,7 +29,7 @@ public class Sound extends ContentResource {
 
     protected Sound() {}
 
-    @JsonIgnore
+    @JsonProperty(JsonConstants.type)
     public String getType() {
         return JsonConstants.Sound;
     }

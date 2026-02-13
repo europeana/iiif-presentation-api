@@ -30,7 +30,7 @@ import eu.europeana.api.iiif.v3.model.content.Video;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY
             , property = type )
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Dataset.class, name = Dataset)

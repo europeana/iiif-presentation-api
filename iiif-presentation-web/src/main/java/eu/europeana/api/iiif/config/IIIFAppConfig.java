@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import eu.europeana.api.commons_sb3.auth.AuthenticationBuilder;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.auth.AuthenticationConfig;
 import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidConfigurationException;
 import eu.europeana.api.commons_sb3.error.i18n.I18nService;
 import eu.europeana.api.commons_sb3.error.i18n.I18nServiceImpl;
-import eu.europeana.api.commons.auth.AuthenticationHandler;
-import eu.europeana.api.commons.auth.apikey.ApikeyBasedAuthentication;
 import eu.europeana.api.iiif.generator.CollectionV2Generator;
 import eu.europeana.api.iiif.generator.CollectionV3Generator;
 import eu.europeana.api.iiif.generator.EdmManifestMappingV2;
@@ -21,12 +22,12 @@ import eu.europeana.api.iiif.media.MediaTypes;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
 import eu.europeana.api.iiif.service.IIIFVersionSupport;
 import eu.europeana.api.iiif.service.IIIFVersionSupportHandler;
-import eu.europeana.api.iiif.utils.IIIFConstants;
 import eu.europeana.api.iiif.v2.io.LanguageValueSerializer;
 import eu.europeana.api.iiif.v2.model.LanguageValue;
 import eu.europeana.set.client.UserSetApiClient;
 import eu.europeana.set.client.exception.SetApiClientException;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,11 +43,11 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+import static eu.europeana.api.iiif.utils.IIIFConstants.*;
 
 @Configuration
 public class IIIFAppConfig {
@@ -61,7 +62,7 @@ public class IIIFAppConfig {
     @Resource
     private CollectionSettings colSettings;
 
-    @Bean(name = IIIFConstants.BEAN_MEDIA_TYPES)
+    @Bean(name = BEAN_MEDIA_TYPES)
     public MediaTypes getMediaTypes() throws IOException {
         String mediaTypeXMLConfigFile = settings.getMediaXMLConfig();
 
@@ -83,26 +84,32 @@ public class IIIFAppConfig {
         return mediaTypes;
     }
 
-    @Bean(IIIFConstants.BEAN_XML_MAPPER)
+    @Bean(BEAN_XML_MAPPER)
     public XmlMapper xmlMapper() {
         XmlMapper xmlMapper = new XmlMapper();
         xmlMapper.setDateFormat(dateFormat);
         return xmlMapper;
     }
 
-    @Bean(name = IIIFConstants.BEAN_IIIF_JSON_HANDLER)
+    @Bean(name = BEAN_IIIF_JSON_HANDLER)
     public IIIFJsonHandler iiifJsonHandler() {
         return new IIIFJsonHandler(v2Mapper(), v3Mapper());
     }
 
-    @Bean(name = IIIFConstants.BEAN_FALLBACK_AUTHORIZATION)
+
+    @Bean(name = BEAN_FALLBACK_AUTHORIZATION)
     public AuthenticationHandler getFallbackAuthorization() {
-        String apikey = settings.getDefaultApiKey();
-        return (apikey != null ? new ApikeyBasedAuthentication(apikey) : null);
+        if (StringUtils.isNotEmpty(settings.getKeycloakTokenEndpoint()) && StringUtils.isNotEmpty(settings.getIIIFGrantParams())) {
+            AuthenticationConfig config = new AuthenticationConfig(settings.getKeycloakTokenEndpoint(), settings.getIIIFGrantParams());
+            return AuthenticationBuilder.newAuthentication(config);
+        } else {
+            LOG.error("Keycloak token endpoint and IIIF grant params not set !!!");
+        }
+        return null;
     }
 
     @Primary
-    @Bean(name = IIIFConstants.BEAN_V2_JSON_MAPPER)
+    @Bean(name = BEAN_V2_JSON_MAPPER)
     public ObjectMapper v2Mapper() {
         ObjectMapper mapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
@@ -124,7 +131,7 @@ public class IIIFAppConfig {
     }
 
 
-    @Bean(name = IIIFConstants.BEAN_V3_JSON_MAPPER)
+    @Bean(name = BEAN_V3_JSON_MAPPER)
     public ObjectMapper v3Mapper() {
         ObjectMapper mapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
@@ -144,9 +151,9 @@ public class IIIFAppConfig {
         return mapper;
     }
 
-    @Bean(name = IIIFConstants.BEAN_IIIF_VERSION_SUPPORT)
+    @Bean(name = BEAN_IIIF_VERSION_SUPPORT)
     public IIIFVersionSupportHandler versionSupportHandler(
-            @Qualifier(value = IIIFConstants.BEAN_MEDIA_TYPES) MediaTypes mediaTypes) {
+            @Qualifier(value = BEAN_MEDIA_TYPES) MediaTypes mediaTypes) {
         IIIFVersionSupportHandler handler = new IIIFVersionSupportHandler();
         handler.register(
                 new IIIFVersionSupport(
@@ -164,12 +171,12 @@ public class IIIFAppConfig {
         return handler;
     }
 
-    @Bean(name = IIIFConstants.BEAN_USER_SET_API_CLIENT)
+    @Bean(name = BEAN_USER_SET_API_CLIENT)
     public UserSetApiClient userSetApiClient() throws InvalidConfigurationException {
         try {
             return new UserSetApiClient(settings.getSetApiServiceUri(), null);
         } catch (SetApiClientException e) {
-            throw new InvalidConfigurationException(Arrays.asList("Set Api Endpoint", "<not null>", settings.getSetApiServiceUri()));
+            throw new InvalidConfigurationException("Set API endpoint not provided !!!");
         }
     }
 

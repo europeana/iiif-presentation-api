@@ -46,7 +46,7 @@ public class CollectionV2Generator extends GeneratorConstants implements Collect
     public Collection generateRoot() {
         Collection col = new Collection(settings.getCollectionRootURI());
         col.setLabel(rootLabel);
-        col.setDescription(rootDescription);
+        col.getDescription().add(rootDescription);
         col.setViewingHint(ViewingHint.individuals);
         col.setLogo(europeanaLogo);
         col.getCollections().add(new Collection(settings.getGalleryRootURI()));
@@ -57,7 +57,7 @@ public class CollectionV2Generator extends GeneratorConstants implements Collect
     public Collection generateGalleryRoot(java.util.Collection<? extends UserSet> sets) {
         Collection col = new Collection(settings.getGalleryRootURI());
         col.setLabel(rootGallerylabel);
-        col.setDescription(rootGalleryDescription);
+        col.getDescription().add(rootGalleryDescription);
         col.setViewingHint(ViewingHint.individuals);
         col.setLogo(europeanaLogo);
         for (UserSet set : sets) {
@@ -104,7 +104,7 @@ public class CollectionV2Generator extends GeneratorConstants implements Collect
             if (item.hasTitle()) {
                 String title = item.getTitle().values().iterator().next().get(0);
                 manifest.setLabel(newValue(title));
-                manifest.setDescription(newValue(description));
+                manifest.getDescription().add(newValue(description));
             } else {
                 manifest.setLabel(newValue(description));
             }

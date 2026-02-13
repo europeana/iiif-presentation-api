@@ -1,6 +1,3 @@
-/**
- * 
- */
 package eu.europeana.api.iiif.v2.model;
 
 import static eu.europeana.api.iiif.v2.io.JsonConstants.*;
@@ -40,9 +37,7 @@ public class Sequence extends PresentationResource {
 
     public Sequence() {}
 
-    // Added JsonIgnore - fetches type value from the parent class @JsonTypeInfo
-    // EA-4232 creates duplicate type value after parsing.
-    @JsonIgnore
+    @JsonProperty(JsonConstants.type)
     public String getType() {
         return JsonConstants.Sequence;
     }

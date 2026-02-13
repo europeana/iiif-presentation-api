@@ -30,9 +30,13 @@ public class Service extends IIIFv2Resource {
     @JsonProperty(JsonConstants.profile)
     private String profile;
 
-    public Service(String id, String type) {
+    public Service(String id) {
         super(id);
-        this.type = type;
+    }
+
+    public Service(String id, String context) {
+        super(id);
+        this.context = context;
     }
 
     protected Service() {}

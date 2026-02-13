@@ -1,10 +1,10 @@
 package eu.europeana.api.iiif.service;
 
-import eu.europeana.api.commons.http.HttpResponseHandler;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
-import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
 import eu.europeana.api.iiif.exceptions.FullTextCheckException;
 import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
 import eu.europeana.api.iiif.generator.ManifestSettings;

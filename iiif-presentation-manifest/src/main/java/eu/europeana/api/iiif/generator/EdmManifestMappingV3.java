@@ -28,10 +28,9 @@ import java.util.*;
 
 import static com.jayway.jsonpath.Filter.filter;
 import static com.jayway.jsonpath.Criteria.where;
+import static eu.europeana.api.iiif.media.MediaType.*;
 import static eu.europeana.api.iiif.model.ManifestDefinitions.ATTRIBUTION_STRING;
 import static eu.europeana.api.iiif.model.ManifestDefinitions.CANVAS_THUMBNAIL_POSTFIX;
-import static eu.europeana.api.iiif.media.MediaType.SOUND;
-import static eu.europeana.api.iiif.media.MediaType.VIDEO;
 import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 
 /**
@@ -574,8 +573,11 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
     private static ContentResource getAnnotationBody(WebResource webResource, MediaType mediaType,
         Annotation anno, Canvas c, ManifestSettings settings) {
 
-        ContentResource annoBody = new Image((String) webResource.get(EdmManifestUtils.ABOUT));
+        ContentResource annoBody = getAnnotationBody(mediaType, (String) webResource.get(EdmManifestUtils.ABOUT));
 
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Instantiated {} Annotation Body with the media type {}", annoBody.getClass().getName(), mediaType.getType());
+        }
         // case 2 - browser supported
         if (mediaType.isBrowserSupported() ) {
             annoBody.setFormat(mediaType.getMimeType());
@@ -586,7 +588,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
             addTechnicalMetadata(c, annoBody);
         }
         // case 3 - rendered - No time mode added as we paint an image here
-        if(mediaType.isRendered()) {
+        if (mediaType.isRendered()) {
             //EA-3745 rendered ones are specialized formats.Generate the image url (which is actually a thumbnail url) based on the media type
             String idForAnnotation = EdmManifestUtils.getIdForAnnotation((String) webResource.get(EdmManifestUtils.ABOUT),mediaType,
                     settings.getThumbnailApiUrl());
@@ -657,6 +659,16 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         }
     }
 
+    private static ContentResource getAnnotationBody(MediaType mediaType, String id) {
+       switch (mediaType.getType()) {
+           case IMAGE: return new Image(id);
+           case VIDEO: return new Video(id);
+           case SOUND: return new Sound(id);
+           case TEXT:  return new Text(id);
+           default: return new Image(id);
+       }
+    }
+
     /**
      * Update the width and height of the canvas based
      * on few conditons
@@ -679,14 +691,4 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
             c.setWidth(400);
         }
     }
-
-//    private static ContentResource instantiateBodyWithType(MediaType mediaType, String id) {
-//        switch (mediaType.getType()) {
-//            case Image: return new Image(id);
-//            case Sound: return new Sound(id);
-//            case Text: return new Text(id);
-//            case Video: return new Video(id);
-//            default: return new Other(id);
-//        }
-//    }
 }

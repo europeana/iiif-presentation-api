@@ -17,6 +17,8 @@ public class MediaType {
 
     public static final String  VIDEO    = "Video";
     public static final String  SOUND    = "Sound";
+    public static final String  TEXT     = "Text";
+    public static final String  IMAGE    = "Image";
 
     @JacksonXmlProperty(localName =  "mediaType", isAttribute = true)
     private String mimeType;

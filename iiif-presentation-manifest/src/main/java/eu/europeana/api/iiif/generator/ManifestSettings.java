@@ -77,6 +77,12 @@ public class ManifestSettings {
     @Value("${media.config}")
     private String mediaXMLConfig;
 
+    @Value("${keycloak.token.endpoint}")
+    private String keycloakTokenEndpoint;
+
+    @Value("${keycloak.token.grant.params}")
+    private String iiifGrantParams;
+
     public String getMediaXMLConfig() {
         return mediaXMLConfig;
     }
@@ -316,6 +322,13 @@ public class ManifestSettings {
         return setApiServiceUri;
     }
 
+    public String getKeycloakTokenEndpoint() {
+        return keycloakTokenEndpoint;
+    }
+
+    public String getIIIFGrantParams() {
+        return iiifGrantParams;
+    }
 
     @PostConstruct
     private void logImportantSettings() {

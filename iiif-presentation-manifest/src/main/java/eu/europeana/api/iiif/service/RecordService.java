@@ -2,11 +2,11 @@ package eu.europeana.api.iiif.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.europeana.api.commons.http.HttpResponseHandler;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
-import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
 import eu.europeana.api.iiif.exceptions.InvalidArgumentException;
 import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
 import eu.europeana.api.iiif.exceptions.RecordNotFoundException;

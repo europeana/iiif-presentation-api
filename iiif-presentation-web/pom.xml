@@ -105,7 +105,13 @@
 
         <dependency>
             <groupId>eu.europeana.api</groupId>
-            <artifactId>commons-sb3-web</artifactId>
+            <artifactId>commons-sb3-oauth</artifactId>
+            <version>${api-commons-sb3.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.europeana.api</groupId>
+            <artifactId>commons-sb3-clientutils</artifactId>
             <version>${api-commons-sb3.version}</version>
         </dependency>
 
@@ -116,11 +122,11 @@
             <version>2.3.1</version>
         </dependency>
  
-        <dependency>
-            <groupId>eu.europeana.api.commons</groupId>
-            <artifactId>commons-clientutils</artifactId>
-            <version>${api.commons.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>eu.europeana.api.commons</groupId>-->
+<!--            <artifactId>commons-clientutils</artifactId>-->
+<!--            <version>${api.commons.version}</version>-->
+<!--        </dependency>-->
 
     </dependencies>
 

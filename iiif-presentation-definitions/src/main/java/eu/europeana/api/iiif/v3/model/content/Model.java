@@ -6,6 +6,7 @@ package eu.europeana.api.iiif.v3.model.content;
 import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import eu.europeana.api.iiif.v3.io.JsonConstants;
@@ -24,7 +25,7 @@ public class Model extends ContentResource {
 
     protected Model() {}
 
-    @JsonIgnore
+    @JsonProperty(JsonConstants.type)
     public String getType() {
         return JsonConstants.Model;
     }
