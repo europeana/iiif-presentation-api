@@ -197,7 +197,8 @@ public class ManifestController {
                 out.flush();
             }
         };
-        return new ResponseEntity<>(responseBody, rspHeaders, HttpStatus.OK);
+        HttpStatus status = data.isArchived? HttpStatus.GONE: HttpStatus.OK;
+        return new ResponseEntity<>(responseBody, rspHeaders, status);
     }
 
     private static class SourceData {
