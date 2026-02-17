@@ -58,6 +58,8 @@ public final class ManifestDefinitions {
 
     public static final String ATTRIBUTION_STRING = "Attribution";
 
+    public static final String DEPUBLISHED_STRING = "Depublished";
+
     private ManifestDefinitions() {
         // empty constructor to avoid initializationRE
     }

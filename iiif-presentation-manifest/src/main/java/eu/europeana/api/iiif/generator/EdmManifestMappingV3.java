@@ -21,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -31,7 +30,7 @@ import static com.jayway.jsonpath.Criteria.where;
 import static eu.europeana.api.iiif.media.MediaType.*;
 import static eu.europeana.api.iiif.model.ManifestDefinitions.ATTRIBUTION_STRING;
 import static eu.europeana.api.iiif.model.ManifestDefinitions.CANVAS_THUMBNAIL_POSTFIX;
-import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
+import static eu.europeana.api.iiif.model.ManifestDefinitions.DEPUBLISHED_STRING;
 
 /**
  * This class contains all the methods for mapping EDM record data to IIIF Manifest data for IIIF v3
@@ -47,7 +46,6 @@ import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
     private static final Logger LOG = LogManager.getLogger(EdmManifestMappingV3.class);
-
     private ManifestSettings     settings;
     private MediaTypes       mediaTypes;
 
@@ -59,10 +57,12 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
     /**
      * Generates a IIIF v3 manifest based on the provided (parsed) json document
-     * @param jsonDoc parsed json document
+     *
+     * @param jsonDoc    parsed json document
+     * @param isArchived indicates if the record is tombstone record
      * @return IIIF Manifest v3 object
      */
-    public Manifest generateManifest(Object jsonDoc) {
+    public Manifest generateManifest(Object jsonDoc, boolean isArchived) {
         String europeanaId = EdmManifestUtils.getEuropeanaId(jsonDoc);
         String isShownBy = EdmManifestUtils.getValueFromDataProviderAggregation(jsonDoc, europeanaId, "edmIsShownBy");
 
@@ -78,7 +78,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         manifest.getThumbnail().add(getThumbnailImageV3(europeanaId, jsonDoc));
         manifest.setNavDate(EdmManifestUtils.getNavDate(europeanaId, jsonDoc));
         manifest.getHomepage().add(EdmManifestUtils.getHomePage(europeanaId, jsonDoc));
-        manifest.setRequiredStatement(getAttributionV3Root(europeanaId, isShownBy, jsonDoc));
+        manifest.setRequiredStatement(getRequiredStatementV3Root(europeanaId,jsonDoc,isShownBy,isArchived));
         manifest.setRights(getRights(europeanaId, jsonDoc));
         manifest.setSeeAlso(getDataSetsV3(settings, europeanaId));
         // get the canvas items and if present add to manifest
@@ -94,6 +94,12 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
                 new Text("https://www.europeana.eu",
                         new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana"), "text/html")));
         return manifest;
+    }
+
+    private LabelledValue getRequiredStatementV3Root(String europeanaId, Object jsonDoc,
+        String isShownBy, boolean isArchived) {
+        return isArchived ? getAttributionForTombstone(europeanaId,jsonDoc)
+            : getAttributionV3Root(europeanaId, isShownBy, jsonDoc);
     }
 
     /**
@@ -381,27 +387,43 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
 
     /**
-     * Return attribution text as a String
-     * We look for the webResource that corresponds to our edmIsShownBy and return the attribution snippet for that.
-     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
-     * @param isShownBy edmIsShownBy value
-     * @param jsonDoc parsed json document
+     * Return attribution text as a String We look for the webResource that corresponds to our
+     * edmIsShownBy and return the attribution snippet for that.
+     *
+     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should
+     *                    have a leading slash and not trailing slash)
+     * @param isShownBy   edmIsShownBy value
+     * @param jsonDoc     parsed json document
      * @return
      */
     static LabelledValue getAttributionV3Root(String europeanaId, String isShownBy, Object jsonDoc) {
-        Filter isShownByFilter = filter(where(EdmManifestUtils.ABOUT).is(isShownBy));
-        String[] attributions = JsonPath.parse(jsonDoc).
-                read("$.object.aggregations[*].webResources[?]."+ EdmManifestUtils.HTML_ATTRIB_SNIPPET, String[].class, isShownByFilter);
-        String attribution = (String) EdmManifestUtils.getFirstValueArray(EdmManifestUtils.HTML_ATTRIB_SNIPPET, europeanaId, attributions);
-        return createRequiredStatementMap(attribution);
+            Filter isShownByFilter = filter(where(EdmManifestUtils.ABOUT).is(isShownBy));
+            String[] attributions = JsonPath.parse(jsonDoc).
+                read("$.object.aggregations[*].webResources[?]."
+                    + EdmManifestUtils.HTML_ATTRIB_SNIPPET, String[].class, isShownByFilter);
+        String attribution = (String) EdmManifestUtils.getFirstValueArray(
+                EdmManifestUtils.HTML_ATTRIB_SNIPPET, europeanaId, attributions);
+
+        return createRequiredStatementMap(attribution,ATTRIBUTION_STRING);
     }
 
-    static LabelledValue createRequiredStatementMap(String attribution){
-        if (StringUtils.isEmpty(attribution)) {
+    /**
+     * Get the DePublication reason for the tombstone records based on the deletion context.
+     * @param jsonDoc
+     * @return LabelledValue object
+     */
+    private LabelledValue getAttributionForTombstone(String europeanaId,Object jsonDoc) {
+        String context = EdmManifestUtils.getChangeLogContextForDeletion(europeanaId,jsonDoc);
+        return StringUtils.isEmpty(context) ? null
+            : createRequiredStatementMap(settings.getDePubMessages().get(context), DEPUBLISHED_STRING);
+    }
+
+    static LabelledValue createRequiredStatementMap(String value,String label){
+        if (StringUtils.isEmpty(value)) {
             return null;
         }
-        return new LabelledValue(new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, ATTRIBUTION_STRING),
-                                        new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, attribution));
+        return new LabelledValue(new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, label),
+                                        new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, value));
     }
 
     /**
@@ -507,7 +529,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
         String attributionText = (String) webResource.get(EdmManifestUtils.HTML_ATTRIB_SNIPPET);
         if (!StringUtils.isEmpty(attributionText)){
-            c.setRequiredStatement(createRequiredStatementMap(attributionText));
+            c.setRequiredStatement(createRequiredStatementMap(attributionText,ATTRIBUTION_STRING));
         }
 
         LinkedHashMap<String, ArrayList<String>> license = (LinkedHashMap<String, ArrayList<String>>) webResource.get("webResourceEdmRights");

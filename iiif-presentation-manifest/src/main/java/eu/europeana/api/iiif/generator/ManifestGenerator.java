@@ -16,10 +16,11 @@ public interface ManifestGenerator<M extends IIIFResource> {
 
     /**
      * Generates a IIIF manifest based on the provided (parsed) json document
-     * @param jsonDoc parsed json document
+     * @param jsonDoc   parsed json document
+     * @param isArchived indicates if the record is tombstone record
      * @return IIIF Manifest
      */
-    M generateManifest(Object jsonDoc);
+    M generateManifest(Object jsonDoc, boolean isArchived);
 
     //void fillWithFullText(M manifest, URL fullTextApi, AuthenticationHandler auth) throws EuropeanaApiException;
 

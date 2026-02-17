@@ -57,7 +57,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @param jsonDoc parsed json document
      * @return IIIF Manifest v2 object
      */
-    public Manifest generateManifest(Object jsonDoc) {
+    public Manifest generateManifest(Object jsonDoc,boolean isArchived) {
         String europeanaId = EdmManifestUtils.getEuropeanaId(jsonDoc);
         String isShownBy = EdmManifestUtils.getValueFromDataProviderAggregation(jsonDoc, europeanaId, "edmIsShownBy");
         Manifest manifest = new Manifest(settings.getManifestId(europeanaId));
@@ -69,7 +69,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         manifest.getMetadata().addAll(getMetaDataV2(jsonDoc));
         manifest.setThumbnail(getThumbnailImageV2(europeanaId, jsonDoc));
         manifest.setNavDate(EdmManifestUtils.getNavDate(europeanaId, jsonDoc));
-        manifest.setAttribution(getAttributionV2(europeanaId, isShownBy, jsonDoc));
+        manifest.setAttribution(getAttributionV2Root(jsonDoc, isArchived, europeanaId, isShownBy));
         manifest.setLicense(getLicense(europeanaId, jsonDoc));
         manifest.setLogo(new Image(ManifestDefinitions.EUROPEANA_LOGO_URL));
         manifest.setSeeAlso(getDataSetsV2(settings, europeanaId));
@@ -81,6 +81,14 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
             LOG.debug("No Canvas generated for europeanaId {}", europeanaId);
         }
         return manifest;
+    }
+
+    private String getAttributionV2Root(Object jsonDoc, boolean isArchived, String europeanaId,
+        String isShownBy) {
+        if(isArchived){
+            return settings.getDePubMessages().get(EdmManifestUtils.getChangeLogContextForDeletion(europeanaId,jsonDoc));
+        }
+        return getAttributionV2(europeanaId, isShownBy, jsonDoc);
     }
 
     /**
@@ -291,11 +299,13 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
     }
 
     /**
-     * Return attribution text as a String
-     * We look for the webResource that corresponds to our edmIsShownBy and return the 'textAttributionSnippet' for that.
-     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
-     * @param isShownBy edmIsShownBy value
-     * @param jsonDoc parsed json document
+     * Return attribution text as a String We look for the webResource that corresponds to our
+     * edmIsShownBy and return the 'textAttributionSnippet' for that.
+     *
+     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should
+     *                    have a leading slash and not trailing slash)
+     * @param isShownBy   edmIsShownBy value
+     * @param jsonDoc     parsed json document
      * @return
      */
     static String getAttributionV2(String europeanaId, String isShownBy, Object jsonDoc) {

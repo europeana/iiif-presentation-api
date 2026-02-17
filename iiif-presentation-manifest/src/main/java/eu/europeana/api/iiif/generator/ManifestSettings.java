@@ -1,9 +1,21 @@
 package eu.europeana.api.iiif.generator;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
+import eu.europeana.api.commons_sb3.http.HttpConnection;
+import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
+import eu.europeana.api.iiif.dto.DePubReasonResponse;
+import eu.europeana.api.iiif.dto.DePubReasonResponse.Concept;
 import eu.europeana.api.iiif.model.ManifestDefinitions;
 import jakarta.annotation.PostConstruct;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +34,8 @@ import static eu.europeana.api.iiif.model.ManifestDefinitions.getFulltextSummary
 public class ManifestSettings {
 
     private static final Logger LOG = LogManager.getLogger(ManifestSettings.class);
+
+    private Map<String,String> dePubMessages = new HashMap<>();
 
     @Value("${iiif-api.base.url:}")
     private String iiifApiBaseUrl;
@@ -82,6 +96,9 @@ public class ManifestSettings {
 
     @Value("${keycloak.token.grant.params}")
     private String iiifGrantParams;
+
+    @Value("${depublication.reasons.repository}")
+    private String dePubMessagesURI;
 
     public String getMediaXMLConfig() {
         return mediaXMLConfig;
@@ -351,4 +368,32 @@ public class ManifestSettings {
         LOG.info("  Suppress parse exceptions = {}", this.getSuppressParseException());
     }
 
+    public String getDePubMessagesURI() {
+        return dePubMessagesURI;
+    }
+
+    @PostConstruct
+    public void loadMessagesForDePublication() {
+        try {
+            URI uri = new URIBuilder(getDePubMessagesURI()).build();
+            HttpResponseHandler resHandler = new HttpConnection().get(uri.toString(), new HashMap<>(), null);
+            if (resHandler != null && HttpStatus.SC_OK == (resHandler.getStatus())) {
+                XmlMapper map = new XmlMapper();
+                DePubReasonResponse res = map.readValue(resHandler.getResponse(),DePubReasonResponse.class);
+                if(res != null) {
+                    List<Concept> concepts = res.getConceptList();
+                    if (concepts != null) {
+                        concepts.forEach(p -> dePubMessages.put(p.getAbout(), p.getNote()));
+                    }
+                }
+            }
+        } catch (IOException | URISyntaxException ex) {
+            LOG.error("Error while fetching the dePublication messages for tombstone records.");
+        }
+
+    }
+
+    public Map<String, String> getDePubMessages() {
+        return dePubMessages;
+    }
 }

@@ -7,6 +7,7 @@ import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
+import eu.europeana.api.iiif.dto.RecordInfo;
 import eu.europeana.api.iiif.exceptions.InvalidArgumentException;
 import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
 import eu.europeana.api.iiif.exceptions.RecordNotFoundException;
@@ -50,16 +51,20 @@ public class RecordService extends BaseService {
      *                               RecordNotFoundException if there was a 404,
      *                               RecordRetrieveException on all other problems)
      */
-    public Object getRecordJson(String recordApiUrl, String recordId
+    public RecordInfo getRecordJson(String recordApiUrl, String recordId
                               , AuthenticationHandler auth, HttpHeaders reqHeaders
                               , ResourceCaching caching) throws EuropeanaApiException {
         try {
             HttpResponseHandler rsp = recordClient.get(buildRecordApiUrl(recordApiUrl, recordId), getHeaderMap(reqHeaders), auth);
             int responseCode = rsp.getStatus();
             String responseBody = rsp.getResponse();
+
             if (responseCode == HttpStatus.SC_OK) {
                 caching.getHeaders(getHeaders(rsp.getCachingHeaders()));
-                return parseResponse(responseBody);
+                return new RecordInfo(false,parseResponse(responseBody));
+            }
+            if (responseCode == HttpStatus.SC_GONE){
+                return new RecordInfo(true,parseResponse(responseBody));
             }
             else if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
                 throw new ResourceNotChangedException(recordId);

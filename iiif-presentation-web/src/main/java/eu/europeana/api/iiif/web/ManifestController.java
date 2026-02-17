@@ -5,6 +5,7 @@ import eu.europeana.api.commons_sb3.definitions.caching.CachingUtils;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.iiif.config.BuildInfo;
+import eu.europeana.api.iiif.dto.RecordInfo;
 import eu.europeana.api.iiif.exceptions.InvalidIIIFVersionException;
 import eu.europeana.api.iiif.exceptions.ManifestInvalidUrlException;
 import eu.europeana.api.iiif.generator.ManifestGenerator;
@@ -90,8 +91,6 @@ public class ManifestController {
      *
      * @param datasetId    (required field)
      * @param recordId     (required field)
-     * @param wskey        apikey (required field)
-     * @param version      (optional) indicates which IIIF version to generate, either '2' or '3'
      * @param recordApi    (optional) alternative recordApi baseUrl to use for retrieving record data
      * @param addFullText  (optional) perform fulltext exists check or not`1
      * @param fullTextApi  (optional) alternative fullTextApi baseUrl to use for retrieving record data
@@ -163,7 +162,11 @@ public class ManifestController {
                     String endpoint 
                         = ( recordApi == null ? settings.getRecordApiEndpoint() 
                                               : recordApi + settings.getRecordApiPath());
-                    data.record = recordService.getRecordJson(endpoint, id, auth, reqHeaders, caching);
+
+                    RecordInfo recordInfo = recordService.getRecordJson(endpoint, id, auth,
+                        reqHeaders, caching);
+                    data.record = recordInfo.getRecord();
+                    data.isArchived = recordInfo.isArchived();
                     return true;
                 }
             },
@@ -183,7 +186,7 @@ public class ManifestController {
 
 
         ManifestGenerator<IIIFResource> generator = version.getManifestGenerator();
-        IIIFResource manifest = generator.generateManifest(data.record);
+        IIIFResource manifest = generator.generateManifest(data.record,data.isArchived);
         generator.fillWithFullText(manifest, data.fulltext);
 
         rspHeaders.add(HttpHeaders.CONTENT_TYPE, version.getContentType());        
@@ -199,7 +202,9 @@ public class ManifestController {
 
     private static class SourceData {
         public Object                             record   = null;
+        public boolean isArchived = false;
         public Map<String, FulltextSummaryCanvas> fulltext = null;
+
     }
 
     private ResourceCaching getBaseCache(IIIFVersionSupport version) {

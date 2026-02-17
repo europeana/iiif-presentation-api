@@ -1,6 +1,7 @@
 package eu.europeana.api.iiif.utils;
 
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import eu.europeana.api.iiif.exceptions.DataInconsistentException;
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.model.WebResource;
@@ -322,5 +323,23 @@ public final class EdmManifestUtils {
                 Optional.ofNullable(mediaType.getType()).map(String::toUpperCase)
                         .map(type -> "&type=" + type).orElse("");
 
+    }
+
+    /**
+     * Fetch the context value for deletion ,For depublished (tombstone) records
+     * @param europeanaId
+     * @param jsonDoc
+     * @return
+     */
+    public static String getChangeLogContextForDeletion(String europeanaId,Object jsonDoc) {
+        try {
+            String jsonpath = "$.object.europeanaAggregation.changeLog[?(@.type == 'Delete')].context";
+            List<String> contexts = JsonPath.parse(jsonDoc).read(jsonpath, List.class);
+            return (contexts != null ? contexts.get(0) : null);
+        }
+        catch (PathNotFoundException e){
+            LOG.warn("Tombstone Record " +  europeanaId + " found without any context of deletion.");
+            return null;
+        }
     }
 }
