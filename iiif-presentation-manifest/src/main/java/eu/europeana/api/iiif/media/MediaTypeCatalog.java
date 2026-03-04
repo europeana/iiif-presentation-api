@@ -15,8 +15,19 @@ import java.util.Optional;
  * @author srishti singh
  * @since 18 April 2023
  */
+
+/*
+
+Example: 
+<config>
+	<format mediaType="image/jpg" label="JPG" category="Image"/>
+	...
+</config>
+
+*/
+
 @JacksonXmlRootElement(localName = "config")
-public class MediaTypes {
+public class MediaTypeCatalog {
 
         @JacksonXmlElementWrapper(useWrapping = false)
         @JacksonXmlProperty(localName = "format")
@@ -55,9 +66,4 @@ public class MediaTypes {
             }
             return Optional.empty();
         }
-
-        public Optional<MediaType> getEUScreenType(String edmType) {
-            return mediaTypeCategories.stream().filter(s -> s.isEuScreen() && s.getType().equalsIgnoreCase(edmType)).findFirst();
-        }
-
 }

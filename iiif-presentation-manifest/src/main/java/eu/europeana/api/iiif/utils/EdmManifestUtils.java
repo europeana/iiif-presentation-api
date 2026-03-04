@@ -3,10 +3,11 @@ package eu.europeana.api.iiif.utils;
 import com.jayway.jsonpath.JsonPath;
 import eu.europeana.api.iiif.exceptions.DataInconsistentException;
 import eu.europeana.api.iiif.media.MediaType;
-import eu.europeana.api.iiif.model.WebResource;
 import eu.europeana.api.iiif.service.WebResourceSorter;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
 import eu.europeana.api.iiif.v3.model.content.Text;
+import eu.europeana.api.record.model.WebResource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,14 +45,8 @@ public final class EdmManifestUtils {
     public static final String SERVICE = "Service";
     public static final List<String> EMBEDED_RESOURCE_MIME_TYPES = List.of("application/json+oembed","application/xml+oembed");
 
-
     private EdmManifestUtils() {
         // private constructor to prevent initialization
-    }
-
-    public static List<String> getEuropeanaLibraryCollections(Object jsonDoc) {
-        return JsonPath.parse(jsonDoc).
-                read("$.object.proxies[*].dctermsIsPartOf.def[?(@ =~ /http(s)?:\\/\\/data.theeuropeanlibrary.org.*/i)]", List.class);
     }
 
     /**
@@ -152,6 +147,12 @@ public final class EdmManifestUtils {
 
         List<String> validWebResources = new ArrayList<>();
         validWebResources.add(edmIsShownBy);
+
+        String isShownAt = JsonPath.parse(jsonDoc).read("$.object.aggregations[*].isShownAt", String.class);
+        if ( isEuScreen(isShownAt) ) {
+            validWebResources.add(isShownAt);
+        }
+
         LOG.trace("edmIsShownBy = {}", edmIsShownBy);
         for (String[] hasView : hasViews) {
             for (String view: hasView) {
@@ -185,6 +186,10 @@ public final class EdmManifestUtils {
             sorted = unsorted;
         }
         return sorted;
+    }
+
+    public static boolean isEuScreen(String url) {
+        return ( url != null && url.contains("://www.euscreen.eu/item.html") );
     }
 
     /**
@@ -319,7 +324,7 @@ public final class EdmManifestUtils {
      */
     public static String getIdForAnnotation(String annotationID, MediaType mediaType, String thumbnailURL) {
         return thumbnailURL + annotationID +
-                Optional.ofNullable(mediaType.getType()).map(String::toUpperCase)
+                Optional.ofNullable(mediaType.getCategory().name()).map(String::toUpperCase)
                         .map(type -> "&type=" + type).orElse("");
 
     }

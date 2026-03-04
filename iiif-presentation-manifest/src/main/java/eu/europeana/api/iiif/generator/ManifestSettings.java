@@ -1,7 +1,6 @@
 package eu.europeana.api.iiif.generator;
 
 import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
-import eu.europeana.api.iiif.model.ManifestDefinitions;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -10,11 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import static eu.europeana.api.iiif.generator.GeneratorConstants.getFulltextSummaryPath;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
-import static eu.europeana.api.iiif.model.ManifestDefinitions.getFulltextSummaryPath;
 
 @Configuration
 @PropertySource("classpath:iiif.properties")
@@ -136,8 +135,8 @@ public class ManifestSettings {
         if (StringUtils.isNotBlank(iiifApiIdPlaceholder)){
             LOG.debug("Using ID PLACEHOLDER from iiif.properties: {}", iiifApiIdPlaceholder);
             return iiifApiIdPlaceholder;
-        } else if (StringUtils.isNotBlank(ManifestDefinitions.ID_PLACEHOLDER)){
-            LOG.debug("Using ID PLACEHOLDER hard-coded in ManifestDefinitions: {}", ManifestDefinitions.ID_PLACEHOLDER);
+        } else if (StringUtils.isNotBlank(GeneratorConstants.ID_PLACEHOLDER)){
+            LOG.debug("Using ID PLACEHOLDER hard-coded in ManifestDefinitions: {}", GeneratorConstants.ID_PLACEHOLDER);
             return IIIFDefinitions.PRESENTATION_PATH;
         } else {
             LOG.error("No value found for ID_PLACEHOLDER!");

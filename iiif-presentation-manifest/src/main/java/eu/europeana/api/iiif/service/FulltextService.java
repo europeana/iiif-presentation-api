@@ -7,8 +7,8 @@ import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
 import eu.europeana.api.iiif.exceptions.FullTextCheckException;
 import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
+import eu.europeana.api.iiif.generator.GeneratorConstants;
 import eu.europeana.api.iiif.generator.ManifestSettings;
-import eu.europeana.api.iiif.model.ManifestDefinitions;
 import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
 import eu.europeana.api.iiif.model.info.FulltextSummaryManifest;
 import org.apache.hc.core5.http.HttpStatus;
@@ -125,6 +125,6 @@ public class FulltextService extends BaseService {
         if ( fullTextApiUrl == null ) {
             fullTextApiUrl = settings.getFullTextApiBaseUrl();
         }
-        return fullTextApiUrl + ManifestDefinitions.getFulltextSummaryPath(europeanaId);
+        return fullTextApiUrl + GeneratorConstants.getFulltextSummaryPath(europeanaId);
     }
 }

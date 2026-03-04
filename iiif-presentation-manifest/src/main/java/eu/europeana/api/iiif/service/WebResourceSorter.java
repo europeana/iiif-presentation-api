@@ -1,7 +1,8 @@
 package eu.europeana.api.iiif.service;
 
 import eu.europeana.api.iiif.exceptions.DataInconsistentException;
-import eu.europeana.api.iiif.model.WebResource;
+import eu.europeana.api.record.model.WebResource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

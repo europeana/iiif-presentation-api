@@ -1,6 +1,10 @@
-package eu.europeana.api.iiif.model;
+package eu.europeana.api.iiif.generator;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
+import eu.europeana.api.record.model.RecordConstants;
 
 /**
  * Definitions specifically for IIIF Manifest. For definitions shared between IIIF Manifest and Fulltext API
@@ -8,7 +12,7 @@ import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
  * @author Patrick Ehlert Created on 26-01-2018
  * @see eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions class
  */
-public final class ManifestDefinitions {
+public final class GeneratorConstants {
 
     /**
      * Place holder for the dataset and record part of an ID. This is used in various places in the manifest
@@ -49,6 +53,13 @@ public final class ManifestDefinitions {
     public static final String IMAGE_SERVICE_TYPE_3 = "ImageService3";
 
     /**
+     * Context value for embed service description
+     */
+    public static final String EMBED_SERVICE_TYPE = "OEmbedService";
+
+    public static final String EMBED_CONTEXT_VALUE = "";
+
+    /**
      * Titles of Fulltext summary types
      */
     public static final String INFO_CANVAS_TYPE   = "FulltextSummaryCanvas";
@@ -58,7 +69,14 @@ public final class ManifestDefinitions {
 
     public static final String ATTRIBUTION_STRING = "Attribution";
 
-    private ManifestDefinitions() {
+    public static final Map<String,String> CONFORMS_TO_SERVICE = new HashMap<>();
+
+    static {
+    	CONFORMS_TO_SERVICE.put(RecordConstants.SERVICE_TYPE_IMAGE, IMAGE_SERVICE_TYPE_3);
+    	CONFORMS_TO_SERVICE.put(RecordConstants.SERVICE_TYPE_EMBED, EMBED_SERVICE_TYPE);
+    }
+
+    private GeneratorConstants() {
         // empty constructor to avoid initializationRE
     }
 
@@ -68,8 +86,9 @@ public final class ManifestDefinitions {
      * @return fulltext summary path
      */
     public static String getFulltextSummaryPath(String europeanaId) {
-        return IIIFDefinitions.PRESENTATION_PATH + europeanaId + IIIFDefinitions.FULLTEXT_SUMMARY_PATH +
-               "/"; // for now trailing slash is needed
+        return IIIFDefinitions.PRESENTATION_PATH + europeanaId 
+             + IIIFDefinitions.FULLTEXT_SUMMARY_PATH
+             + "/"; // for now trailing slash is needed
     }
 
 }

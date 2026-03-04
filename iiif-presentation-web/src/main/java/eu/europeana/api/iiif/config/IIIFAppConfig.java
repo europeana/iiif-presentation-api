@@ -18,7 +18,7 @@ import eu.europeana.api.iiif.generator.EdmManifestMappingV3;
 import eu.europeana.api.iiif.generator.ManifestSettings;
 import eu.europeana.api.iiif.generator.CollectionSettings;
 import eu.europeana.api.iiif.media.MediaType;
-import eu.europeana.api.iiif.media.MediaTypes;
+import eu.europeana.api.iiif.media.MediaTypeCatalog;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
 import eu.europeana.api.iiif.service.IIIFVersionSupport;
 import eu.europeana.api.iiif.service.IIIFVersionSupportHandler;
@@ -63,21 +63,21 @@ public class IIIFAppConfig {
     private CollectionSettings colSettings;
 
     @Bean(name = BEAN_MEDIA_TYPES)
-    public MediaTypes getMediaTypes() throws IOException {
+    public MediaTypeCatalog getMediaTypes() throws IOException {
         String mediaTypeXMLConfigFile = settings.getMediaXMLConfig();
 
-        MediaTypes mediaTypes;
+        MediaTypeCatalog mediaTypes;
         try (InputStream is = getClass().getResourceAsStream(mediaTypeXMLConfigFile)) {
             assert is != null;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
                 String contents = reader.lines().collect(
                         Collectors.joining(System.lineSeparator()));
-                mediaTypes = xmlMapper().readValue(contents, MediaTypes.class);
+                mediaTypes = xmlMapper().readValue(contents, MediaTypeCatalog.class);
             }
         }
 
         if (!mediaTypes.mediaTypeCategories.isEmpty()) {
-            mediaTypes.getMap().putAll(mediaTypes.mediaTypeCategories.stream().filter(media -> !media.isEuScreen()).collect(Collectors.toMap(MediaType::getMimeType, e-> e)));
+            mediaTypes.getMap().putAll(mediaTypes.mediaTypeCategories.stream().collect(Collectors.toMap(MediaType::getMimeType, e-> e)));
         } else {
             LOG.error("media Categories not configured at startup. mediacategories.xml file not added or is empty");
         }
@@ -153,7 +153,7 @@ public class IIIFAppConfig {
 
     @Bean(name = BEAN_IIIF_VERSION_SUPPORT)
     public IIIFVersionSupportHandler versionSupportHandler(
-            @Qualifier(value = BEAN_MEDIA_TYPES) MediaTypes mediaTypes) {
+            @Qualifier(value = BEAN_MEDIA_TYPES) MediaTypeCatalog mediaTypes) {
         IIIFVersionSupportHandler handler = new IIIFVersionSupportHandler();
         handler.register(
                 new IIIFVersionSupport(
