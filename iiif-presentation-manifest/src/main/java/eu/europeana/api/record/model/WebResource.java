@@ -1,32 +1,23 @@
 package eu.europeana.api.record.model;
 
+import static eu.europeana.api.record.model.RecordConstants.*;
 import java.util.Collection;
 import java.util.HashMap;
-
-
 import org.apache.commons.lang3.StringUtils;
-
 import eu.europeana.api.iiif.media.MediaType;
-
-
 /**
  * Class to help retrieve and sort web resources received from record JSON data
  * @author Patrick Ehlert
  * Created on 07-03-2018
  */
-public class WebResource extends HashMap<String, Object> implements RecordConstants {
-
+public class WebResource extends HashMap<String, Object> {
     private static final long serialVersionUID = -1726986203390766226L;
-
     private Collection<SvcsService> services;
-
     private MediaType mediaType;
-
     public WebResource() {
         super();
         // default constructor
     }
-
     /**
      * Create new webresource (for testing)
      * @param id String containing this webresource's id
@@ -44,6 +35,7 @@ public class WebResource extends HashMap<String, Object> implements RecordConsta
     public String getId() {
         return JsonUtils.asString(get(ABOUT));
     }
+
 
     public void setServices(Collection<SvcsService> services) {
         this.services = services;
@@ -114,15 +106,18 @@ public class WebResource extends HashMap<String, Object> implements RecordConsta
         return JsonUtils.asString(this.get(TEXT_ATTRIB_SNIPPET));
     }
 
-
     public boolean hasService(String conformsTo) {
     	return ( getService(conformsTo) != null );
     }
 
     public SvcsService getService(String conformsTo) {
-    	for ( SvcsService s : services ) {
-    		if ( conformsTo.equals(s.getConformsTo()) ) { return s; }
-    	}
-    	return null;
+        if (services != null) {
+            for (SvcsService service : services) {
+                if (conformsTo.equals(service.getConformsTo())) {
+                    return service;
+                }
+            }
+        }
+        return null;
     }
 }

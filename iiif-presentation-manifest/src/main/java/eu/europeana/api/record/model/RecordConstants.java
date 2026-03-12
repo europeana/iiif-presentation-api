@@ -1,6 +1,6 @@
 package eu.europeana.api.record.model;
 
-public interface RecordConstants {
+public class RecordConstants {
 
     public static final String ABOUT = "about";
     public static final String TEXT_ATTRIB_SNIPPET = "textAttributionSnippet";

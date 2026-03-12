@@ -17,18 +17,17 @@ import static eu.europeana.api.iiif.generator.GeneratorUtils.*;
  * @author Hugo
  * @since 14 Oct 2024
  */
-public class CollectionV3Generator extends GeneratorConstants implements CollectionGenerator<Collection> {
-
+public class CollectionV3Generator extends CollectionGenConstants implements CollectionGenerator<Collection> {
     private static LanguageMap rootLabel
-        = new LanguageMap(LANG_META, GeneratorConstants.ROOT_LABEL);
+        = new LanguageMap(LANG_META, CollectionGenConstants.ROOT_LABEL);
     private static LanguageMap rootSummary
         = new LanguageMap(LANG_META, ROOT_DESCRIPTION);
     private static LanguageMap rootGalleryLabel
-        = new LanguageMap(LANG_META, GeneratorConstants.ROOT_GALLERY_LABEL);
+        = new LanguageMap(LANG_META, CollectionGenConstants.ROOT_GALLERY_LABEL);
     private static LanguageMap rootGallerySummary
         = new LanguageMap(LANG_META, ROOT_GALLERY_DESCRIPTION);
     private static LanguageMap websiteTitleGallery
-        = new LanguageMap(LANG_META, GeneratorConstants.WEBSITE_TITLE_GALLERY);
+        = new LanguageMap(LANG_META, CollectionGenConstants.WEBSITE_TITLE_GALLERY);
 
     private static Agent europeana = newEuropeanaProvider();
 

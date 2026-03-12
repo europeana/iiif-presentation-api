@@ -22,18 +22,17 @@ import java.util.Map;
  * @author Hugo
  * @since 14 Oct 2024
  */
-public class CollectionV2Generator extends GeneratorConstants implements CollectionGenerator<Collection> {
-
+public class CollectionV2Generator extends CollectionGenConstants implements CollectionGenerator<Collection> {
     private static LanguageValue rootLabel
-        = new LanguageValue(GeneratorConstants.ROOT_LABEL, LANG_META);
+        = new LanguageValue(CollectionGenConstants.ROOT_LABEL, LANG_META);
     private static LanguageValue rootDescription
-        = new LanguageValue(GeneratorConstants.ROOT_DESCRIPTION, LANG_META);
+        = new LanguageValue(CollectionGenConstants.ROOT_DESCRIPTION, LANG_META);
     private static LanguageValue rootGallerylabel
-        = new LanguageValue(GeneratorConstants.ROOT_GALLERY_LABEL, LANG_META);
+        = new LanguageValue(CollectionGenConstants.ROOT_GALLERY_LABEL, LANG_META);
     private static LanguageValue rootGalleryDescription
-        = new LanguageValue(GeneratorConstants.ROOT_GALLERY_DESCRIPTION, LANG_META);
+        = new LanguageValue(CollectionGenConstants.ROOT_GALLERY_DESCRIPTION, LANG_META);
     private static Image         europeanaLogo
-        = new Image(GeneratorConstants.EUROPEANA_LOGO);
+        = new Image(EUROPEANA_LOGO);
 
     @Resource
     private CollectionSettings settings;
@@ -41,7 +40,6 @@ public class CollectionV2Generator extends GeneratorConstants implements Collect
     public CollectionV2Generator(CollectionSettings settings) {
         this.settings = settings;
     }
-
     @Override
     public Collection generateRoot() {
         Collection col = new Collection(settings.getCollectionRootURI());

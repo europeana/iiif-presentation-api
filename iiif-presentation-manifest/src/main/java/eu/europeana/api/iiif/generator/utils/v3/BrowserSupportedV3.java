@@ -1,5 +1,7 @@
-package eu.europeana.api.iiif.generator.utils;
+package eu.europeana.api.iiif.generator.utils.v3;
 
+import static eu.europeana.api.record.model.RecordConstants.*;
+import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
 import java.util.Collection;
 
 import eu.europeana.api.iiif.media.MediaType;
@@ -12,9 +14,10 @@ import eu.europeana.api.iiif.v3.model.TimeMode;
 import eu.europeana.api.iiif.v3.model.content.Image;
 import eu.europeana.api.record.model.SvcsService;
 import eu.europeana.api.record.model.WebResource;
+import org.springframework.stereotype.Component;
 
-import static eu.europeana.api.iiif.generator.GeneratorUtils.*;
-import static eu.europeana.api.iiif.generator.GeneratorConstants.*;
+
+import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.*;
 
 
 
@@ -44,24 +47,22 @@ Example:
   ]
 }
  */
+@Component
 public class BrowserSupportedV3 extends AbsMediaGeneratorV3 {
-
+    public BrowserSupportedV3(ManifestGeneratorUtils utils) {
+        super(utils);
+    }
     @Override
     public Canvas generate(Canvas canvas, WebResource wr) {
-
         canvas.setWidth(wr.getWidth());
         canvas.setHeight(wr.getHeight());
         canvas.setDuration(wr.getDurationInSeconds());
-
         addCanvasMetadata(canvas, wr);
-
         // Add thumbnail but only if it is not a IIIF image
         if ( wr.hasService(SERVICE_TYPE_IMAGE) ) {
-            canvas.getThumbnail().add(new Image(getThumbnailV2(wr)));
+            canvas.getThumbnail().add(new Image(utils.getThumbnailV2(wr)));
         }
-
         Annotation anno = newContentAnnotation(canvas);
-
         MediaType mediaType = wr.getMediaType();
         if (mediaType.isAudioVisual()) { anno.setTimeMode(TimeMode.trim); }
 
@@ -69,31 +70,27 @@ public class BrowserSupportedV3 extends AbsMediaGeneratorV3 {
         // Note: An annotation has 1 annotationBody
         ContentResource annoBody = getAnnotationBody(wr.getId(), mediaType.getCategory());
         anno.setBody(annoBody);
-
         annoBody.setFormat(mediaType.getMimeType());
         addTechnicalMetadata(canvas, annoBody);
-
         handleServices(annoBody, wr.getServices());
-
         return canvas;
     }
-
-
     protected void handleServices(ContentResource annoBody
                                 , Collection<SvcsService> services) {
-        for ( SvcsService s : services ) {
-            Service service = processService(s);
-            if ( service == null ) { continue; }
-
-            annoBody.getServices().add(service);
-            return;
+        if(services != null) {
+            for (SvcsService s : services) {
+                Service service = processService(s);
+                if (service == null) {
+                    continue;
+                }
+                annoBody.getServices().add(service);
+                return;
+            }
         }
     }
-
     protected Service processService(SvcsService service) {
         String type = CONFORMS_TO_SERVICE.get(service.getConformsTo());
         if ( type == null ) { return null; }
-
         Service s = new Service(service.getId(), type);
         s.setProfile(service.getImplements());
         String label = service.getLabel();

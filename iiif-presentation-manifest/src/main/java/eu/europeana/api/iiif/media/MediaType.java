@@ -2,6 +2,7 @@ package eu.europeana.api.iiif.media;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.io.Serializable;
 
 /**
  * @author Hugo Manguinhas
@@ -14,7 +15,7 @@ Example:
 
  */
 @JacksonXmlRootElement(localName = "format")
-public class MediaType {
+public class MediaType implements Serializable {
 
     @JacksonXmlProperty(localName =  "mediaType", isAttribute = true)
     private String mimeType;

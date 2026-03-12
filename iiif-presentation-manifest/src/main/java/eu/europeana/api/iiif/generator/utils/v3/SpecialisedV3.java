@@ -1,5 +1,6 @@
-package eu.europeana.api.iiif.generator.utils;
+package eu.europeana.api.iiif.generator.utils.v3;
 
+import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.utils.EdmManifestUtils;
 import eu.europeana.api.iiif.v3.model.Canvas;
@@ -9,8 +10,7 @@ import eu.europeana.api.iiif.v3.model.content.Image;
 import eu.europeana.api.iiif.v3.model.content.Rendering;
 import eu.europeana.api.record.model.Resolution;
 import eu.europeana.api.record.model.WebResource;
-
-import static eu.europeana.api.iiif.generator.GeneratorUtils.*;
+import org.springframework.stereotype.Component;
 
 /*
 
@@ -48,12 +48,17 @@ Example:
 }
 
  */
+@Component
 public class SpecialisedV3 extends AbsMediaGeneratorV3 {
+
+    public SpecialisedV3(ManifestGeneratorUtils utils) {
+        super(utils);
+    }
 
     @Override
     public Canvas generate(Canvas canvas, WebResource wr) {
 
-        String thumbnailUrl = getThumbnailV2(wr);
+        String thumbnailUrl = utils.getThumbnailV2(wr);
         Resolution res = wr.getResolution().scaleToWidth(400);
 
         canvas.setWidth(res.width());

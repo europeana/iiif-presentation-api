@@ -5,24 +5,25 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.jayway.jsonpath.JsonPath;
 
-import eu.europeana.api.iiif.media.MediaCategory;
-import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.utils.LanguageMapUtils;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
 import eu.europeana.api.record.model.WebResource;
+import org.springframework.stereotype.Component;
 
-public class GeneratorUtils {
-
-    public static String getThumbnailV2(WebResource wr) {
+@Component
+public class ManifestGeneratorUtils {
+    ManifestSettings settings;
+    public ManifestGeneratorUtils(ManifestSettings settings) {
+        this.settings = settings;
+    }
+    public String getThumbnailV2(WebResource wr) {
         String url = URLEncoder.encode(wr.getId(), StandardCharsets.UTF_8);
-        return ( settings.getThumbnailApiUrl() + url 
+        return (settings.getThumbnailApiUrl() + url
                + "&type=" + wr.getMediaType().getCategory().name() );
     }
-
     /**
      * We first check all proxies for a title. If there are no titles, then we check the description fields
      * @param jsonDoc parsed json document

@@ -1,10 +1,22 @@
 package eu.europeana.api.iiif.media;
 
-public enum MediaCategory {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    Video, Sound, Text, Image, Model, EmbeddableResource;
+public enum MediaCategory {
+    @JsonProperty("Video")
+    VIDEO,
+    @JsonProperty("Sound")
+    SOUND,
+    @JsonProperty("Text")
+    TEXT,
+    @JsonProperty("Image")
+    IMAGE,
+    @JsonProperty("Model")
+    MODEL,
+    @JsonProperty("EmbeddableResource")
+    EMBEDDABLE_RESOURCE;
 
     public boolean isAudioVisual() {
-        return ( name().equals(Video.name()) || name().equals(Sound.name()) );
+        return ( name().equals(VIDEO.name()) || name().equals(SOUND.name()) );
     }
 }

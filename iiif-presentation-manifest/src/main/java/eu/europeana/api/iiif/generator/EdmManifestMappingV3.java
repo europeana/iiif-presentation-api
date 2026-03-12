@@ -4,7 +4,10 @@ import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
 
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
+import eu.europeana.api.iiif.generator.utils.MediaGenerator;
 import eu.europeana.api.iiif.generator.utils.MediaGeneratorType;
+import eu.europeana.api.iiif.generator.utils.MediaGeneratorVersion;
+import eu.europeana.api.iiif.generator.utils.MediaGeneratorRegistry;
 import eu.europeana.api.iiif.media.MappingTable;
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.media.MediaTypeCatalog;
@@ -26,9 +29,9 @@ import java.util.*;
 
 import static com.jayway.jsonpath.Filter.filter;
 import static com.jayway.jsonpath.Criteria.where;
-import static eu.europeana.api.iiif.generator.GeneratorUtils.*;
+import static eu.europeana.api.iiif.generator.ManifestGeneratorUtils.*;
 
-import static eu.europeana.api.iiif.generator.GeneratorConstants.*;
+import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.*;
 
 /**
  * This class contains all the methods for mapping EDM record data to IIIF Manifest data for IIIF v3
@@ -44,14 +47,19 @@ import static eu.europeana.api.iiif.generator.GeneratorConstants.*;
 public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
     private static final Logger LOG = LogManager.getLogger(EdmManifestMappingV3.class);
+    public static final MediaGeneratorVersion VERSION = MediaGeneratorVersion.V3;
 
     private ManifestSettings     settings;
     private MediaTypeCatalog       mediaTypes;
 
+    private MediaGeneratorRegistry registry;
+
     public EdmManifestMappingV3(ManifestSettings settings
-                              , MediaTypeCatalog mediaTypes) {
-        this.settings   = settings;
+        , MediaTypeCatalog mediaTypes
+        , MediaGeneratorRegistry registry) {
+        this.settings = settings;
         this.mediaTypes = mediaTypes;
+        this.registry = registry;
     }
 
     /**
@@ -85,7 +93,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
             LOG.debug("No Canvas generated for europeanaId {}", europeanaId);
         }
         manifest.getProvider().add(new Agent("https://www.europeana.eu/en/about-us",
-                new Image(GeneratorConstants.EUROPEANA_LOGO_URL),
+                new Image(ManifestGeneratorConstants.EUROPEANA_LOGO_URL),
                 new Text("https://www.europeana.eu",
                         new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana"), "text/html")));
         return manifest;
@@ -146,8 +154,8 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
      */
     private Service getServiceDescriptionV3(ManifestSettings ms, String europeanaId) {
         Service service = new Service(ms.getContentSearchURL(europeanaId), null);
-        service.setContext(GeneratorConstants.SEARCH_CONTEXT_VALUE);
-        service.setProfile(GeneratorConstants.SEARCH_PROFILE_VALUE);
+        service.setContext(ManifestGeneratorConstants.SEARCH_CONTEXT_VALUE);
+        service.setProfile(ManifestGeneratorConstants.SEARCH_PROFILE_VALUE);
         return service;
     }
 
@@ -327,7 +335,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         		             , org.springframework.http.MediaType.APPLICATION_JSON_VALUE
         		             , EDM_SCHEMA_URL));
         result.add(new Dataset(settings.getDatasetId(europeanaId, ".rdf")
-        		             , GeneratorConstants.MEDIA_TYPE_RDF
+        		             , ManifestGeneratorConstants.MEDIA_TYPE_RDF
         		             , EDM_SCHEMA_URL));
         return result;
     }
@@ -380,7 +388,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         Map<String, Object>[] services = JsonPath.parse(jsonDoc).read("$.object[?(@.services)].services[*]", Map[].class);
         List<Canvas> canvases = new ArrayList<>(sortedResources.size());
         for (WebResource webResource: sortedResources) {
-            Canvas canvas = getCanvasV3(settings, mediaTypes, europeanaId, order, webResource, services);
+            Canvas canvas = getCanvasV3(settings, mediaTypes, europeanaId, order, webResource);
             // for non supported media types we do not create any canvas. Case-4 of media type handling : See-EA-3413
             if (canvas != null) {
                 canvases.add(canvas);
@@ -399,15 +407,17 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
                                MediaTypeCatalog mediaTypes,
                                String europeanaId,
                                int order,
-                               WebResource webResource,
-                               Map<String, Object>[] services) {
+                               WebResource webResource
+                               ) {
 
         Canvas c = new Canvas(settings.getCanvasId(europeanaId, order));
         c.setLabel(new LanguageMap(null, "p. " + order));
 
         //special exception for euscreen which is not mimetype specific
         if ( EdmManifestUtils.isEuScreen(webResource.getId()) ) {
-            return MediaGeneratorType.euscreen.generate(c, webResource);
+            MediaGenerator<Canvas> generator = registry.getGenerator(MediaGeneratorType.EUSCREEN,
+                VERSION);
+            return generator.generate(c,webResource);
         }
 
         // get the configured media type of the mimetype
@@ -416,7 +426,11 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         if (media.isEmpty()) { return null; }
 
         webResource.setMediaType(media.get());
-        return MappingTable.getGeneratorTypeV3(mimeType)
-                           .generate(c, webResource);
+
+
+
+        MediaGenerator<Canvas> generator = registry.getGenerator(MappingTable.getGeneratorTypeV3(mimeType),
+            VERSION);
+        return generator.generate(c,webResource);
     }
 }

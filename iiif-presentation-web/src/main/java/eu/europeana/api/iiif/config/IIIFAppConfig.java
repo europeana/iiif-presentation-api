@@ -17,6 +17,10 @@ import eu.europeana.api.iiif.generator.EdmManifestMappingV2;
 import eu.europeana.api.iiif.generator.EdmManifestMappingV3;
 import eu.europeana.api.iiif.generator.ManifestSettings;
 import eu.europeana.api.iiif.generator.CollectionSettings;
+import eu.europeana.api.iiif.generator.utils.MediaGeneratorRegistry;
+import eu.europeana.api.iiif.media.MappingTable;
+import eu.europeana.api.iiif.media.MappingTable.MappingEntry;
+import eu.europeana.api.iiif.media.MappingTableEntry;
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.media.MediaTypeCatalog;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
@@ -51,21 +55,17 @@ import static eu.europeana.api.iiif.utils.IIIFConstants.*;
 
 @Configuration
 public class IIIFAppConfig {
-
     private static final Logger LOG = LogManager.getLogger(IIIFAppConfig.class);
-
     private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX");
-
     @Resource
     private ManifestSettings settings;
-
     @Resource
     private CollectionSettings colSettings;
-
+    @Resource
+    private MediaGeneratorRegistry registry;
     @Bean(name = BEAN_MEDIA_TYPES)
     public MediaTypeCatalog getMediaTypes() throws IOException {
         String mediaTypeXMLConfigFile = settings.getMediaXMLConfig();
-
         MediaTypeCatalog mediaTypes;
         try (InputStream is = getClass().getResourceAsStream(mediaTypeXMLConfigFile)) {
             assert is != null;
@@ -75,7 +75,6 @@ public class IIIFAppConfig {
                 mediaTypes = xmlMapper().readValue(contents, MediaTypeCatalog.class);
             }
         }
-
         if (!mediaTypes.mediaTypeCategories.isEmpty()) {
             mediaTypes.getMap().putAll(mediaTypes.mediaTypeCategories.stream().collect(Collectors.toMap(MediaType::getMimeType, e-> e)));
         } else {
@@ -84,18 +83,38 @@ public class IIIFAppConfig {
         return mediaTypes;
     }
 
+    @Bean(name = BEAN_MEDIA_TYPE_MAPPING)
+    public MappingTable getMediaTypeMapping() throws IOException{
+        String mappingTableXml =  settings.getMediaXMLMappingConfig();
+
+        MappingTable table ;
+        try (InputStream is = getClass().getResourceAsStream(mappingTableXml)) {
+            assert is != null;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                String contents = reader.lines().collect(
+                    Collectors.joining(System.lineSeparator()));
+                table = xmlMapper().readValue(contents, MappingTable.class);
+            }
+        }
+        if (!table.entries.isEmpty()) {
+            MappingTable.getMap().putAll(table.entries.stream().collect(
+                Collectors.toMap(MappingTableEntry::getMediaType, e-> new MappingEntry(e.getMethodV2(),e.getMethodV3()))));
+        } else {
+            LOG.error("Mapping entries not configured at startup. mediatypemapping.xml file not added or is empty");
+        }
+        return table;
+    }
+
     @Bean(BEAN_XML_MAPPER)
     public XmlMapper xmlMapper() {
         XmlMapper xmlMapper = new XmlMapper();
         xmlMapper.setDateFormat(dateFormat);
         return xmlMapper;
     }
-
     @Bean(name = BEAN_IIIF_JSON_HANDLER)
     public IIIFJsonHandler iiifJsonHandler() {
         return new IIIFJsonHandler(v2Mapper(), v3Mapper());
     }
-
 
     @Bean(name = BEAN_FALLBACK_AUTHORIZATION)
     public AuthenticationHandler getFallbackAuthorization() {
@@ -159,14 +178,14 @@ public class IIIFAppConfig {
                 new IIIFVersionSupport(
                         eu.europeana.api.iiif.v2.io.JsonConstants.CONTEXT_URI
                       , "2"
-                      , new EdmManifestMappingV2(settings, mediaTypes)
+                      , new EdmManifestMappingV2(settings, mediaTypes,registry)
                       , new CollectionV2Generator(colSettings)));
 
         handler.register(
                 new IIIFVersionSupport(
                         eu.europeana.api.iiif.v3.io.JsonConstants.CONTEXT_URI
                       , "3"
-                      , new EdmManifestMappingV3(settings, mediaTypes)
+                      , new EdmManifestMappingV3(settings, mediaTypes,registry)
                       , new CollectionV3Generator(colSettings)));
         return handler;
     }
@@ -185,7 +204,6 @@ public class IIIFAppConfig {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
         messageSource.setBasenames(ErrorConfig.COMMON_MESSAGE_SOURCE);
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
-        I18nServiceImpl service =  new I18nServiceImpl(messageSource);
-        return service;
+        return new I18nServiceImpl(messageSource);
     }
 }

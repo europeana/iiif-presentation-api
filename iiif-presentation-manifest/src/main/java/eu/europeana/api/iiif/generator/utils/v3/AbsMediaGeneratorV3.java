@@ -1,9 +1,9 @@
-package eu.europeana.api.iiif.generator.utils;
+package eu.europeana.api.iiif.generator.utils.v3;
 
-import static eu.europeana.api.iiif.generator.GeneratorConstants.ATTRIBUTION_STRING;
+import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.ATTRIBUTION_STRING;
 
-import org.apache.commons.lang3.StringUtils;
-
+import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
+import eu.europeana.api.iiif.generator.utils.MediaGenerator;
 import eu.europeana.api.iiif.media.MediaCategory;
 import eu.europeana.api.iiif.v3.model.Annotation;
 import eu.europeana.api.iiif.v3.model.AnnotationPage;
@@ -17,13 +17,15 @@ import eu.europeana.api.iiif.v3.model.content.Model;
 import eu.europeana.api.iiif.v3.model.content.Sound;
 import eu.europeana.api.iiif.v3.model.content.Text;
 import eu.europeana.api.iiif.v3.model.content.Video;
-import eu.europeana.api.record.model.RecordConstants;
 import eu.europeana.api.record.model.WebResource;
+import org.apache.commons.lang3.StringUtils;
 
-public abstract class AbsMediaGeneratorV3 implements RecordConstants
-                                                   , MediaGenerator<Canvas> {
-
-	protected void addCanvasMetadata(Canvas canvas, WebResource webResource) {
+public abstract class AbsMediaGeneratorV3 implements  MediaGenerator<Canvas> {
+  protected ManifestGeneratorUtils utils;
+  protected AbsMediaGeneratorV3(ManifestGeneratorUtils utils){
+      this.utils = utils;
+  }
+	public void addCanvasMetadata(Canvas canvas, WebResource webResource) {
         canvas.setRequiredStatement(createRequiredStatementMap(webResource.getAttributionText()));
         canvas.setRights(createLicense(webResource.getLicense()));
 	}
@@ -62,15 +64,14 @@ public abstract class AbsMediaGeneratorV3 implements RecordConstants
     }
 
     protected ContentResource getAnnotationBody(String id, MediaCategory mediaCategory) {
-        switch (mediaCategory) {
-            case Image: return new Image(id);
-            case Video: return new Video(id);
-            case Sound: return new Sound(id);
-            case Text : return new Text(id);
-            case Model: return new Model(id);
-            case EmbeddableResource: return new EmbeddableResource(id);
-            default: return new Image(id);
-        }
+      return switch (mediaCategory) {
+        case VIDEO -> new Video(id);
+        case SOUND -> new Sound(id);
+        case TEXT -> new Text(id);
+        case MODEL -> new Model(id);
+        case EMBEDDABLE_RESOURCE -> new EmbeddableResource(id);
+        default -> new Image(id);
+      };
      }
 
     /**
@@ -79,17 +80,17 @@ public abstract class AbsMediaGeneratorV3 implements RecordConstants
      * @param body
      */
     protected void addTechnicalMetadata(Canvas canvas, ContentResource body) {
-        if (body instanceof Image) {
-            ((Image)body).setHeight(canvas.getHeight());
-            ((Image)body).setWidth(canvas.getWidth());
+      if (body instanceof Image img) {
+        img.setHeight(canvas.getHeight());
+        img.setWidth(canvas.getWidth());
+      }
+        if (body instanceof Video video) {
+          video.setHeight(canvas.getHeight());
+          video.setWidth(canvas.getWidth());
+          video.setDuration(canvas.getDuration());
         }
-        if (body instanceof Video) {
-            ((Video)body).setHeight(canvas.getHeight());
-            ((Video)body).setWidth(canvas.getWidth());
-            ((Video)body).setDuration(canvas.getDuration());
-        }
-        if (body instanceof Sound) {
-            ((Sound)body).setDuration(canvas.getDuration());
+        if (body instanceof Sound sound) {
+          sound.setDuration(canvas.getDuration());
         }
     }
 }

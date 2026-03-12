@@ -1,42 +1,42 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <config>
-        <format mediaType="image/gif"                    label="GIF"         type="Image"      support="Browser"/>
-        <format mediaType="image/jpeg"                   label="JPEG"        type="Image"      support="Browser"/>
-        <format mediaType="image/png"                    label="PNG"         type="Image"      support="Browser"/>
-        <format mediaType="image/bmp"                    label="BMP"         type="Image"      support="Browser"/>
-        <format mediaType="image/x-ms-bmp"               label="BMP"         type="Image"      support="Browser"/>
-        <format mediaType="image/svg+xml"                label="SVG"         type="Image"      support="Browser"/>
-        <format mediaType="image/webp"                   label="WebP"        type="Image"      support="Browser"/>
-        <format mediaType="audio/mp4"                    label="MP4"         type="Sound"      support="Browser"/>
-        <format mediaType="audio/mpeg"                   label="MPEG"        type="Sound"      support="Browser"/>
-        <format mediaType="audio/ogg"                    label="Ogg (Audio)" type="Sound"      support="Browser"/>
-        <format mediaType="audio/vnd.wave"               label="WAVE"        type="Sound"      support="Browser"/>
-        <format mediaType="audio/vorbis"                 label="Vorbis"      type="Sound"      support="Browser"/>
-        <format mediaType="audio/x-flac"                 label="FLAC"        type="Sound"      support="Browser"/>
-        <format mediaType="audio/x-wav"                  label="WAV"         type="Sound"      support="Browser"/>
-        <format mediaType="video/ogg"                    label="Ogg (Video)" type="Video"      support="Browser"/>
-        <format mediaType="video/mp4"                    label="MP4"         type="Video"      support="Browser"/>
-        <format mediaType="video/mpeg"                   label="MPEG"        type="Video"      support="Browser"/>
-        <format mediaType="video/quicktime"              label="QTFF"        type="Video"      support="Browser"/>
-        <format mediaType="video/webm"                   label="WebM"        type="Video"      support="Browser"/>
-        <format mediaType="video/x-m4v"                  label="M4V"         type="Video"      support="Browser"/>
-        <format mediaType="application/dash+xml"         label="MPEG-DASH"   type="Video"      support="Browser"/>
-        <format mediaType="video/x-flv"                  label="FLV"         type="Video"      support="Rendered"/>
-        <format mediaType="audio/x-ms-wma"               label="WMA"         type="Sound"      support="Rendered"/>
-        <format mediaType="video/x-ms-wmv"               label="WMV"         type="Video"      support="Rendered"/>
-        <format mediaType="video/x-msvideo"              label="AVI"         type="Video"      support="Rendered"/>
-        <format mediaType="image/jp2"                    label="JP2000"      type="Image"      support="Rendered"/>
-        <format mediaType="image/x-pict"                 label="PICT"        type="Image"      support="Rendered"/>
-        <format mediaType="image/tiff"                   label="TIFF"        type="Image"      support="Rendered"/>
-        <format mediaType="image/x-xcf"                  label="XCF"         type="Image"      support="Rendered"/>
-        <format mediaType="image/vnd.djvu"               label="DjVu"        type="Image"      support="Rendered"/>
-        <format mediaType="image/vnd.adobe.photoshop"    label="PSD"         type="Image"      support="Rendered"/>
-        <format mediaType="text/plain"                   label="TXT"         type="Text"       support="Rendered"/>
-        <format mediaType="application/pdf"              label="PDF"         type="Text"       support="Rendered"/>
-        <format mediaType="application/rtf"              label="RTF"         type="Text"       support="Rendered"/>
-        <format mediaType="application/epub+zip"         label="EPUB"        type="Text"       support="Rendered"/>
-        <format                                                              type="Video"      support="EUScreen"/>
-        <format                                                              type="Sound"      support="EUScreen"/>
-        <format mediaType="application/json+oembed"      label="oEmbed"      type="Video"      support="Rendered"/>
-        <format mediaType="application/xml+oembed"       label="oEmbed"      type="Video"      support="Rendered"/>
+        <format mediaType="image/gif"                    label="GIF"         category="Image"/>
+        <format mediaType="image/jpeg"                   label="JPEG"        category="Image"/>
+        <format mediaType="image/png"                    label="PNG"         category="Image"/>
+        <format mediaType="image/bmp"                    label="BMP"         category="Image"/>
+        <format mediaType="image/x-ms-bmp"               label="BMP"         category="Image"/>
+        <format mediaType="image/svg+xml"                label="SVG"         category="Image"/>
+        <format mediaType="image/webp"                   label="WebP"        category="Image"/>
+        <format mediaType="audio/mp4"                    label="MP4"         category="Sound"/>
+        <format mediaType="audio/mpeg"                   label="MPEG"        category="Sound"/>
+        <format mediaType="audio/ogg"                    label="Ogg (Audio)" category="Sound"/>
+        <format mediaType="audio/vnd.wave"               label="WAVE"        category="Sound"/>
+        <format mediaType="audio/vorbis"                 label="Vorbis"      category="Sound"/>
+        <format mediaType="audio/x-flac"                 label="FLAC"        category="Sound"/>
+        <format mediaType="audio/x-wav"                  label="WAV"         category="Sound"/>
+        <format mediaType="video/ogg"                    label="Ogg (Video)" category="Video"/>
+        <format mediaType="video/mp4"                    label="MP4"         category="Video"/>
+        <format mediaType="video/mpeg"                   label="MPEG"        category="Video"/>
+        <format mediaType="video/quicktime"              label="QTFF"        category="Video"/>
+        <format mediaType="video/webm"                   label="WebM"        category="Video"/>
+        <format mediaType="video/x-m4v"                  label="M4V"         category="Video"/>
+        <format mediaType="application/dash+xml"         label="MPEG-DASH"   category="Video"/>
+        <format mediaType="video/x-flv"                  label="FLV"         category="Video"/>
+        <format mediaType="audio/x-ms-wma"               label="WMA"         category="Sound"/>
+        <format mediaType="video/x-ms-wmv"               label="WMV"         category="Video"/>
+        <format mediaType="video/x-msvideo"              label="AVI"         category="Video"/>
+        <format mediaType="image/jp2"                    label="JP2000"      category="Image"/>
+        <format mediaType="image/x-pict"                 label="PICT"        category="Image"/>
+        <format mediaType="image/tiff"                   label="TIFF"        category="Image"/>
+        <format mediaType="image/x-xcf"                  label="XCF"         category="Image"/>
+        <format mediaType="image/vnd.djvu"               label="DjVu"        category="Image"/>
+        <format mediaType="image/vnd.adobe.photoshop"    label="PSD"         category="Image"/>
+        <format mediaType="text/plain"                   label="TXT"         category="Text" />
+        <format mediaType="application/pdf"              label="PDF"         category="Text" />
+        <format mediaType="application/rtf"              label="RTF"         category="Text" />
+        <format mediaType="application/epub+zip"         label="EPUB"        category="Text" />
+        <format mediaType="application/json+oembed"      label="oEmbed"      category="EmbeddableResource"/>
+        <format mediaType="application/xml+oembed"       label="oEmbed"      category="EmbeddableResource"/>
+<!--        <format                                                              category="Video"/>-->
+<!--        <format                                                              category="Sound"/>-->
 </config>

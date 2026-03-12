@@ -1,12 +1,9 @@
 package eu.europeana.api.record.model;
 
 import java.util.HashMap;
+import static eu.europeana.api.record.model.RecordConstants.*;
 
-
-public class SvcsService extends HashMap<String, Object> implements RecordConstants {
-
-	public SvcsService() {}
-
+public class SvcsService extends HashMap<String, Object>  {
     /**
      * @return the id of the service (in 'about' value)
      */

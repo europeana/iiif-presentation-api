@@ -8,29 +8,28 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 public class JsonUtils {
-
+	private JsonUtils(){}
 	public static Integer asInteger(Object obj) {
-	    return (obj != null && obj instanceof Integer ? (Integer)obj : null );
+	    return (obj instanceof Integer value ? value : null );
     }
 
 	public static Long asLong(Object obj) {
 	    if (obj == null ) { return null; }
-	    if ( obj instanceof Long ) { return (Long)obj; }
-	    if ( obj instanceof String ) { return Long.valueOf((String)obj); }
+	    if ( obj instanceof Long val ) { return val; }
+	    if ( obj instanceof String val ) { return Long.valueOf(val); }
 	    return null;
     }
 
 	public static String asString(Object obj) {
 		if ( obj == null ) { return null; }
-		if ( obj instanceof String ) {
-			String s = (String)obj;
+		if ( obj instanceof String s ) {
 			return ( StringUtils.isBlank(s) ? null : s );
 		}
-		if ( obj instanceof List ) {
-			return asString(((List)obj).get(0));
+		if ( obj instanceof List list) {
+			return asString((list).get(0));
 		}
-		if ( obj instanceof Map ) {
-			return asString(((Map)obj).values().iterator().next());
+		if ( obj instanceof Map map) {
+			return asString((map).values().iterator().next());
 		}
 		return null;
 	}

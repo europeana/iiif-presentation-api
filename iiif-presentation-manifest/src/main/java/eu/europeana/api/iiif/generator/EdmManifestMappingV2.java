@@ -4,7 +4,10 @@ import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
 
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
+import eu.europeana.api.iiif.generator.utils.MediaGenerator;
 import eu.europeana.api.iiif.generator.utils.MediaGeneratorType;
+import eu.europeana.api.iiif.generator.utils.MediaGeneratorVersion;
+import eu.europeana.api.iiif.generator.utils.MediaGeneratorRegistry;
 import eu.europeana.api.iiif.media.MappingTable;
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.media.MediaTypeCatalog;
@@ -19,14 +22,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.jayway.jsonpath.Filter.filter;
 import static com.jayway.jsonpath.Criteria.where;
-import static eu.europeana.api.iiif.generator.GeneratorUtils.*;
-import static eu.europeana.api.iiif.generator.GeneratorConstants.*;
+import static eu.europeana.api.iiif.generator.ManifestGeneratorUtils.*;
+import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.*;
 
 /**
  * This class contains all the methods for mapping EDM record data to IIIF Manifest data for IIIF v2
@@ -44,13 +45,17 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     private static final Logger LOG = LogManager.getLogger(EdmManifestMappingV2.class);
 
+    public static final MediaGeneratorVersion VERSION = MediaGeneratorVersion.V2;
+
     private ManifestSettings    settings;
     private MediaTypeCatalog    mediaTypes;
+    private MediaGeneratorRegistry registry;
 
     public EdmManifestMappingV2(ManifestSettings settings
-                              , MediaTypeCatalog mediaTypes) {
+                              , MediaTypeCatalog mediaTypes, MediaGeneratorRegistry registry) {
         this.settings        = settings;
         this.mediaTypes      = mediaTypes;
+        this.registry        = registry;
     }
 
     /**
@@ -72,7 +77,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         manifest.setNavDate(EdmManifestUtils.getNavDate(europeanaId, jsonDoc));
         manifest.setAttribution(getAttributionV2(europeanaId, isShownBy, jsonDoc));
         manifest.setLicense(getLicense(europeanaId, jsonDoc));
-        manifest.setLogo(new Image(GeneratorConstants.EUROPEANA_LOGO_URL));
+        manifest.setLogo(new Image(ManifestGeneratorConstants.EUROPEANA_LOGO_URL));
         manifest.setSeeAlso(getDataSetsV2(settings, europeanaId));
         List<Sequence> sequences = getSequencesV2(settings, mediaTypes, europeanaId, isShownBy, jsonDoc);
         if (sequences != null) {
@@ -162,8 +167,8 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      */
     private Service getServiceDescriptionV2(ManifestSettings settings, String europeanaId) {
         Service service = new Service(settings.getContentSearchURL(europeanaId));
-        service.setContext(GeneratorConstants.SEARCH_CONTEXT_VALUE);
-        service.setProfile(GeneratorConstants.SEARCH_PROFILE_VALUE);
+        service.setContext(ManifestGeneratorConstants.SEARCH_CONTEXT_VALUE);
+        service.setProfile(ManifestGeneratorConstants.SEARCH_PROFILE_VALUE);
         return service;
     }
 
@@ -300,7 +305,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         		             , org.springframework.http.MediaType.APPLICATION_JSON_VALUE
         		             , EDM_SCHEMA_URL));
         result.add(new Dataset(settings.getDatasetId(europeanaId, ".rdf")
-        		             , GeneratorConstants.MEDIA_TYPE_RDF
+        		             , ManifestGeneratorConstants.MEDIA_TYPE_RDF
                              , EDM_SCHEMA_URL));
         return result;
     }
@@ -367,8 +372,11 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
     	Canvas c = new Canvas(settings.getCanvasId(europeanaId, order));
         c.setLabel(new LanguageValue("p. "+order));
 
-        if ( EdmManifestUtils.isEuScreen(webResource.getId()) ) {
-            return MediaGeneratorType.euscreen.generate(c, webResource);
+        if (EdmManifestUtils.isEuScreen(webResource.getId())) {
+            MediaGenerator<Canvas> generator = registry.getGenerator(MediaGeneratorType.EUSCREEN,
+                VERSION);
+            return generator.generate(c,webResource);
+            //return MediaGeneratorType.euscreen.generate(c, webResource);
         }
 
         // get the configured media type of the mimetype
@@ -377,6 +385,11 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         if (media.isEmpty()) { return null; }
 
         webResource.setMediaType(media.get());
-        return MappingTable.getGeneratorTypeV2(mimeType).generate(c, webResource);
+
+        MediaGenerator<Canvas> generator = registry.getGenerator(MappingTable.getGeneratorTypeV2(mimeType),
+            VERSION);
+        return generator.generate(c,webResource);
+
+
     }
 }

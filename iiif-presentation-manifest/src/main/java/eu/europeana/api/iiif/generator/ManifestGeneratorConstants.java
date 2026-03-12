@@ -12,7 +12,7 @@ import eu.europeana.api.record.model.RecordConstants;
  * @author Patrick Ehlert Created on 26-01-2018
  * @see eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions class
  */
-public final class GeneratorConstants {
+public final class ManifestGeneratorConstants {
 
     /**
      * Place holder for the dataset and record part of an ID. This is used in various places in the manifest
@@ -76,7 +76,7 @@ public final class GeneratorConstants {
     	CONFORMS_TO_SERVICE.put(RecordConstants.SERVICE_TYPE_EMBED, EMBED_SERVICE_TYPE);
     }
 
-    private GeneratorConstants() {
+    private ManifestGeneratorConstants() {
         // empty constructor to avoid initializationRE
     }
 

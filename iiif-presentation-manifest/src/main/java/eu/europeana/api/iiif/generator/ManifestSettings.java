@@ -1,19 +1,17 @@
 package eu.europeana.api.iiif.generator;
 
+
 import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
 import jakarta.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-
-import static eu.europeana.api.iiif.generator.GeneratorConstants.getFulltextSummaryPath;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 @Configuration
 @PropertySource("classpath:iiif.properties")
@@ -76,6 +74,9 @@ public class ManifestSettings {
     @Value("${media.config}")
     private String mediaXMLConfig;
 
+    @Value("${media.type.canvas.generator.mapping}")
+    private String mediaXMLMappingConfig;
+
     @Value("${keycloak.token.endpoint}")
     private String keycloakTokenEndpoint;
 
@@ -84,6 +85,10 @@ public class ManifestSettings {
 
     public String getMediaXMLConfig() {
         return mediaXMLConfig;
+    }
+
+    public String getMediaXMLMappingConfig() {
+        return mediaXMLMappingConfig;
     }
 
     /**
@@ -135,8 +140,8 @@ public class ManifestSettings {
         if (StringUtils.isNotBlank(iiifApiIdPlaceholder)){
             LOG.debug("Using ID PLACEHOLDER from iiif.properties: {}", iiifApiIdPlaceholder);
             return iiifApiIdPlaceholder;
-        } else if (StringUtils.isNotBlank(GeneratorConstants.ID_PLACEHOLDER)){
-            LOG.debug("Using ID PLACEHOLDER hard-coded in ManifestDefinitions: {}", GeneratorConstants.ID_PLACEHOLDER);
+        } else if (StringUtils.isNotBlank(ManifestGeneratorConstants.ID_PLACEHOLDER)){
+            LOG.debug("Using ID PLACEHOLDER hard-coded in ManifestDefinitions: {}", ManifestGeneratorConstants.ID_PLACEHOLDER);
             return IIIFDefinitions.PRESENTATION_PATH;
         } else {
             LOG.error("No value found for ID_PLACEHOLDER!");
@@ -346,7 +351,7 @@ public class ManifestSettings {
         }
         LOG.info("  Record API endpoint = {} ", getRecordApiEndpoint());
         LOG.info("  Thumbnail API Url = {} ", this.getThumbnailApiUrl());
-        LOG.info("  Full-Text Summary Url = {}{} ", this.getFullTextApiBaseUrl(), getFulltextSummaryPath("/<collectionId>/<itemId>"));
+        LOG.info("  Full-Text Summary Url = {}{} ", this.getFullTextApiBaseUrl(), ManifestGeneratorConstants.getFulltextSummaryPath("/<collectionId>/<itemId>"));
         LOG.info("  Suppress parse exceptions = {}", this.getSuppressParseException());
     }
 

@@ -143,30 +143,15 @@ public final class EdmManifestUtils {
      * @return sorted list of web resources that are either edmIsShownBy or hasView
      */
     public static List<WebResource> getSortedWebResources(String europeanaId, String edmIsShownBy, Object jsonDoc) {
-        String[][] hasViews = JsonPath.parse(jsonDoc).read("$.object.aggregations[*].hasView", String[][].class);
-
-        List<String> validWebResources = new ArrayList<>();
-        validWebResources.add(edmIsShownBy);
-
-        String isShownAt = JsonPath.parse(jsonDoc).read("$.object.aggregations[*].isShownAt", String.class);
-        if ( isEuScreen(isShownAt) ) {
-            validWebResources.add(isShownAt);
-        }
-
-        LOG.trace("edmIsShownBy = {}", edmIsShownBy);
-        for (String[] hasView : hasViews) {
-            for (String view: hasView) {
-                // check for duplicates
-                if (!validWebResources.contains(view)) {
-                    validWebResources.add(view);
-                }
-            }
-            for (String hv : hasView) {
-                LOG.trace("hasView = {}", hv);
-            }
-        }
-
+        List<String> validResourceIds = gatherValidWebResourceIds(edmIsShownBy, jsonDoc);
         // get all web resources and check if they are edmIsShownBy or hasView
+        List<WebResource> unsorted = getWebResourcesWithValidId(jsonDoc, validResourceIds);
+        //return sorted Web Resources
+        return sortWebResources(europeanaId, unsorted, validResourceIds);
+    }
+
+    private static List<WebResource> getWebResourcesWithValidId(Object jsonDoc,
+        List<String> validWebResources) {
         WebResource[] webResources = JsonPath.parse(jsonDoc).read("$.object.aggregations[*].webResources[*]", WebResource[].class);
         List<WebResource> unsorted = new ArrayList<>();
         for (WebResource wr : webResources) {
@@ -177,7 +162,38 @@ public final class EdmManifestUtils {
                 LOG.debug("Skipping webresource {}", wr.getId());
             }
         }
+        return unsorted;
+    }
 
+    private static List<String> gatherValidWebResourceIds(String edmIsShownBy, Object jsonDoc) {
+        String[][] hasViews = JsonPath.parse(jsonDoc).read("$.object.aggregations[*].hasView", String[][].class);
+        List<String> validValues = new ArrayList<>();
+        validValues.add(edmIsShownBy);
+
+        ArrayList<String> resources = JsonPath.parse(jsonDoc).read("$.object.aggregations[*].isShownAt", ArrayList.class);
+        for(String isShownAt : resources) {
+            if (isEuScreen(isShownAt)) {
+                validValues.add(isShownAt);
+            }
+        }
+
+        LOG.trace("edmIsShownBy = {}", edmIsShownBy);
+        for (String[] hasView : hasViews) {
+            for (String view: hasView) {
+                // check for duplicates
+                if (!validValues.contains(view)) {
+                    validValues.add(view);
+                }
+            }
+            for (String hv : hasView) {
+                LOG.trace("hasView = {}", hv);
+            }
+        }
+        return validValues;
+    }
+
+    private static List<WebResource> sortWebResources(String europeanaId, List<WebResource> unsorted,
+        List<String> validWebResources) {
         List<WebResource> sorted;
         try {
             sorted = WebResourceSorter.sort(unsorted, validWebResources);
