@@ -385,7 +385,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
             return null;
         }
         int order = 1;
-        Map<String, Object>[] services = JsonPath.parse(jsonDoc).read("$.object[?(@.services)].services[*]", Map[].class);
+
         List<Canvas> canvases = new ArrayList<>(sortedResources.size());
         for (WebResource webResource: sortedResources) {
             Canvas canvas = getCanvasV3(settings, mediaTypes, europeanaId, order, webResource);
