@@ -32,6 +32,6 @@ public class MappingTable {
 	public static Map<String, MappingEntry> getMap() {
 		return map;
 	}
-	public  static record MappingEntry(MediaGeneratorType v2, MediaGeneratorType v3) {}
+	public record MappingEntry(MediaGeneratorType v2, MediaGeneratorType v3) {}
 
 }

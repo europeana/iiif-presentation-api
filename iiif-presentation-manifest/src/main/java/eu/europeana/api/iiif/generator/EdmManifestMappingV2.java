@@ -323,10 +323,9 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
             return null;
         }
         int order = 1;
-        Map<String, Object>[] services = JsonPath.parse(jsonDoc).read("$.object[?(@.services)].services[*]", Map[].class);
-        List<Canvas> canvases = new ArrayList<>(sortedResources.size());
+         List<Canvas> canvases = new ArrayList<>(sortedResources.size());
         for (WebResource webResource: sortedResources) {
-            Canvas canvas = getCanvasV2(settings, mediaTypes, europeanaId, order, webResource, services);
+            Canvas canvas = getCanvasV2(settings, mediaTypes, europeanaId, order, webResource);
             // for non supported media types we do not create any canvas. Case-4 of media type handling : See-EA-3413
             if (canvas != null) {
                 canvases.add(canvas);
@@ -366,10 +365,9 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
                                MediaTypeCatalog mediaTypes,
                                String europeanaId,
                                int order,
-                               WebResource webResource,
-                               Map<String, Object>[] services) {
+                               WebResource webResource) {
 
-    	Canvas c = new Canvas(settings.getCanvasId(europeanaId, order));
+        Canvas c = new Canvas(settings.getCanvasId(europeanaId, order));
         c.setLabel(new LanguageValue("p. "+order));
 
         if (EdmManifestUtils.isEuScreen(webResource.getId())) {
