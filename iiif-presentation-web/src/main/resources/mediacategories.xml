@@ -1,42 +1,70 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <config>
-        <format mediaType="image/gif"                    label="GIF"         category="Image"/>
-        <format mediaType="image/jpeg"                   label="JPEG"        category="Image"/>
-        <format mediaType="image/png"                    label="PNG"         category="Image"/>
-        <format mediaType="image/bmp"                    label="BMP"         category="Image"/>
-        <format mediaType="image/x-ms-bmp"               label="BMP"         category="Image"/>
-        <format mediaType="image/svg+xml"                label="SVG"         category="Image"/>
-        <format mediaType="image/webp"                   label="WebP"        category="Image"/>
-        <format mediaType="audio/mp4"                    label="MP4"         category="Sound"/>
-        <format mediaType="audio/mpeg"                   label="MPEG"        category="Sound"/>
-        <format mediaType="audio/ogg"                    label="Ogg (Audio)" category="Sound"/>
-        <format mediaType="audio/vnd.wave"               label="WAVE"        category="Sound"/>
-        <format mediaType="audio/vorbis"                 label="Vorbis"      category="Sound"/>
-        <format mediaType="audio/x-flac"                 label="FLAC"        category="Sound"/>
-        <format mediaType="audio/x-wav"                  label="WAV"         category="Sound"/>
-        <format mediaType="video/ogg"                    label="Ogg (Video)" category="Video"/>
-        <format mediaType="video/mp4"                    label="MP4"         category="Video"/>
-        <format mediaType="video/mpeg"                   label="MPEG"        category="Video"/>
-        <format mediaType="video/quicktime"              label="QTFF"        category="Video"/>
-        <format mediaType="video/webm"                   label="WebM"        category="Video"/>
-        <format mediaType="video/x-m4v"                  label="M4V"         category="Video"/>
-        <format mediaType="application/dash+xml"         label="MPEG-DASH"   category="Video"/>
-        <format mediaType="video/x-flv"                  label="FLV"         category="Video"/>
-        <format mediaType="audio/x-ms-wma"               label="WMA"         category="Sound"/>
-        <format mediaType="video/x-ms-wmv"               label="WMV"         category="Video"/>
-        <format mediaType="video/x-msvideo"              label="AVI"         category="Video"/>
-        <format mediaType="image/jp2"                    label="JP2000"      category="Image"/>
-        <format mediaType="image/x-pict"                 label="PICT"        category="Image"/>
-        <format mediaType="image/tiff"                   label="TIFF"        category="Image"/>
-        <format mediaType="image/x-xcf"                  label="XCF"         category="Image"/>
-        <format mediaType="image/vnd.djvu"               label="DjVu"        category="Image"/>
-        <format mediaType="image/vnd.adobe.photoshop"    label="PSD"         category="Image"/>
-        <format mediaType="text/plain"                   label="TXT"         category="Text" />
-        <format mediaType="application/pdf"              label="PDF"         category="Text" />
-        <format mediaType="application/rtf"              label="RTF"         category="Text" />
-        <format mediaType="application/epub+zip"         label="EPUB"        category="Text" />
-        <format mediaType="application/json+oembed"      label="oEmbed"      category="EmbeddableResource"/>
-        <format mediaType="application/xml+oembed"       label="oEmbed"      category="EmbeddableResource"/>
+        <format mediaType="image/gif"                    label="GIF"         category="Image" />
+        <format mediaType="image/jpeg"                   label="JPEG" category="Image" />
+        <format mediaType="image/png"                    label="PNG" category="Image" />
+        <format mediaType="image/bmp"                    label="BMP" category="Image" />
+        <format mediaType="image/x-ms-bmp"               label="BMP" category="Image" />
+        <format mediaType="image/svg+xml"                label="SVG" category="Image" />
+        <format mediaType="image/webp"                   label="WebP" category="Image" />
+        <format mediaType="audio/mp4"                    label="MP4" category="Sound" />
+        <format mediaType="audio/mpeg"                   label="MPEG" category="Sound" />
+        <format mediaType="audio/ogg"                    label="Ogg (Audio)" category="Sound" />
+        <format mediaType="audio/vnd.wave"               label="WAVE" category="Sound" />
+        <format mediaType="audio/vorbis"                 label="Vorbis" category="Sound" />
+        <format mediaType="audio/x-flac"                 label="FLAC" category="Sound" />
+        <format mediaType="audio/x-wav"                  label="WAV" category="Sound" />
+        <format mediaType="video/ogg"                    label="Ogg (Video)" category="Video" />
+        <format mediaType="video/mp4"                    label="MP4" category="Video" />
+        <format mediaType="video/mpeg"                   label="MPEG" category="Video" />
+        <format mediaType="video/quicktime"              label="QTFF" category="Video" />
+        <format mediaType="video/webm"                   label="WebM" category="Video" />
+        <format mediaType="video/x-m4v"                  label="M4V" category="Video" />
+        <format mediaType="application/dash+xml"         label="MPEG-DASH" category="Video" />
+        <format mediaType="audio/x-aiff"                 label="AIFF" category="Sound" />
+        <format mediaType="video/x-flv"                  label="FLV" category="Video" />
+        <format mediaType="audio/x-ms-wma"               label="WMA" category="Sound" />
+        <format mediaType="video/x-ms-wmv"               label="WMV" category="Video" />
+        <format mediaType="video/x-msvideo"              label="AVI" category="Video" />
+        <format mediaType="audio/amr"                    label="AMR" category="Sound" />
+        <format mediaType="video/x-matroska"             label="MKV" category="Video" />
+        <format mediaType="image/jp2"                    label="JP2000" category="Image" />
+        <format mediaType="image/jpeg2000-image"         label="JP2000" category="Image" />
+        <format mediaType="image/x-jpeg2000-image"       label="JP2000" category="Image" />
+        <format mediaType="image/x-jp2-codestream"       label="JP2000" category="Image" />
+        <format mediaType="image/jpeg2000"               label="JP2000" category="Image" />
+        <format mediaType="image/jpx"                    label="JP2000" category="Image" />
+        <format mediaType="image/x-pict"                 label="PICT" category="Image" />
+        <format mediaType="image/tiff"                   label="TIFF" category="Image" />
+        <format mediaType="image/x-xcf"                  label="XCF" category="Image" />
+        <format mediaType="image/vnd.djvu"               label="DjVu" category="Image" />
+        <format mediaType="image/vnd.adobe.photoshop"    label="PSD" category="Image" />
+        <format mediaType="text/plain"                   label="TXT" category="Text" />
+        <format mediaType="application/pdf"              label="PDF" category="Text" />
+        <format mediaType="application/rtf"              label="RTF" category="Text" />
+        <format mediaType="application/epub+zip"         label="EPUB" category="Text" />
+        <format mediaType="application/vnd.las"          label="LAS" category="Model" />
+        <format mediaType="application/vnd.laszip"       label="LAZ" category="Model" />
+        <format mediaType="model/e57"                    label="E57" category="Model" />
+        <format mediaType="image/vnd.dxf"                label="DXF" category="Model" />
+        <format mediaType="model/obj"                    label="OBJ" category="Model" />
+        <format mediaType="model/vnd.collada+xml"        label="DAE" category="Model" />
+        <format mediaType="model/stl"                    label="STL" category="Model" />
+        <format mediaType="model/iges"                   label="IGES" category="Model" />
+        <format mediaType="model/step"                   label="STEP" category="Model" />
+        <format mediaType="model/step+xml"               label="STEP" category="Model" />
+        <format mediaType="model/step+zip"               label="STEP" category="Model" />
+        <format mediaType="model/step-xml+zip"           label="STEP" category="Model" />
+        <format mediaType="model/vrml"                   label="VRML" category="Model" />
+        <format mediaType="model/x3d+xml"                label="X3D" category="Model" />
+        <format mediaType="model/x3d+fastinfoset"        label="X3D" category="Model" />
+        <format mediaType="model/x3d-vrml"               label="X3D" category="Model" />
+        <format mediaType="model/gltf+json"              label="glTF" category="Model" />
+        <format mediaType="model/gltf-binary"            label="glTF" category="Model" />
+        <format mediaType="model/vnd.usda"               label="USD" category="Model" />
+        <format mediaType="model/vnd.usdz+zip"           label="USD" category="Model" />
+        <format mediaType="application/json+oembed"      label="oEmbed" category="EmbeddableResource" />
+        <format mediaType="application/xml+oembed"       label="oEmbed" category="EmbeddableResource" />
 <!--        <format                                                              category="Video"/>-->
 <!--        <format                                                              category="Sound"/>-->
 </config>
