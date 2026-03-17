@@ -6,6 +6,7 @@ import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.service.WebResourceSorter;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
 import eu.europeana.api.iiif.v3.model.content.Text;
+import eu.europeana.api.record.model.SvcsService;
 import eu.europeana.api.record.model.WebResource;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,14 +36,8 @@ public final class EdmManifestUtils {
     public static final String ABOUT = "about";
     public static final String TEXT_ATTRIB_SNIPPET = "textAttributionSnippet";
     public static final String HTML_ATTRIB_SNIPPET = "htmlAttributionSnippet";
-    public static final String EBUCORE_HEIGHT = "ebucoreHeight";
-    public static final String EBUCORE_WIDTH = "ebucoreWidth";
     public static final String SVCS_HAS_SERVICE = "svcsHasService";
-    public static final String WEB_RESOURCE_EDM_RIGHTS = "webResourceEdmRights";
-    public static final String EBUCORE_DURATION = "ebucoreDuration";
-    public static final String EBUCORE_HAS_MIMETYPE = "ebucoreHasMimeType";
     public static final String LINGUISTIC = "zxx";
-    public static final String SERVICE = "Service";
     public static final List<String> EMBEDED_RESOURCE_MIME_TYPES = List.of("application/json+oembed","application/xml+oembed");
 
     private EdmManifestUtils() {
@@ -146,8 +141,32 @@ public final class EdmManifestUtils {
         List<String> validResourceIds = gatherValidWebResourceIds(edmIsShownBy, jsonDoc);
         // get all web resources and check if they are edmIsShownBy or hasView
         List<WebResource> unsorted = getWebResourcesWithValidId(jsonDoc, validResourceIds);
+        //Enrich with required details
+        updateWebResourceData(jsonDoc,europeanaId,unsorted);
         //return sorted Web Resources
         return sortWebResources(europeanaId, unsorted, validResourceIds);
+    }
+
+    /**
+     * Read the Service elements from the json received from record api,
+     * Iterate over Web Resources. If the 'svcHasService' of web resource matches with the service->'about'
+     *  then that service is associated to that web resource.
+     */
+    private static void updateWebResourceData(Object jsonDoc, String europeanaId, List<WebResource> resourceList) {
+        SvcsService[] seviceArray = JsonPath.parse(jsonDoc).read("$.object[?(@.services)].services[*]",SvcsService[].class);
+
+        if(seviceArray != null && seviceArray.length >0 ) {
+            for (WebResource webResource : resourceList) {
+                List<SvcsService> relatedServices = new ArrayList<>();
+                for (SvcsService service : seviceArray) {
+                    String about = service.getId();
+                    if (about != null && about.equalsIgnoreCase(getServiceId(webResource, europeanaId))) {
+                        relatedServices.add(service);
+                    }
+                }
+                webResource.setServices(relatedServices);
+            }
+        }
     }
 
     private static List<WebResource> getWebResourcesWithValidId(Object jsonDoc,
