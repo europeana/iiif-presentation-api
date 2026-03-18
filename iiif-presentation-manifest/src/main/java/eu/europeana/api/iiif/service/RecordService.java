@@ -1,21 +1,9 @@
 package eu.europeana.api.iiif.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
-import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
-import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
-import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
-import eu.europeana.api.iiif.exceptions.InvalidArgumentException;
-import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
-import eu.europeana.api.record.model.Record;
-import eu.europeana.api.record.model.RecordResponse;
-import eu.europeana.api.record.serialization.BeanLifecycleModifier;
-import eu.europeana.api.iiif.exceptions.RecordNotFoundException;
-import eu.europeana.api.iiif.exceptions.RecordRetrievalException;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -23,19 +11,24 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.jayway.jsonpath.spi.json.JsonProvider;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
+import eu.europeana.api.iiif.exceptions.InvalidArgumentException;
+import eu.europeana.api.iiif.exceptions.RecordNotFoundException;
+import eu.europeana.api.iiif.exceptions.RecordRetrievalException;
+import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
+import eu.europeana.api.record.model.RecordResponse;
+import eu.europeana.api.record.serialization.BeanLifecycleModifier;
 
-import static com.jayway.jsonpath.Configuration.defaultConfiguration;
 import static eu.europeana.api.commons_sb3.error.EuropeanaErrorConstants.*;
-import static eu.europeana.api.commons_sb3.error.EuropeanaErrorConstants.code;
 
 @Service
 public class RecordService extends BaseService {
