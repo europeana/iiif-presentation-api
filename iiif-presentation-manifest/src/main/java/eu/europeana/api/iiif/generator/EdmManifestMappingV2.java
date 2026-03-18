@@ -1,21 +1,19 @@
 package eu.europeana.api.iiif.generator;
 
-import com.jayway.jsonpath.Filter;
-import com.jayway.jsonpath.JsonPath;
-
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
-import eu.europeana.api.iiif.generator.utils.MediaGenerator;
-import eu.europeana.api.iiif.generator.utils.MediaGeneratorType;
-import eu.europeana.api.iiif.generator.utils.MediaGeneratorVersion;
-import eu.europeana.api.iiif.generator.utils.MediaGeneratorRegistry;
+import eu.europeana.api.iiif.generator.media.MediaGeneratorRegistry;
+import eu.europeana.api.iiif.generator.media.MediaGeneratorType;
+import eu.europeana.api.iiif.generator.media.MediaGeneratorVersion;
 import eu.europeana.api.iiif.media.MappingTable;
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.media.MediaTypeCatalog;
 import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
-import eu.europeana.api.iiif.utils.EdmManifestUtils;
 import eu.europeana.api.iiif.utils.LanguageMapUtils;
 import eu.europeana.api.iiif.v2.model.*;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
+import eu.europeana.api.record.model.Aggregation;
+import eu.europeana.api.record.model.Proxy;
+import eu.europeana.api.record.model.Record;
 import eu.europeana.api.record.model.WebResource;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,8 +22,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
-import static com.jayway.jsonpath.Filter.filter;
-import static com.jayway.jsonpath.Criteria.where;
 import static eu.europeana.api.iiif.generator.ManifestGeneratorUtils.*;
 import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.*;
 
@@ -44,18 +40,17 @@ import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.*;
 public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     private static final Logger LOG = LogManager.getLogger(EdmManifestMappingV2.class);
+    private static final MediaGeneratorVersion VERSION = MediaGeneratorVersion.V2;
 
-    public static final MediaGeneratorVersion VERSION = MediaGeneratorVersion.V2;
-
-    private ManifestSettings    settings;
-    private MediaTypeCatalog    mediaTypes;
+    private ManifestSettings       settings;
+    private MediaTypeCatalog       mediaTypes;
     private MediaGeneratorRegistry registry;
 
     public EdmManifestMappingV2(ManifestSettings settings
                               , MediaTypeCatalog mediaTypes, MediaGeneratorRegistry registry) {
-        this.settings        = settings;
-        this.mediaTypes      = mediaTypes;
-        this.registry        = registry;
+        this.settings   = settings;
+        this.mediaTypes = mediaTypes;
+        this.registry   = registry;
     }
 
     /**
@@ -63,29 +58,27 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @param jsonDoc parsed json document
      * @return IIIF Manifest v2 object
      */
-    public Manifest generateManifest(Object jsonDoc) {
-        String europeanaId = EdmManifestUtils.getEuropeanaId(jsonDoc);
-        String isShownBy = EdmManifestUtils.getValueFromDataProviderAggregation(jsonDoc, europeanaId, "edmIsShownBy");
-        Manifest manifest = new Manifest(settings.getManifestId(europeanaId));
-        manifest.getServices().add(getServiceDescriptionV2(settings, europeanaId));
-        // EA-3325
-//        manifest.setWithin(getWithinV2(jsonDoc));
-        manifest.setLabel(getLabelsV2(jsonDoc));
-        manifest.getDescription().addAll(getDescriptionV2(jsonDoc));
-        manifest.getMetadata().addAll(getMetaDataV2(jsonDoc));
-        manifest.setThumbnail(getThumbnailImageV2(europeanaId, jsonDoc));
-        manifest.setNavDate(EdmManifestUtils.getNavDate(europeanaId, jsonDoc));
-        manifest.setAttribution(getAttributionV2(europeanaId, isShownBy, jsonDoc));
-        manifest.setLicense(getLicense(europeanaId, jsonDoc));
-        manifest.setLogo(new Image(ManifestGeneratorConstants.EUROPEANA_LOGO_URL));
-        manifest.setSeeAlso(getDataSetsV2(settings, europeanaId));
-        List<Sequence> sequences = getSequencesV2(settings, mediaTypes, europeanaId, isShownBy, jsonDoc);
-        if (sequences != null) {
-            manifest.setSequences(sequences);
+    public Manifest generateManifest(Record record) {
 
-        } else {
-            LOG.debug("No Canvas generated for europeanaId {}", europeanaId);
-        }
+        String europeanaId = record.getId();
+        Manifest manifest = new Manifest(settings.getManifestId(europeanaId));
+        manifest.getServices().add(getServiceDescription(europeanaId));
+
+        Aggregation aggr = record.getProviderAggregation();
+        Proxy proxy = record.getProxy();
+        manifest.setLabel(getLabels(proxy));
+        manifest.getDescription().addAll(getDescription(proxy));
+        addMetaDataV2(proxy, manifest.getMetadata());
+        manifest.setThumbnail(getThumbnailImageV2(record));
+        manifest.setNavDate(getNavDate(proxy));
+        manifest.setAttribution(getAttribution(aggr));
+        manifest.setLicense(aggr.getRights());
+        manifest.setLogo(new Image(ManifestGeneratorConstants.EUROPEANA_LOGO_URL));
+        addRelated(record, manifest);
+        addDataSets(record, manifest);
+
+        addSequences(record, manifest);
+
         return manifest;
     }
 
@@ -118,7 +111,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
                 LOG.warn("Possible inconsistent data. No fulltext annopage found for record {} page {}. Generated hash = {}",
                         manifest.getID(), canvas.getID(), apHash);
             } else {
-                addFulltextLinkToCanvasV2(canvas, ftCanvas);
+                addFulltextLinkToCanvas(canvas, ftCanvas);
             }
         }
 
@@ -152,7 +145,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         */
     }
 
-    private void addFulltextLinkToCanvasV2(Canvas canvas, FulltextSummaryCanvas summaryCanvas) {
+    private void addFulltextLinkToCanvas(Canvas canvas, FulltextSummaryCanvas summaryCanvas) {
         canvas.getOtherContent().addAll(summaryCanvas.getAnnoPageIDs());
         for (eu.europeana.api.iiif.v2.model.Annotation ann : canvas.getImages()) {
             // original language will be null for translation
@@ -165,7 +158,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
     /**
      * Generates a service description for the manifest
      */
-    private Service getServiceDescriptionV2(ManifestSettings settings, String europeanaId) {
+    private Service getServiceDescription(String europeanaId) {
         Service service = new Service(settings.getContentSearchURL(europeanaId));
         service.setContext(ManifestGeneratorConstants.SEARCH_CONTEXT_VALUE);
         service.setProfile(ManifestGeneratorConstants.SEARCH_PROFILE_VALUE);
@@ -183,13 +176,8 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @param jsonDoc parsed json document
      * @return array of LanguageObject
      */
-    private LanguageValue getLabelsV2(Object jsonDoc) {
-        // we read everything in as LanguageMap[] because that best matches the EDM implementation, then we convert to LanguageObjects[]
-        LanguageMap labelsV3 = getLabels(jsonDoc);
-        if (labelsV3 == null) {
-            return null;
-        }
-        return LanguageMapUtils.langMapToObject(labelsV3);
+    private LanguageValue getLabels(Proxy proxy) {
+        return LanguageMapUtils.langMapToObject(proxy.getTitleOrDescription());
     }
 
     /**
@@ -197,13 +185,8 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @param jsonDoc parsed json document
      * @return
      */
-    private List<LanguageValue> getDescriptionV2(Object jsonDoc) {
-        // we read everything in as LanguageMap[] because that best matches the EDM implementation, then we convert to LanguageObjects[]
-        LanguageMap descriptionsV3 = getDescription(jsonDoc);
-        if (descriptionsV3 == null) {
-            return Collections.emptyList();
-        }
-        return LanguageMapUtils.langMapToObjects(getDescription(jsonDoc));
+    private List<LanguageValue> getDescription(Proxy proxy) {
+        return LanguageMapUtils.langMapToObjects(proxy.getDescription());
     }
 
     /**
@@ -212,67 +195,39 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @param jsonDoc parsed json document
      * @return
      */
-    private List<LabelledValue> getMetaDataV2(Object jsonDoc) {
-        // fieldname , list of values
-        Map<String, List<LanguageValue>> data = new LinkedHashMap<>();
-        addMetaDataV2(data, JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcDate", LanguageMap[].class), "date");
-        addMetaDataV2(data, JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcFormat", LanguageMap[].class), "format");
-        addMetaDataV2(data, JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcRelation", LanguageMap[].class), "relation");
-        addMetaDataV2(data, JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcType", LanguageMap[].class), "type");
-        addMetaDataV2(data, JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcLanguage", LanguageMap[].class), "language");
-        addMetaDataV2(data, JsonPath.parse(jsonDoc).read("$.object.proxies[*].dcSource", LanguageMap[].class), "source");
-
-        List<LabelledValue> result = new ArrayList<>(data.entrySet().size());
-        for (Map.Entry<String, List<LanguageValue>> entry : data.entrySet()) {
-            String label = entry.getKey();
-            List<LanguageValue> values = entry.getValue();
-            result.add(new LabelledValue(label, values));
-        }
-
-        if (result.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return result;
+    private void addMetaDataV2(Proxy proxy, List<LabelledValue> ret) {
+        addMetaDataV2("date", proxy.getDate(), ret);
+        addMetaDataV2("format", proxy.getFormat(), ret);
+        addMetaDataV2("relation", proxy.getRelation(), ret);
+        addMetaDataV2("type", proxy.getType(), ret);
+        addMetaDataV2("language", proxy.getLanguage(), ret);
+        addMetaDataV2("source", proxy.getSource(), ret);
     }
 
-    /**
-     * We read in metadata as a LanguageMap[], but we need to convert it to Map consisting of labels and List<LanguageObjects>
-     * Also if the key is 'def' we should leave that out (for v2)
-     */
-    private void addMetaDataV2(Map<String, List<LanguageValue>> metaData, LanguageMap[] dataToAdd, String fieldName) {
-        for (LanguageMap map : dataToAdd) {
-            for (Map.Entry<String, List<String>> entry : map.entrySet()) {
-                String language = entry.getKey();
-                List<String> values = entry.getValue();
-                for (String value: values) {
-                    processMetaDataField(fieldName, metaData, language, value);
-                }
+    private void addMetaDataV2(String fieldName, LanguageMap map
+                             , List<LabelledValue> dest) {
+        if ( map.isEmpty() ) { return; }
+
+        List<LanguageValue> list = new ArrayList<>();
+        for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+            String lang = entry.getKey();
+            List<String> values = entry.getValue();
+            for ( String value : values ) {
+                list.add(new LanguageValue(lang, value));
             }
         }
+        dest.add(new LabelledValue(fieldName, list));
     }
 
-    private void processMetaDataField(String fieldName,  Map<String, List<LanguageValue>> metaData, String language, String value) {
-        List<LanguageValue> langObjects;
-        if (!metaData.containsKey(fieldName)) {
-            langObjects = new ArrayList<>();
-            metaData.put(fieldName, langObjects);
-        } else {
-            langObjects = metaData.get(fieldName);
-        }
-        langObjects.add(new LanguageValue(value, language));
-    }
 
     /**
      * Return an with the id of the thumbnail as defined in 'europeanaAggregation.edmPreview'
      * @param jsonDoc parsed json document
      * @return Image object, or null if no edmPreview was found
      */
-    private Image getThumbnailImageV2(String europeanaId, Object jsonDoc) {
-        String thumbnailId = EdmManifestUtils.getThumbnailId(europeanaId, jsonDoc);
-        if (StringUtils.isEmpty(thumbnailId)) {
-            return null;
-        }
-        return new Image(EdmManifestUtils.getThumbnailId(europeanaId, jsonDoc));
+    private Image getThumbnailImageV2(Record record) {
+    	String preview = record.getPreview();
+        return (StringUtils.isEmpty(preview) ? null : new Image(preview) );
     }
 
     /**
@@ -283,11 +238,20 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @param jsonDoc parsed json document
      * @return
      */
-    private String getAttributionV2(String europeanaId, String isShownBy, Object jsonDoc) {
-        Filter isShownByFilter = filter(where(EdmManifestUtils.ABOUT).is(isShownBy));
-        String[] attributions = JsonPath.parse(jsonDoc).
-                read("$.object.aggregations[*].webResources[?]." + EdmManifestUtils.TEXT_ATTRIB_SNIPPET, String[].class, isShownByFilter);
-        return (String) EdmManifestUtils.getFirstValueArray(EdmManifestUtils.TEXT_ATTRIB_SNIPPET, europeanaId, attributions);
+    private String getAttribution(Aggregation aggr) {
+        WebResource wr = aggr.getIsShownByResource();
+        if ( wr != null ) { wr = aggr.getIsShownAtResource(); }
+
+        return ( wr == null ? null : wr.getTextAttributionSnippet() );
+    }
+
+    private void addRelated(Record record, Manifest manifest) {
+        String landingPage = record.getLandingPage();
+        if ( landingPage == null ) { return; }
+
+        manifest.getRelated().add(
+            new ResourceReference(landingPage, "Europeana Website"
+                               , "text/html") );
     }
 
 
@@ -296,18 +260,17 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
      * @return array of 3 datasets
      */
-    private List<Dataset> getDataSetsV2(ManifestSettings settings, String europeanaId) {
-        List<Dataset> result = new ArrayList<>(3);
-        result.add(new Dataset(settings.getDatasetId(europeanaId, ".json-ld")
-        		             , AcceptUtils.MEDIA_TYPE_JSONLD
-        		             , EDM_SCHEMA_URL));
-        result.add(new Dataset(settings.getDatasetId(europeanaId, ".json")
-        		             , org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-        		             , EDM_SCHEMA_URL));
-        result.add(new Dataset(settings.getDatasetId(europeanaId, ".rdf")
-        		             , ManifestGeneratorConstants.MEDIA_TYPE_RDF
-                             , EDM_SCHEMA_URL));
-        return result;
+    private void addDataSets(Record record, Manifest manifest) {
+        String id = record.getId();
+        manifest.getSeeAlso().add(new Dataset(settings.getDatasetId(id, ".json-ld")
+                                , AcceptUtils.MEDIA_TYPE_JSONLD
+                                , EDM_SCHEMA_URL));
+        manifest.getSeeAlso().add(new Dataset(settings.getDatasetId(id, ".json")
+                                , org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+                                , EDM_SCHEMA_URL));
+        manifest.getSeeAlso().add(new Dataset(settings.getDatasetId(id, ".rdf")
+                                , ManifestGeneratorConstants.MEDIA_TYPE_RDF
+                                , EDM_SCHEMA_URL));
     }
 
     /**
@@ -316,78 +279,58 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @param jsonDoc parsed json document
      * @return
      */
-    private List<Sequence> getSequencesV2(ManifestSettings settings, MediaTypeCatalog mediaTypes,String europeanaId, String isShownBy, Object jsonDoc) {
-        // generate canvases in a same order as the web resources
-        List<WebResource> sortedResources = EdmManifestUtils.getSortedWebResources(europeanaId, isShownBy, jsonDoc);
-        if (sortedResources.isEmpty()) {
-            return null;
-        }
+    private void addSequences(Record record, Manifest manifest) {
+
+    	List<WebResource> views = record.getProviderAggregation().getOrderedViews();
+    	if ( views.isEmpty() ) { 
+            LOG.debug("No Canvas generated for europeanaId {}", record.getId());
+    		return; 
+    	}
+
         int order = 1;
-         List<Canvas> canvases = new ArrayList<>(sortedResources.size());
-        for (WebResource webResource: sortedResources) {
-            Canvas canvas = getCanvasV2(settings, mediaTypes, europeanaId, order, webResource);
+        List<Canvas> canvases = new ArrayList<>(views.size());
+        for (WebResource webResource : views) {
+            Canvas canvas = getCanvas(webResource, order);
             // for non supported media types we do not create any canvas. Case-4 of media type handling : See-EA-3413
-            if (canvas != null) {
-                canvases.add(canvas);
-                order++;
-            }
+            if (canvas == null) { continue; }
+
+            canvases.add(canvas);
+            order++;
         }
+
         // if there are canvas generated add the sequence
         if (!canvases.isEmpty()) {
             // there should be only 1 sequence, so sequence number is always 1
-            List<Sequence> result = new ArrayList<>(1);
             Sequence sequence = new Sequence();
-            sequence.setStartCanvas(settings.getCanvasId(europeanaId, 1));
+            sequence.setStartCanvas(canvases.get(0).getID());
             sequence.setCanvases(canvases);
             sequence.setLabel(new LanguageValue("Current Page Order"));
-            result.add(sequence);
-            return result;
+        	manifest.getSequences().add(sequence);
         }
-        return null;
     }
 
-
-    /**
-     * Return the first license description we find in any 'aggregation.edmRights' field. Note that we first try the europeanaAggregation and if
-     * that doesn't contain an edmRights, we check the other aggregations
-     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
-     * @param jsonDoc parsed json document
-     * @return String containing rights information
-     */
-    private String getLicense(String europeanaId, Object jsonDoc) {
-        return EdmManifestUtils.getLicenseText(europeanaId, jsonDoc);
-    }
 
     /**
      * Generates a new canvas, but note that we do not fill the otherContent (Full-Text) here. That is done later
      */
-    private Canvas getCanvasV2(ManifestSettings settings,
-                               MediaTypeCatalog mediaTypes,
-                               String europeanaId,
-                               int order,
-                               WebResource webResource) {
+    private Canvas getCanvas(WebResource wr, int order) {
 
-        Canvas c = new Canvas(settings.getCanvasId(europeanaId, order));
-        c.setLabel(new LanguageValue("p. "+order));
+        Canvas c = new Canvas(settings.getCanvasId(wr, order));
+        c.setLabel(new LanguageValue("p. " + order));
 
-        if (EdmManifestUtils.isEuScreen(webResource.getId())) {
-            MediaGenerator<Canvas> generator = registry.getGenerator(MediaGeneratorType.EUSCREEN,
-                VERSION);
-            return generator.generate(c,webResource);
-            //return MediaGeneratorType.euscreen.generate(c, webResource);
+        if (isEuScreen(wr.getId())) {
+            return (Canvas)registry.getGenerator(MediaGeneratorType.EUSCREEN, VERSION)
+                                   .generate(c, wr);
         }
 
         // get the configured media type of the mimetype
-        String mimeType = webResource.getMimeType();
+        String mimeType = wr.getMimeType();
         Optional<MediaType> media = mediaTypes.getMediaType(mimeType);
         if (media.isEmpty()) { return null; }
 
-        webResource.setMediaType(media.get());
+        wr.setMediaType(media.get());
 
-        MediaGenerator<Canvas> generator = registry.getGenerator(MappingTable.getGeneratorTypeV2(mimeType),
-            VERSION);
-        return generator.generate(c,webResource);
-
-
+        return (Canvas)registry.getGenerator(MappingTable.getGeneratorTypeV2(mimeType), VERSION)
+                               .generate(c, wr);
     }
 }

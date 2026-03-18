@@ -20,7 +20,7 @@ import eu.europeana.api.iiif.v2.io.JsonConstants;
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonPropertyOrder({ id, type, label, format, service })
 @SuppressWarnings("javaarchitecture:S7091")
-public abstract class ContentResource extends IIIFv2Resource {
+public class ContentResource extends IIIFv2Resource {
 
     @JsonProperty(JsonConstants.label)
     private LanguageValue label;
@@ -39,6 +39,11 @@ public abstract class ContentResource extends IIIFv2Resource {
     public ContentResource(String id, String format) {
         super(id);
         this.format = format;
+    }
+
+    public ContentResource(String id, LanguageValue label, String format) {
+        this(id, format);
+        this.label = label;
     }
 
     protected ContentResource() {}
@@ -68,5 +73,10 @@ public abstract class ContentResource extends IIIFv2Resource {
 
     public void setService(Service service) {
         this.service = service;
+    }
+
+    @Override
+    public String getType() {
+        return null;
     }
 }

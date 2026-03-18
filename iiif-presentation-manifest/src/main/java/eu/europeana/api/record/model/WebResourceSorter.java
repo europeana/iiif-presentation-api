@@ -1,4 +1,4 @@
-package eu.europeana.api.iiif.service;
+package eu.europeana.api.record.model;
 
 import eu.europeana.api.iiif.exceptions.DataInconsistentException;
 import eu.europeana.api.record.model.WebResource;
@@ -42,7 +42,7 @@ public final class WebResourceSorter {
      * @throws DataInconsistentException when
      * @return sorted array of webResources
      */
-    public static List<WebResource> sort(List<WebResource> webResources, List<String> orderViews) throws DataInconsistentException {
+    public static List<WebResource> sort(List<WebResource> webResources, Collection<String> orderViews) throws DataInconsistentException {
         LOG.trace("WebResources = {}", webResources);
 
         // to simplify/speed up processing we generate a hashmap that links all ids to the appropriate webResource object
@@ -54,7 +54,7 @@ public final class WebResourceSorter {
             if (idsWebResources.put(wrId, wr) != null) {
                 throw new DataInconsistentException("Duplicate webresource id found "+wrId);
             }
-            String nextInSequence = wr.getNextInSequence();
+            String nextInSequence = wr.getIsNextInSequence();
             idsNextInSequence.put(wrId, nextInSequence);
             LOG.trace("    {} -> {} ", wrId, nextInSequence);
         }
@@ -71,7 +71,7 @@ public final class WebResourceSorter {
             List<WebResource> sequence = getSequence(startNodeId, idsWebResources, idsNextInSequence);
             LOG.trace("  Sequence = {}", sequence);
             // add the edmIsShowmBy sequence first in the results
-            if (seqContainsEdmIsShownBy(orderViews.get(0), sequence)) {
+            if (seqContainsEdmIsShownBy(orderViews.iterator().next(), sequence)) {
                 result.addAll(0, sequence);
             } else {
                 result.addAll(sequence);
@@ -83,7 +83,7 @@ public final class WebResourceSorter {
         for (String orderId : orderViews) {
             if(idsWebResources.keySet().contains(orderId)) {
                 WebResource isolated = idsWebResources.get(orderId);
-                if (isolated.hasNextInSequence()) {
+                if (isolated.hasIsNextInSequence()) {
                     throw new DataInconsistentException("Expected webresource "+isolated.getId()+" to not have a nextInSequence value");
                 }
                 LOG.trace("  Adding ordered isolated node = {}", isolated);

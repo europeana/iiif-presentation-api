@@ -65,10 +65,10 @@ public final class LanguageMapUtils {
      * @return first language object
      */
     public static LanguageValue langMapToObject(LanguageMap map) {
+        if ( map == null ) { return null; }
+
         List<LanguageValue> result = langMapToObjects(map);
-        if (result.isEmpty()) {
-            return  new LanguageValue();
-        }
+        if (result.isEmpty()) { return new LanguageValue(); }
         return result.get(0);
     }
 }

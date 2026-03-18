@@ -1,10 +1,9 @@
-package eu.europeana.api.iiif.generator.utils.v3;
+package eu.europeana.api.iiif.generator.media.v3;
 
-import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.ATTRIBUTION_STRING;
-
-import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
-import eu.europeana.api.iiif.generator.utils.MediaGenerator;
+import eu.europeana.api.iiif.generator.ManifestSettings;
+import eu.europeana.api.iiif.generator.media.MediaGenerator;
 import eu.europeana.api.iiif.media.MediaCategory;
+import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.v3.model.Annotation;
 import eu.europeana.api.iiif.v3.model.AnnotationPage;
 import eu.europeana.api.iiif.v3.model.Canvas;
@@ -14,21 +13,30 @@ import eu.europeana.api.iiif.v3.model.LanguageMap;
 import eu.europeana.api.iiif.v3.model.content.EmbeddableResource;
 import eu.europeana.api.iiif.v3.model.content.Image;
 import eu.europeana.api.iiif.v3.model.content.Model;
+import eu.europeana.api.iiif.v3.model.content.Rendering;
 import eu.europeana.api.iiif.v3.model.content.Sound;
 import eu.europeana.api.iiif.v3.model.content.Text;
 import eu.europeana.api.iiif.v3.model.content.Video;
+import eu.europeana.api.record.model.Aggregation;
+import eu.europeana.api.record.model.Record;
 import eu.europeana.api.record.model.WebResource;
+
 import org.apache.commons.lang3.StringUtils;
 
+import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.*;
+
 public abstract class AbsMediaGeneratorV3 implements  MediaGenerator<Canvas> {
-  protected ManifestGeneratorUtils utils;
-  protected AbsMediaGeneratorV3(ManifestGeneratorUtils utils){
-      this.utils = utils;
-  }
-	public void addCanvasMetadata(Canvas canvas, WebResource webResource) {
-        canvas.setRequiredStatement(createRequiredStatementMap(webResource.getAttributionText()));
+
+    protected ManifestSettings settings;
+
+    protected AbsMediaGeneratorV3(ManifestSettings settings) {
+        this.settings = settings;
+    }
+
+    public void addCanvasMetadata(Canvas canvas, WebResource webResource) {
+        canvas.setRequiredStatement(createRequiredStatementMap(webResource.getTextAttributionSnippet()));
         canvas.setRights(createLicense(webResource.getLicense()));
-	}
+    }
 
     protected Text createLicense(String license) {
         return ( license == null ? null 
@@ -64,14 +72,14 @@ public abstract class AbsMediaGeneratorV3 implements  MediaGenerator<Canvas> {
     }
 
     protected ContentResource getAnnotationBody(String id, MediaCategory mediaCategory) {
-      return switch (mediaCategory) {
-        case VIDEO -> new Video(id);
-        case SOUND -> new Sound(id);
-        case TEXT -> new Text(id);
-        case MODEL -> new Model(id);
-        case EMBEDDABLE_RESOURCE -> new EmbeddableResource(id);
-        default -> new Image(id);
-      };
+        return switch (mediaCategory) {
+            case VIDEO -> new Video(id);
+            case SOUND -> new Sound(id);
+            case TEXT -> new Text(id);
+            case MODEL -> new Model(id);
+            case EMBEDDABLE_RESOURCE -> new EmbeddableResource(id);
+            default -> new Image(id);
+        };
      }
 
     /**
@@ -80,17 +88,44 @@ public abstract class AbsMediaGeneratorV3 implements  MediaGenerator<Canvas> {
      * @param body
      */
     protected void addTechnicalMetadata(Canvas canvas, ContentResource body) {
-      if (body instanceof Image img) {
-        img.setHeight(canvas.getHeight());
-        img.setWidth(canvas.getWidth());
-      }
-        if (body instanceof Video video) {
-          video.setHeight(canvas.getHeight());
-          video.setWidth(canvas.getWidth());
-          video.setDuration(canvas.getDuration());
+        if (body instanceof Image img) {
+            img.setHeight(canvas.getHeight());
+            img.setWidth(canvas.getWidth());
         }
+
+        if (body instanceof Video video) {
+            video.setHeight(canvas.getHeight());
+            video.setWidth(canvas.getWidth());
+            video.setDuration(canvas.getDuration());
+        }
+
         if (body instanceof Sound sound) {
-          sound.setDuration(canvas.getDuration());
+            sound.setDuration(canvas.getDuration());
+        }
+    }
+
+    protected void addRendering(WebResource wr, Canvas canvas) {
+        if ( wr == null ) { return; }
+
+        MediaType mediaType = wr.getMediaType();
+        Rendering renderingImage = new Rendering(wr.getId()
+                                               , mediaType.getCategory().name());
+        renderingImage.setFormat(mediaType.getMimeType());
+        String label = mediaType.getLabel();
+        if ( label != null ) {
+            renderingImage.setLabel(new LanguageMap(LINGUISTIC, label));
+        }
+        canvas.getRendering().add(renderingImage);
+    }
+
+    protected void handleIsFormatOf(WebResource wr, Canvas canvas) {
+        if ( !wr.hasIsFormatOf() ) { return; }
+
+        Aggregation aggr = wr.getRecord().getProviderAggregation();
+        for ( String isFormatOf : wr.getIsFormatOf() ) {
+            if ( aggr.getView(isFormatOf) != null ) { continue; }
+
+            addRendering(aggr.getWebResource(isFormatOf), canvas);
         }
     }
 }

@@ -1,22 +1,21 @@
-package eu.europeana.api.iiif.generator.utils.v3;
+package eu.europeana.api.iiif.generator.media.v3;
 
-import static eu.europeana.api.record.model.RecordConstants.*;
-import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
-import java.util.Collection;
+import eu.europeana.api.iiif.generator.ManifestSettings;
 
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.v3.model.Annotation;
 import eu.europeana.api.iiif.v3.model.Canvas;
 import eu.europeana.api.iiif.v3.model.ContentResource;
-import eu.europeana.api.iiif.v3.model.LanguageMap;
 import eu.europeana.api.iiif.v3.model.Service;
 import eu.europeana.api.iiif.v3.model.TimeMode;
 import eu.europeana.api.iiif.v3.model.content.Image;
 import eu.europeana.api.record.model.SvcsService;
 import eu.europeana.api.record.model.WebResource;
+
 import org.springframework.stereotype.Component;
 
 
+import static eu.europeana.api.iiif.generator.ManifestGeneratorUtils.*;
 import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.*;
 
 
@@ -49,18 +48,22 @@ Example:
  */
 @Component
 public class BrowserSupportedV3 extends AbsMediaGeneratorV3 {
-    public BrowserSupportedV3(ManifestGeneratorUtils utils) {
-        super(utils);
+
+    public BrowserSupportedV3(ManifestSettings settings) {
+        super(settings);
     }
+
     @Override
     public Canvas generate(Canvas canvas, WebResource wr) {
         canvas.setWidth(wr.getWidth());
         canvas.setHeight(wr.getHeight());
         canvas.setDuration(wr.getDurationInSeconds());
         addCanvasMetadata(canvas, wr);
+
         // Add thumbnail but only if it is not a IIIF image
-        if ( wr.hasService(SERVICE_TYPE_IMAGE) ) {
-            canvas.getThumbnail().add(new Image(utils.getThumbnailV2(wr)));
+        if ( wr.hasServiceByConformsTo(SERVICE_TYPE_IMAGE) ) {
+            String url = getThumbnailV2(settings, wr);
+            canvas.getThumbnail().add(new Image(url));
         }
         Annotation anno = newContentAnnotation(canvas);
         MediaType mediaType = wr.getMediaType();
@@ -72,29 +75,25 @@ public class BrowserSupportedV3 extends AbsMediaGeneratorV3 {
         anno.setBody(annoBody);
         annoBody.setFormat(mediaType.getMimeType());
         addTechnicalMetadata(canvas, annoBody);
-        handleServices(annoBody, wr.getServices());
+
+        handleServices(annoBody, wr);
+        handleIsFormatOf(wr, canvas);
+
         return canvas;
     }
-    protected void handleServices(ContentResource annoBody
-                                , Collection<SvcsService> services) {
-        if(services != null) {
-            for (SvcsService s : services) {
-                Service service = processService(s);
-                if (service == null) {
-                    continue;
-                }
-                annoBody.getServices().add(service);
-                return;
-            }
+
+    protected void handleServices(ContentResource annoBody, WebResource wr) {
+        if ( !wr.hasServices() ) { return; }
+
+        for ( SvcsService s : wr.getServicesAsResources() ) {
+
+            String type = getServiceType(s.getConformsTo());
+            if ( type == null ) { continue; }
+
+            Service service = new Service(s.getId(), type);
+            service.setProfile(s.getImplements());
+            service.setLabel(s.getLabel());
+            annoBody.getServices().add(service);
         }
-    }
-    protected Service processService(SvcsService service) {
-        String type = CONFORMS_TO_SERVICE.get(service.getConformsTo());
-        if ( type == null ) { return null; }
-        Service s = new Service(service.getId(), type);
-        s.setProfile(service.getImplements());
-        String label = service.getLabel();
-        if ( label != null) { s.setLabel(new LanguageMap(label)); }
-        return s;
     }
 }

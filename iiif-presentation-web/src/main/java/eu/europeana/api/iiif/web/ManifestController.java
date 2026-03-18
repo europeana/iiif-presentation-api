@@ -4,6 +4,7 @@ import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.CachingUtils;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.record.model.Record;
 import eu.europeana.api.iiif.config.BuildInfo;
 import eu.europeana.api.iiif.exceptions.InvalidIIIFVersionException;
 import eu.europeana.api.iiif.exceptions.ManifestInvalidUrlException;
@@ -52,7 +53,7 @@ public class ManifestController {
     private final BuildInfo           buildInfo;
     private ManifestSettings          settings;
     private IIIFAuthorizationService  authService;
-    private IIIFJsonHandler iiifJsonHandler;
+    private IIIFJsonHandler           iiifJsonHandler;
 
     @Autowired
     public ManifestController(BuildInfo buildInfo
@@ -163,7 +164,7 @@ public class ManifestController {
                     String endpoint 
                         = ( recordApi == null ? settings.getRecordApiEndpoint() 
                                               : recordApi + settings.getRecordApiPath());
-                    data.record = recordService.getRecordJson(endpoint, id, auth, reqHeaders, caching);
+                    data.record = recordService.getRecordJson(endpoint, id, auth, reqHeaders, caching).getRecord();
                     return true;
                 }
             },
@@ -198,7 +199,7 @@ public class ManifestController {
     }
 
     private static class SourceData {
-        public Object                             record   = null;
+        public Record                             record   = null;
         public Map<String, FulltextSummaryCanvas> fulltext = null;
     }
 

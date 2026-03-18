@@ -2,6 +2,7 @@ package eu.europeana.api.iiif.generator;
 
 
 import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
+import eu.europeana.api.record.model.WebResource;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
@@ -275,8 +276,8 @@ public class ManifestSettings {
      * @param order       number
      * @return String containing the canvas ID
      */
-    public String getCanvasId(String europeanaId, int order) {
-        return getCanvasIDTemplate().replace(getIIIFApiIdPlaceholder(), europeanaId).concat(
+    public String getCanvasId(WebResource wr, int order) {
+        return getCanvasIDTemplate().replace(getIIIFApiIdPlaceholder(), wr.getRecord().getId()).concat(
                 Integer.toString(order));
     }
 
@@ -351,7 +352,7 @@ public class ManifestSettings {
         }
         LOG.info("  Record API endpoint = {} ", getRecordApiEndpoint());
         LOG.info("  Thumbnail API Url = {} ", this.getThumbnailApiUrl());
-        LOG.info("  Full-Text Summary Url = {}{} ", this.getFullTextApiBaseUrl(), ManifestGeneratorConstants.getFulltextSummaryPath("/<collectionId>/<itemId>"));
+        LOG.info("  Full-Text Summary Url = {}{} ", this.getFullTextApiBaseUrl(), ManifestGeneratorUtils.getFulltextSummaryPath("/<collectionId>/<itemId>"));
         LOG.info("  Suppress parse exceptions = {}", this.getSuppressParseException());
     }
 

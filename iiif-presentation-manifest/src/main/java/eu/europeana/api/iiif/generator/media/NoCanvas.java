@@ -1,7 +1,8 @@
-package eu.europeana.api.iiif.generator.utils;
+package eu.europeana.api.iiif.generator.media;
+
+import org.springframework.stereotype.Component;
 
 import eu.europeana.api.record.model.WebResource;
-import org.springframework.stereotype.Component;
 
 @Component
 public class NoCanvas<Canvas> implements MediaGenerator<Canvas> {

@@ -1,48 +1,85 @@
 package eu.europeana.api.record.model;
 
-import static eu.europeana.api.record.model.RecordConstants.*;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import org.apache.commons.lang3.StringUtils;
+import java.util.Collections;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import eu.europeana.api.iiif.media.MediaType;
-/**
- * Class to help retrieve and sort web resources received from record JSON data
- * @author Patrick Ehlert
- * Created on 07-03-2018
- */
-public class WebResource extends HashMap<String, Object> {
-    private static final long serialVersionUID = -1726986203390766226L;
-    private Collection<SvcsService> services;
+import eu.europeana.api.record.serialization.ConverterUtils;
+
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonAutoDetect(fieldVisibility = Visibility.NONE
+              , getterVisibility = Visibility.NONE)
+public class WebResource {
+
+    @JsonProperty("about")
+    private String id;
+
+    private Record record;
+
+    @JsonProperty("isNextInSequence")
+    private String isNextInSequence;
+
+    @JsonProperty("ebucoreHasMimeType")
+    private String hasMimeType;
+
     private MediaType mediaType;
-    public WebResource() {
-        super();
-        // default constructor
-    }
-    /**
-     * Create new webresource (for testing)
-     * @param id String containing this webresource's id
-     * @param isNextInSequence String containing the id of the webresource that's next in sequence
-     */
-    public WebResource(String id, String isNextInSequence) {
-        super();
-        super.put(ABOUT, id);
-        super.put(EDM_NEXT_IN_SEQUENCE, isNextInSequence);
-    }
 
-    /**
-     * @return the id of the webresource (in edm 'about' value)
-     */
+    @JsonProperty("ebucoreWidth")
+    private Integer width;
+
+    @JsonProperty("ebucoreHeight")
+    private Integer height;
+
+    @JsonProperty("ebucoreDuration")
+    private Long duration;
+
+    @JsonProperty("webResourceEdmRights")
+    @JsonDeserialize(converter = ConverterUtils.ToString.class)
+    private String rights;
+
+    @JsonProperty("dctermsIsFormatOf")
+    @JsonDeserialize(converter = ConverterUtils.ToListString.class)
+    private List<String> isFormatOf;
+
+    @JsonProperty("textAttributionSnippet")
+    private String attributionSnippet;
+
+    @JsonProperty("svcsHasService")
+    @JsonDeserialize(converter = ConverterUtils.ToListString.class)
+    private List<String> hasService;
+
     public String getId() {
-        return JsonUtils.asString(get(ABOUT));
+        return id;
     }
 
-
-    public void setServices(Collection<SvcsService> services) {
-        this.services = services;
+    public Record getRecord() {
+        return record;
     }
 
-    public Collection<SvcsService> getServices() {
-    	return services;
+    public String getIsNextInSequence() {
+        return isNextInSequence;
+    }
+
+    public boolean hasIsNextInSequence() {
+        return (isNextInSequence != null);
+    }
+
+    public String getTextAttributionSnippet() {
+        return attributionSnippet;
+    }
+
+    public String getMimeType() {
+        return hasMimeType;
     }
 
     public void setMediaType(MediaType mediaType) {
@@ -50,46 +87,28 @@ public class WebResource extends HashMap<String, Object> {
     }
 
     public MediaType getMediaType() {
-    	return mediaType;
-    }
-
-    /**
-     * @return true if the webresource has a isNextInSequence key with a non-empty value
-     */
-    public boolean hasNextInSequence() {
-        return !StringUtils.isEmpty(this.getNextInSequence());
-    }
-
-    /**
-     * @return the value of the isNextInSequence key, or null if there is no key
-     */
-    public String getNextInSequence() {
-        return JsonUtils.asString(get(EDM_NEXT_IN_SEQUENCE));
-    }
-
-    public String getMimeType() {
-        return JsonUtils.asString(get(EBUCORE_HAS_MIMETYPE));
+        return mediaType;
     }
 
     public String getLicense() {
-    	return JsonUtils.asString(get(WEB_RESOURCE_EDM_RIGHTS));
+        return rights;
     }
 
     public Integer getHeight() {
-	    return JsonUtils.asInteger(get(EBUCORE_HEIGHT));
+        return height;
     }
 
     public Integer getWidth() {
-	    return JsonUtils.asInteger(get(EBUCORE_WIDTH));
+        return width;
     }
 
     public Long getDuration() {
-	    return JsonUtils.asLong(get(EBUCORE_DURATION));
+        return duration;
     }
 
     public Double getDurationInSeconds() {
-	    Long duration = getDuration();
-	    return ( duration == null ? null : duration / 1000D);
+        Long duration = getDuration();
+        return ( duration == null ? null : duration / 1000D);
     }
 
     public Resolution getResolution() {
@@ -99,25 +118,50 @@ public class WebResource extends HashMap<String, Object> {
         // if the WebResource does not have width or height
         // Set width and height to 400 (this is the size of the default icon which is what will likely be displayed)
         return (height != null && width != null ? new Resolution(width, height)
-        									    : new Resolution(400,400) );
+                                                : new Resolution(400,400) );
     }
 
-    public String getAttributionText() {
-        return JsonUtils.asString(this.get(TEXT_ATTRIB_SNIPPET));
+    public boolean hasIsFormatOf() {
+        return ( isFormatOf != null || !isFormatOf.isEmpty() );
     }
 
-    public boolean hasService(String conformsTo) {
-    	return ( getService(conformsTo) != null );
+    public List<String> getIsFormatOf() {
+        return isFormatOf;
     }
 
-    public SvcsService getService(String conformsTo) {
-        if (services != null) {
-            for (SvcsService service : services) {
-                if (conformsTo.equals(service.getConformsTo())) {
-                    return service;
-                }
+    public boolean hasServices() {
+        return ( hasService != null && !hasService.isEmpty() );
+    }
+
+    public Collection<SvcsService> getServicesAsResources() {
+        if ( !hasServices() ) { return Collections.emptyList(); }
+
+        List<SvcsService> ret = new ArrayList<>(this.hasService.size());
+        for ( String hasService : this.hasService ) {
+            SvcsService service = record.getService(hasService);
+            if ( service != null ) { ret.add(service); }
+        }
+        return ret;
+    }
+
+    public boolean hasServiceByConformsTo(String conformsTo) {
+        return ( getServiceByConformsTo(conformsTo) != null );
+    }
+
+    public SvcsService getServiceByConformsTo(String conformsTo) {
+        if ( !hasServices() ) { return null; }
+
+        for ( String hasService : this.hasService ) {
+            SvcsService service = record.getService(hasService);
+            if ( service != null 
+              && conformsTo.equals(service.getConformsTo()) ) {
+                return service;
             }
         }
         return null;
+    }
+
+    protected void setRecord(Record record) {
+        this.record = record;
     }
 }

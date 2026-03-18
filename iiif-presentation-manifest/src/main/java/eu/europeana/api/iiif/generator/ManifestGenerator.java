@@ -7,6 +7,7 @@ import java.util.Map;
 
 import eu.europeana.api.iiif.model.IIIFResource;
 import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
+import eu.europeana.api.record.model.Record;
 
 /**
  * @author Hugo
@@ -19,7 +20,7 @@ public interface ManifestGenerator<M extends IIIFResource> {
      * @param jsonDoc parsed json document
      * @return IIIF Manifest
      */
-    M generateManifest(Object jsonDoc);
+    M generateManifest(Record record);
 
     //void fillWithFullText(M manifest, URL fullTextApi, AuthenticationHandler auth) throws EuropeanaApiException;
 

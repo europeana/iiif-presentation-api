@@ -1,5 +1,6 @@
-package eu.europeana.api.record.model;
+package eu.europeana.api.record.serialization;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +33,21 @@ public class JsonUtils {
 			return asString((map).values().iterator().next());
 		}
 		return null;
+	}
+
+	public static List<String> asListString(Object obj) {
+		if ( obj == null ) { return Collections.emptyList(); }
+
+		if ( obj instanceof Collection ) { 
+			Collection<Object> col = (Collection<Object>)obj; 
+			List<String> ret = new ArrayList<String>(col.size());
+			for ( Object o : col ) { ret.add(asString(o)); }
+			return ret;
+		}
+		if ( obj instanceof Map ) { 
+			return asListString(((Map)obj).values());
+		}
+		return Collections.emptyList();
 	}
 
 	public static Collection<Object> asCollection(Object obj) {

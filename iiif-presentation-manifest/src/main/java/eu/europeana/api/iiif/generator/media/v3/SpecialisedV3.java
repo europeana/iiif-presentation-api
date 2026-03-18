@@ -1,8 +1,8 @@
-package eu.europeana.api.iiif.generator.utils.v3;
+package eu.europeana.api.iiif.generator.media.v3;
 
 import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
+import eu.europeana.api.iiif.generator.ManifestSettings;
 import eu.europeana.api.iiif.media.MediaType;
-import eu.europeana.api.iiif.utils.EdmManifestUtils;
 import eu.europeana.api.iiif.v3.model.Canvas;
 import eu.europeana.api.iiif.v3.model.ContentResource;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
@@ -10,6 +10,7 @@ import eu.europeana.api.iiif.v3.model.content.Image;
 import eu.europeana.api.iiif.v3.model.content.Rendering;
 import eu.europeana.api.record.model.Resolution;
 import eu.europeana.api.record.model.WebResource;
+
 import org.springframework.stereotype.Component;
 
 /*
@@ -51,14 +52,14 @@ Example:
 @Component
 public class SpecialisedV3 extends AbsMediaGeneratorV3 {
 
-    public SpecialisedV3(ManifestGeneratorUtils utils) {
-        super(utils);
+    public SpecialisedV3(ManifestSettings settings) {
+        super(settings);
     }
 
     @Override
     public Canvas generate(Canvas canvas, WebResource wr) {
 
-        String thumbnailUrl = utils.getThumbnailV2(wr);
+        String thumbnailUrl = ManifestGeneratorUtils.getThumbnailV2(settings, wr);
         Resolution res = wr.getResolution().scaleToWidth(400);
 
         canvas.setWidth(res.width());
@@ -72,13 +73,8 @@ public class SpecialisedV3 extends AbsMediaGeneratorV3 {
         addTechnicalMetadata(canvas, annoBody);
 
         // add rendering component
-        MediaType mediaType = wr.getMediaType();
-        Rendering renderingImage = new Rendering(wr.getId()
-                                               , mediaType.getCategory().name());
-        renderingImage.setFormat(mediaType.getMimeType());
-        renderingImage.setLabel(new LanguageMap(EdmManifestUtils.LINGUISTIC
-                                              , mediaType.getLabel()));
-        canvas.getRendering().add(renderingImage);
+        addRendering(wr, canvas);
+        handleIsFormatOf(wr, canvas);
 
         return canvas;
     }

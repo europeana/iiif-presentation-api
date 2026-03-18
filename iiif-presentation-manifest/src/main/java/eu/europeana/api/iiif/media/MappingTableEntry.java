@@ -2,7 +2,8 @@ package eu.europeana.api.iiif.media;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import eu.europeana.api.iiif.generator.utils.MediaGeneratorType;
+
+import eu.europeana.api.iiif.generator.media.MediaGeneratorType;
 
 /**
  * Represents the 'mapping' element from mediatypemapping.xml e.g.  *

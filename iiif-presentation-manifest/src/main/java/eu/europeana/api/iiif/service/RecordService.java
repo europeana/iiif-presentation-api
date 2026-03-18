@@ -9,9 +9,13 @@ import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
 import eu.europeana.api.iiif.exceptions.InvalidArgumentException;
 import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
+import eu.europeana.api.record.model.Record;
+import eu.europeana.api.record.model.RecordResponse;
+import eu.europeana.api.record.serialization.BeanLifecycleModifier;
 import eu.europeana.api.iiif.exceptions.RecordNotFoundException;
 import eu.europeana.api.iiif.exceptions.RecordRetrievalException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -20,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 
 import java.io.ByteArrayInputStream;
@@ -37,7 +42,14 @@ public class RecordService extends BaseService {
 
     private static final Logger LOG = LogManager.getLogger(RecordService.class);
 
-    private static final ObjectMapper recordMapper = new ObjectMapper();
+    private ObjectMapper recordMapper;
+
+    public RecordService() {
+        SimpleModule module = new SimpleModule();
+        module.setDeserializerModifier(new BeanLifecycleModifier());
+        recordMapper = new ObjectMapper();
+        recordMapper.registerModule(module);
+    }
 
     /**
      * Return record information in Json format using the Record API base URL defined in the iiif.properties
@@ -50,36 +62,37 @@ public class RecordService extends BaseService {
      *                               RecordNotFoundException if there was a 404,
      *                               RecordRetrieveException on all other problems)
      */
-    public Object getRecordJson(String recordApiUrl, String recordId
+    public RecordResponse getRecordJson(String recordApiUrl, String recordId
                               , AuthenticationHandler auth, HttpHeaders reqHeaders
                               , ResourceCaching caching) throws EuropeanaApiException {
         try {
-            HttpResponseHandler rsp = recordClient.get(buildRecordApiUrl(recordApiUrl, recordId), getHeaderMap(reqHeaders), auth);
+            HttpResponseHandler rsp = recordClient.get(buildRecordApiUrl(recordApiUrl, recordId)
+                                                     , getHeaderMap(reqHeaders)
+                                                     , auth);
             int responseCode = rsp.getStatus();
-            String responseBody = rsp.getResponse();
             if (responseCode == HttpStatus.SC_OK) {
                 caching.getHeaders(getHeaders(rsp.getCachingHeaders()));
-                return parseResponse(responseBody);
+                return parseResponse(rsp);
             }
-            else if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
+
+            if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
                 throw new ResourceNotChangedException(recordId);
             }
-            else {
-                EuropeanaApiErrorResponse errorResponse = constructErrorResponse(responseCode, responseBody);
-                //TODO replace it once we start using record api v3
-                // recordMapper.readValue(responseBody, EuropeanaApiErrorResponse.class);
 
-                if (responseCode == HttpStatus.SC_UNAUTHORIZED || responseCode == HttpStatus.SC_FORBIDDEN) {
-                    throw new RecordRetrievalException(errorResponse, rsp.getStatus());
-                }
-                if (responseCode == HttpStatus.SC_NOT_FOUND) {
-                    throw new RecordNotFoundException("Record with id '" + recordId + "' not found");
-                }
+            EuropeanaApiErrorResponse errorResponse = constructErrorResponse(responseCode, rsp.getResponse());
+            //TODO replace it once we start using record api v3
+            // recordMapper.readValue(responseBody, EuropeanaApiErrorResponse.class);
 
-                LOG.error("Error retrieving record {}, reason {}", recordId, errorResponse.getMessage());
-                throw new RecordRetrievalException("Error retrieving record: " + errorResponse.getMessage(),
-                        errorResponse.getError(), errorResponse.getCode(), errorResponse.getStatus());
+            if (responseCode == HttpStatus.SC_UNAUTHORIZED || responseCode == HttpStatus.SC_FORBIDDEN) {
+                throw new RecordRetrievalException(errorResponse, rsp.getStatus());
             }
+            if (responseCode == HttpStatus.SC_NOT_FOUND) {
+                throw new RecordNotFoundException("Record with id '" + recordId + "' not found");
+            }
+
+            LOG.error("Error retrieving record {}, reason {}", recordId, errorResponse.getMessage());
+            throw new RecordRetrievalException("Error retrieving record: " + errorResponse.getMessage(),
+                    errorResponse.getError(), errorResponse.getCode(), errorResponse.getStatus());
         }
         catch (InvalidArgumentException | IOException e) {
             throw new RecordRetrievalException(" Error retrieving the record : " + e.getMessage());
@@ -110,14 +123,15 @@ public class RecordService extends BaseService {
         }
     }
 
-    private Object parseResponse(String responseBody) throws RecordRetrievalException {
-        try (InputStream in = new ByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8))) {
-            JsonProvider jsonProvider = defaultConfiguration().jsonProvider();
-            return jsonProvider.parse(in, StandardCharsets.UTF_8.name());
+    private RecordResponse parseResponse(HttpResponseHandler rsp) throws RecordRetrievalException {
+        try {
+            return recordMapper.readValue(rsp.getResponse()
+                                        , RecordResponse.class);
         } catch (IOException e) {
             throw new RecordRetrievalException(" Error parsing the record response: " + e.getMessage());
         }
     }
+
     /**
      * TODO Should be removed once we start using record api v3
      * as Current SR API uses different model of error response

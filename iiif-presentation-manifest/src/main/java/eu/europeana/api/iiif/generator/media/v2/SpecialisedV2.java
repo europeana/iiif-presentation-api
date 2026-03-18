@@ -1,6 +1,7 @@
-package eu.europeana.api.iiif.generator.utils.v2;
+package eu.europeana.api.iiif.generator.media.v2;
 
 import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
+import eu.europeana.api.iiif.generator.ManifestSettings;
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.v2.model.AnnotationBody;
 import eu.europeana.api.iiif.v2.model.Canvas;
@@ -8,6 +9,7 @@ import eu.europeana.api.iiif.v2.model.Image;
 import eu.europeana.api.iiif.v2.model.LanguageValue;
 import eu.europeana.api.record.model.Resolution;
 import eu.europeana.api.record.model.WebResource;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -45,14 +47,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpecialisedV2 extends AbsMediaGeneratorV2 {
 
-    public SpecialisedV2(ManifestGeneratorUtils utils) {
-        super(utils);
+    public SpecialisedV2(ManifestSettings settings) {
+        super(settings);
     }
 
     @Override
     public Canvas generate(Canvas canvas, WebResource wr) {
 
-        String thumbnailUrl = utils.getThumbnailV2(wr);
+        String thumbnailUrl = ManifestGeneratorUtils.getThumbnailV2(settings, wr);
         Resolution res = wr.getResolution().scaleToWidth(400);
 
         canvas.setWidth(res.width());
@@ -67,11 +69,8 @@ public class SpecialisedV2 extends AbsMediaGeneratorV2 {
         addTechnicalMetadata(canvas, annoBody);
 
         // add rendering component
-        MediaType mediaType = wr.getMediaType();
-        Image renderingImage = new Image(wr.getId());
-        renderingImage.setFormat(mediaType.getMimeType());
-        renderingImage.setLabel(new LanguageValue(mediaType.getLabel()));
-        canvas.getRendering().add(renderingImage);
+        addRendering(wr, canvas);
+        handleIsFormatOf(wr, canvas);
 
         return canvas;
     }
