@@ -4,7 +4,6 @@ import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.iiif.generator.media.MediaGeneratorRegistry;
 import eu.europeana.api.iiif.generator.media.MediaGeneratorType;
 import eu.europeana.api.iiif.generator.media.MediaGeneratorVersion;
-import eu.europeana.api.iiif.media.MappingTable;
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.media.MediaTypeCatalog;
 import eu.europeana.api.iiif.model.info.FulltextSummaryAnnoPage;
@@ -318,8 +317,8 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
         wr.setMediaType(media.get());
 
-        return (Canvas)registry.getGenerator(MappingTable.getGeneratorTypeV3(mimeType), VERSION)
-                       .generate(c, wr);
+        return (Canvas) registry.getGenerator(mediaTypes.getGeneratorMethodV3(mimeType), VERSION)
+            .generate(c, wr);
     }
 
     private void addProvider(Manifest manifest) {

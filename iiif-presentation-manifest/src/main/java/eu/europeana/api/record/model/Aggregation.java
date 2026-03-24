@@ -106,19 +106,22 @@ public class Aggregation implements SerializationLifecycle {
     private List<WebResource> buildOrderedViews() {
 
         LinkedHashSet<String> views = new LinkedHashSet<String>();
-        if ( isEuScreen(isShownAt) ) {
+        if (isEuScreen(isShownAt)) {
             views.add(isShownAt);
         }
-        if ( isShownBy != null ) { views.add(isShownBy); }
-        views.addAll(hasViews);
-
-
-        List<WebResource> unsorted = new ArrayList<>();
-        for ( String view : views ) {
-            WebResource wr = getWebResource(view);
-            if ( wr != null ) { unsorted.add(wr); }
+        if (isShownBy != null) {
+            views.add(isShownBy);
         }
-
+        if (hasViews != null) {
+            views.addAll(hasViews);
+        }
+        List<WebResource> unsorted = new ArrayList<>();
+        for (String view : views) {
+            WebResource wr = getWebResource(view);
+            if (wr != null) {
+                unsorted.add(wr);
+            }
+        }
         List<WebResource> sorted;
         try {
             sorted = WebResourceSorter.sort(unsorted, views);

@@ -72,4 +72,5 @@ public final class ManifestGeneratorConstants {
     public static final String CANVAS_THUMBNAIL_POSTFIX = "&type=TEXT";
 
     public static final String ATTRIBUTION_STRING = "Attribution";
+
 }

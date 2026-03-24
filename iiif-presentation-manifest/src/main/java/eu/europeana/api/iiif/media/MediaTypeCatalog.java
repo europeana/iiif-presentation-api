@@ -4,6 +4,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
+import eu.europeana.api.iiif.generator.media.MediaGeneratorType;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -20,7 +21,7 @@ import java.util.Optional;
 
 Example: 
 <config>
-	<format mediaType="image/jpg" label="JPG" category="Image"/>
+	<format mediaType="image/gif" label="GIF" category="Image" methodV2="supported" methodV3="supported"/>
 	...
 </config>
 
@@ -66,4 +67,16 @@ public class MediaTypeCatalog {
             }
             return Optional.empty();
         }
+
+
+  public MediaGeneratorType getGeneratorMethodV2(String mimetype) {
+    Optional<MediaType> mediaType = Optional.ofNullable(map.get(mimetype));
+    return mediaType.isPresent() ? mediaType.get().getMethodV2() : null;
+  }
+
+  public MediaGeneratorType getGeneratorMethodV3(String mimetype) {
+    Optional<MediaType> mediaType = Optional.ofNullable(map.get(mimetype));
+    return mediaType.isPresent() ? mediaType.get().getMethodV3() : null;
+  }
+
 }

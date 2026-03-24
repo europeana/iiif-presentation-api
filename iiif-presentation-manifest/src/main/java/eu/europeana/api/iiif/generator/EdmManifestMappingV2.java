@@ -4,7 +4,6 @@ import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.iiif.generator.media.MediaGeneratorRegistry;
 import eu.europeana.api.iiif.generator.media.MediaGeneratorType;
 import eu.europeana.api.iiif.generator.media.MediaGeneratorVersion;
-import eu.europeana.api.iiif.media.MappingTable;
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.media.MediaTypeCatalog;
 import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
@@ -55,7 +54,6 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     /**
      * Generates a IIIF v2 manifest based on the provided (parsed) json document
-     * @param jsonDoc parsed json document
      * @return IIIF Manifest v2 object
      */
     public Manifest generateManifest(Record record) {
@@ -222,8 +220,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     /**
      * Return an with the id of the thumbnail as defined in 'europeanaAggregation.edmPreview'
-     * @param jsonDoc parsed json document
-     * @return Image object, or null if no edmPreview was found
+      * @return Image object, or null if no edmPreview was found
      */
     private Image getThumbnailImageV2(Record record) {
     	String preview = record.getPreview();
@@ -319,7 +316,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         c.setLabel(new LanguageValue("p. " + order));
 
         if (isEuScreen(wr.getId())) {
-            return (Canvas)registry.getGenerator(MediaGeneratorType.EUSCREEN, VERSION)
+            return (Canvas)registry.getGenerator(MediaGeneratorType.EUSCREEN,VERSION)
                                    .generate(c, wr);
         }
 
@@ -330,7 +327,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
         wr.setMediaType(media.get());
 
-        return (Canvas)registry.getGenerator(MappingTable.getGeneratorTypeV2(mimeType), VERSION)
+        return (Canvas)registry.getGenerator(mediaTypes.getGeneratorMethodV2(mimeType), VERSION)
                                .generate(c, wr);
     }
 }

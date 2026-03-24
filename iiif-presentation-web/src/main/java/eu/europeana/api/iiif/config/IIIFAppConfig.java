@@ -1,26 +1,33 @@
 package eu.europeana.api.iiif.config;
 
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+import static eu.europeana.api.iiif.utils.IIIFConstants.BEAN_FALLBACK_AUTHORIZATION;
+import static eu.europeana.api.iiif.utils.IIIFConstants.BEAN_IIIF_JSON_HANDLER;
+import static eu.europeana.api.iiif.utils.IIIFConstants.BEAN_IIIF_VERSION_SUPPORT;
+import static eu.europeana.api.iiif.utils.IIIFConstants.BEAN_MEDIA_TYPES;
+import static eu.europeana.api.iiif.utils.IIIFConstants.BEAN_USER_SET_API_CLIENT;
+import static eu.europeana.api.iiif.utils.IIIFConstants.BEAN_V2_JSON_MAPPER;
+import static eu.europeana.api.iiif.utils.IIIFConstants.BEAN_V3_JSON_MAPPER;
+import static eu.europeana.api.iiif.utils.IIIFConstants.BEAN_XML_MAPPER;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.api.commons_sb3.auth.AuthenticationBuilder;
-import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.auth.AuthenticationConfig;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidConfigurationException;
 import eu.europeana.api.commons_sb3.error.i18n.I18nService;
 import eu.europeana.api.commons_sb3.error.i18n.I18nServiceImpl;
+import eu.europeana.api.iiif.generator.CollectionSettings;
 import eu.europeana.api.iiif.generator.CollectionV2Generator;
 import eu.europeana.api.iiif.generator.CollectionV3Generator;
 import eu.europeana.api.iiif.generator.EdmManifestMappingV2;
 import eu.europeana.api.iiif.generator.EdmManifestMappingV3;
 import eu.europeana.api.iiif.generator.ManifestSettings;
 import eu.europeana.api.iiif.generator.media.MediaGeneratorRegistry;
-import eu.europeana.api.iiif.generator.CollectionSettings;
-import eu.europeana.api.iiif.media.MappingTable;
-import eu.europeana.api.iiif.media.MappingTable.MappingEntry;
-import eu.europeana.api.iiif.media.MappingTableEntry;
 import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.media.MediaTypeCatalog;
 import eu.europeana.api.iiif.service.IIIFJsonHandler;
@@ -31,6 +38,14 @@ import eu.europeana.api.iiif.v2.model.LanguageValue;
 import eu.europeana.set.client.UserSetApiClient;
 import eu.europeana.set.client.exception.SetApiClientException;
 import jakarta.annotation.Resource;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,19 +54,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
-import java.util.stream.Collectors;
-
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-import static eu.europeana.api.iiif.utils.IIIFConstants.*;
 
 @Configuration
 public class IIIFAppConfig {
@@ -78,31 +80,9 @@ public class IIIFAppConfig {
         if (!mediaTypes.mediaTypeCategories.isEmpty()) {
             mediaTypes.getMap().putAll(mediaTypes.mediaTypeCategories.stream().collect(Collectors.toMap(MediaType::getMimeType, e-> e)));
         } else {
-            LOG.error("media Categories not configured at startup. mediacategories.xml file not added or is empty");
+            LOG.error("media Categories not configured at startup. mediaTypes.xml file not added or is empty");
         }
         return mediaTypes;
-    }
-
-    @Bean(name = BEAN_MEDIA_TYPE_MAPPING)
-    public MappingTable getMediaTypeMapping() throws IOException{
-        String mappingTableXml =  settings.getMediaXMLMappingConfig();
-
-        MappingTable table ;
-        try (InputStream is = getClass().getResourceAsStream(mappingTableXml)) {
-            assert is != null;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-                String contents = reader.lines().collect(
-                    Collectors.joining(System.lineSeparator()));
-                table = xmlMapper().readValue(contents, MappingTable.class);
-            }
-        }
-        if (!table.entries.isEmpty()) {
-            MappingTable.getMap().putAll(table.entries.stream().collect(
-                Collectors.toMap(MappingTableEntry::getMediaType, e-> new MappingEntry(e.getMethodV2(),e.getMethodV3()))));
-        } else {
-            LOG.error("Mapping entries not configured at startup. mediatypemapping.xml file not added or is empty");
-        }
-        return table;
     }
 
     @Bean(BEAN_XML_MAPPER)

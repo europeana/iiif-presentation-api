@@ -2,6 +2,7 @@ package eu.europeana.api.iiif.media;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import eu.europeana.api.iiif.generator.media.MediaGeneratorType;
 import java.io.Serializable;
 
 /**
@@ -11,7 +12,7 @@ import java.io.Serializable;
 /*
 
 Example: 
-<format mediaType="image/jpg" label="JPG" category="Image"/>
+<format mediaType="image/gif" label="GIF" category="Image" methodV2="supported" methodV3="supported"/>
 
  */
 @JacksonXmlRootElement(localName = "format")
@@ -25,6 +26,12 @@ public class MediaType implements Serializable {
 
     @JacksonXmlProperty(isAttribute = true)
     private MediaCategory category;
+
+    @JacksonXmlProperty(isAttribute = true)
+    private String methodV2;
+    @JacksonXmlProperty(isAttribute = true)
+    private String methodV3;
+
 
     public String getMimeType() {
         return mimeType;
@@ -41,4 +48,13 @@ public class MediaType implements Serializable {
     public boolean isAudioVisual() {
         return category.isAudioVisual() ;
     }
+
+    public MediaGeneratorType getMethodV2() {
+        return MediaGeneratorType.valueOf(methodV2.toUpperCase());
+    }
+
+    public MediaGeneratorType getMethodV3() {
+        return MediaGeneratorType.valueOf(methodV3.toUpperCase());
+    }
+
 }

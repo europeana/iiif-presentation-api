@@ -20,15 +20,15 @@ public class MappingTableEntry {
   @JacksonXmlProperty(isAttribute = true)
   private String methodV3;
 
-  public String getMediaType() {
-    return mediaType;
-  }
-
   public MediaGeneratorType getMethodV2() {
     return MediaGeneratorType.valueOf(methodV2.toUpperCase());
   }
 
   public MediaGeneratorType getMethodV3() {
     return MediaGeneratorType.valueOf(methodV3.toUpperCase());
+  }
+
+  public String getMediaType() {
+    return mediaType;
   }
 }

@@ -58,7 +58,7 @@ public class MediaGeneratorRegistry {
         if ( generatorSet == null ) {
             throw new IllegalArgumentException("No Media Generators found for the Type : "+ type);
         }
-        return (MediaGenerator<T>) generatorSet.get(version);
+        return generatorSet.get(version);
     }
 
     public String toString() {

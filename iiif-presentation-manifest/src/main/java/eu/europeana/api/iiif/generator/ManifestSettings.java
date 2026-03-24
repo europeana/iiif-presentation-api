@@ -75,9 +75,6 @@ public class ManifestSettings {
     @Value("${media.config}")
     private String mediaXMLConfig;
 
-    @Value("${media.type.canvas.generator.mapping}")
-    private String mediaXMLMappingConfig;
-
     @Value("${keycloak.token.endpoint}")
     private String keycloakTokenEndpoint;
 
@@ -87,11 +84,6 @@ public class ManifestSettings {
     public String getMediaXMLConfig() {
         return mediaXMLConfig;
     }
-
-    public String getMediaXMLMappingConfig() {
-        return mediaXMLMappingConfig;
-    }
-
     /**
      * Get the value for IIIF API base URL
      * @return if defined, returns the value from iiif.properties
