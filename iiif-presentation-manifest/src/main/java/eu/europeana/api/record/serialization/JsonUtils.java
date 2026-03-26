@@ -40,12 +40,12 @@ public class JsonUtils {
 
 		if ( obj instanceof Collection ) { 
 			Collection<Object> col = (Collection<Object>)obj; 
-			List<String> ret = new ArrayList<String>(col.size());
+			List<String> ret = new ArrayList<>(col.size());
 			for ( Object o : col ) { ret.add(asString(o)); }
 			return ret;
 		}
-		if ( obj instanceof Map ) { 
-			return asListString(((Map)obj).values());
+		if ( obj instanceof Map mapObj ) {
+			return asListString(mapObj.values());
 		}
 		return Collections.emptyList();
 	}

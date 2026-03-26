@@ -10,32 +10,30 @@ import eu.europeana.api.record.model.WebResource;
 import org.springframework.stereotype.Component;
 
 
-
-/*
-
-Example:
-{
-  "id": "https://iiif.europeana.eu/presentation/2051918/data_euscreenXL_EUS_15541BBE705033639D4E06691D7A5D2E/canvas/p1",
-  "type": "Canvas",
-  ...
-  "items": [
-    {
-      "type": "AnnotationPage",
-      "items": [
-        {
-           "type": "Annotation",
-           "motivation": "painting",
-           "timeMode": "trim",
-           "body": {
-             "id": "http://www.euscreen.eu/item.html?id=EUS_15541BBE705033639D4E06691D7A5D2E",
-             "type": "Video"
-           },
-           "target": "https://iiif.europeana.eu/presentation/2051918/data_euscreenXL_EUS_15541BBE705033639D4E06691D7A5D2E/canvas/p1"
-         }
-      ]
-    }
-  ]
-}
+/**
+ * Example:
+ * {
+ *   "id": "https://iiif.europeana.eu/presentation/2051918/data_euscreenXL_EUS_15541BBE705033639D4E06691D7A5D2E/canvas/p1",
+ *   "type": "Canvas",
+ *   ...
+ *   "items": [
+ *     {
+ *       "type": "AnnotationPage",
+ *       "items": [
+ *         {
+ *            "type": "Annotation",
+ *            "motivation": "painting",
+ *            "timeMode": "trim",
+ *            "body": {
+ *              "id": "http://www.euscreen.eu/item.html?id=EUS_15541BBE705033639D4E06691D7A5D2E",
+ *              "type": "Video"
+ *            },
+ *            "target": "https://iiif.europeana.eu/presentation/2051918/data_euscreenXL_EUS_15541BBE705033639D4E06691D7A5D2E/canvas/p1"
+ *          }
+ *       ]
+ *     }
+ *   ]
+ * }
  */
 
 @Component

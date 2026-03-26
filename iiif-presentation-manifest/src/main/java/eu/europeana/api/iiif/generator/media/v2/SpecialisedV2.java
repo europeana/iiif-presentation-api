@@ -2,11 +2,8 @@ package eu.europeana.api.iiif.generator.media.v2;
 
 import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
 import eu.europeana.api.iiif.generator.ManifestSettings;
-import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.iiif.v2.model.AnnotationBody;
 import eu.europeana.api.iiif.v2.model.Canvas;
-import eu.europeana.api.iiif.v2.model.Image;
-import eu.europeana.api.iiif.v2.model.LanguageValue;
 import eu.europeana.api.record.model.Resolution;
 import eu.europeana.api.record.model.WebResource;
 

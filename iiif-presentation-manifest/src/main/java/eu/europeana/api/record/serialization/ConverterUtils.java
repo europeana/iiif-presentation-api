@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.util.StdConverter;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
 
 public class ConverterUtils {
+    private ConverterUtils(){
+        //Private constructor to hide implicit public constructor for utility class.
+    }
     
     public static class ToListString extends StdConverter<Object, List<String>> {
 

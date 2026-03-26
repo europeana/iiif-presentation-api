@@ -17,8 +17,8 @@ public class BeanLifecycleModifier extends BeanDeserializerModifier {
     public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config
     		                                    , BeanDescription beanDesc
     		                                    , JsonDeserializer<?> deserializer) {
-        if (deserializer instanceof BeanDeserializer) {
-            return new BeanLifecycleDeserializer((BeanDeserializer) deserializer);
+        if (deserializer instanceof BeanDeserializer beanDeserializer) {
+            return new BeanLifecycleDeserializer(beanDeserializer);
         }
 
         return deserializer;
@@ -34,8 +34,8 @@ public class BeanLifecycleModifier extends BeanDeserializerModifier {
         @Override
         public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             Object obj = super.deserialize(p, ctxt);
-            if ( obj instanceof SerializationLifecycle ) {
-                ((SerializationLifecycle)obj).postDeserialize();
+            if ( obj instanceof SerializationLifecycle serializationLifecycle ) {
+                serializationLifecycle.postDeserialize();
             }
             return obj;
         }

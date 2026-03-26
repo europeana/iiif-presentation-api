@@ -87,10 +87,10 @@ public class Aggregation implements SerializationLifecycle {
         this.orderedViews = buildOrderedViews();
     }
 
-    protected void setRecord(Record record) {
+    protected void setRecord(Record recordObj) {
         if(webResources != null) {
             for (WebResource wr : webResources) {
-                wr.setRecord(record);
+                wr.setRecord(recordObj);
             }
         }
     }
@@ -107,7 +107,7 @@ public class Aggregation implements SerializationLifecycle {
 
     private List<WebResource> buildOrderedViews() {
 
-        LinkedHashSet<String> views = new LinkedHashSet<String>();
+        LinkedHashSet<String> views = new LinkedHashSet<>();
         if (isEuScreen(isShownAt)) {
             views.add(isShownAt);
         }
@@ -128,8 +128,7 @@ public class Aggregation implements SerializationLifecycle {
         try {
             sorted = WebResourceSorter.sort(unsorted, views);
         } catch (DataInconsistentException e) {
-            //LOG.error("Error trying to sort webresources for {}. Cause: {}", europeanaId, e);
-            sorted = unsorted;
+             sorted = unsorted;
         }
         return sorted;
     }

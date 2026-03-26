@@ -57,29 +57,29 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
     /**
      * Generates a IIIF v3 manifest based on the provided (parsed) json document
-     * @param jsonDoc parsed json document
+     * @param recordObj record Object
      * @return IIIF Manifest v3 object
      */
-    public Manifest generateManifest(Record record) {
-        String europeanaId = record.getId();
+    public Manifest generateManifest(Record recordObj) {
+        String europeanaId = recordObj.getId();
 
         Manifest manifest = new Manifest(settings.getManifestId(europeanaId));
         manifest.getServices().add(getServiceDescriptionV3(settings, europeanaId));
 
-        Aggregation aggr = record.getProviderAggregation();
-        Proxy proxy = record.getProxy();
+        Aggregation aggr = recordObj.getProviderAggregation();
+        Proxy proxy = recordObj.getProxy();
         manifest.setLabel(proxy.getTitleOrDescription());
         manifest.setSummary(proxy.getDescription());
         addMetaDataV3(proxy, manifest.getMetadata());
-        manifest.getThumbnail().add(getThumbnailImage(record));
+        manifest.getThumbnail().add(getThumbnailImage(recordObj));
         manifest.setNavDate(getNavDate(proxy));
-        addHomePage(record, manifest);
-        manifest.setRequiredStatement(getAttribution(record));
+        addHomePage(recordObj, manifest);
+        manifest.setRequiredStatement(getAttribution(recordObj));
         manifest.setRights(getRights(aggr));
-        manifest.setSeeAlso(getDataSets(record));
+        manifest.setSeeAlso(getDataSets(recordObj));
 
         // get the canvas items and if present add to manifest
-        addItems(record, manifest);
+        addItems(recordObj, manifest);
 
         addProvider(manifest);
 
@@ -187,55 +187,48 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
     /**
      * Return the first license description we find in any 'aggregation.edmRights' field. Note that we first try the europeanaAggregation and if
      * that doesn't contain an edmRights, we check the other aggregations
-     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
-     * @param jsonDoc parsed json document
-     * @return Rights object containing rights information
+     * @param aggr Aggregation object
+     * @return Text containing rights information
      */
     private Text getRights(Aggregation aggr) {
     	String rights = aggr.getRights();
         if ( StringUtils.isEmpty(rights) ) { return null; }
-
-        return new Text(rights, null, "text/html");
+        return new Text(rights, null, MIME_TYPE_TEXT_HTML);
     }
 
     /**
-     * Return array with the id of the thumbnail as defined in 'europeanaAggregation.edmPreview'
-     * @param jsonDoc parsed json document
+     *  Return Image based on preview details.
+     * @param recordObj Record object
      * @return Image object, or null if no edmPreview was found
      */
-    private Image getThumbnailImage(Record record) {
-    	String preview = record.getPreview();
+    private Image getThumbnailImage(Record recordObj) {
+    	String preview = recordObj.getPreview();
         return ( StringUtils.isEmpty(preview) ? null : new Image(preview) );
     }
 
-    /**
-     * @param europeanaId consisting of dataset ID and record ID separated by a slash
-     * @param jsonDoc parsed json document
-     * @return {@link Text} containing reference to the landing page of the item on Europeana website
-     */
-    private void addHomePage(Record record, Manifest manifest) {
-        String landingPage = record.getLandingPage();
+    private void addHomePage(Record recordObj, Manifest manifest) {
+        String landingPage = recordObj.getLandingPage();
         if ( landingPage == null ) { return; }
 
         manifest.getHomepage().add(new Text(landingPage
                                           , new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana")
-                                          , "text/html") );
+                                          , MIME_TYPE_TEXT_HTML) );
     }
 
     /**
      * Return attribution text  as labeled value
      * We look for the webResource that corresponds to our edmIsShownBy and return the attribution snippet for that.
      * For tombstone records, the attribution fetched from change log of deletion if present.
-     * @param record record object
+     * @param recordObj recordObj object
      * @return labeled value
      */
-    private LabelledValue getAttribution(Record record) {
-        return  record.isArchived() ? getAttributionForTombstoneRecord(record)
-            : getAttributionForRecord(record);
+    private LabelledValue getAttribution(Record recordObj) {
+        return  recordObj.isArchived() ? getAttributionForTombstoneRecord(recordObj)
+            : getAttributionForRecord(recordObj);
     }
 
-    private LabelledValue getAttributionForTombstoneRecord(Record record) {
-        ChangeLog c = record.getChangeLogByType("Delete");
+    private LabelledValue getAttributionForTombstoneRecord(Record reocdObj) {
+        ChangeLog c = reocdObj.getChangeLogByType("Delete");
         if (c == null || c.getContext() == null) {
             return null;
         }
@@ -245,16 +238,15 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
                 settings.getDePubMessages().get(c.getContext())));
     }
 
-    private LabelledValue getAttributionForRecord(Record record) {
-        Aggregation aggr = record.getProviderAggregation();
+    private LabelledValue getAttributionForRecord(Record recordObj) {
+        Aggregation aggr = recordObj.getProviderAggregation();
 
         WebResource wr = aggr.getIsShownByResource();
         if (wr == null) {
             return null;
         }
-        if (wr != null) {
-            wr = aggr.getIsShownAtResource();
-        }
+        wr = aggr.getIsShownAtResource();
+
         String attribution = wr.getTextAttributionSnippet();
         if (StringUtils.isEmpty(attribution)) {
             return null;
@@ -266,11 +258,11 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
     /**
      * Generates 3 datasets with the appropriate ID and format (one for rdf/xml, one for json and one for json-ld)
-     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
+     * @param recordObj record object
      * @return array of 3 datasets
      */
-    private List<Dataset> getDataSets(Record record) {
-        String id = record.getId();
+    private List<Dataset> getDataSets(Record recordObj) {
+        String id = recordObj.getId();
         List<Dataset> result = new ArrayList<>(3);
         result.add(new Dataset(settings.getDatasetId(id, ".json-ld")
                              , AcceptUtils.MEDIA_TYPE_JSONLD
@@ -286,19 +278,17 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
     /**
      * Generates an ordered array of {@link Canvas}es referring to edmIsShownBy and hasView {@link WebResource}s.
-     * For more information about the ordering @see {@link WebResourceSorter}
-     * @param europeanaId
-     * @param isShownBy
-     * @param jsonDoc
+     * @param recordObj record Object
+     * @param manifest manifest object to update
      * @return array of Canvases
      */
-    private void addItems(Record record, Manifest manifest) {
+    private void addItems(Record recordObj, Manifest manifest) {
         
     	// generate canvases in a same order as the web resources
-        List<WebResource> views = record.getProviderAggregation().getOrderedViews();
+        List<WebResource> views = recordObj.getProviderAggregation().getOrderedViews();
 
         if (views.isEmpty()) {
-            LOG.debug("No Canvas generated for europeanaId {}", record.getId());
+            LOG.debug("No Canvas generated for europeanaId {}", recordObj.getId());
             return;
         }
 
@@ -347,6 +337,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         manifest.getProvider().add(new Agent("https://www.europeana.eu/en/about-us",
                 new Image(ManifestGeneratorConstants.EUROPEANA_LOGO_URL),
                 new Text("https://www.europeana.eu",
-                        new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana"), "text/html")));
+                        new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana"),
+                    MIME_TYPE_TEXT_HTML)));
     }
 }

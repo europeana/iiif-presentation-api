@@ -26,6 +26,7 @@ public class MediaGeneratorRegistry {
 
     @SuppressWarnings("rawtypes")
     public record GeneratorSet(MediaGenerator v2Generator, MediaGenerator v3Generator) {
+
         @SuppressWarnings("unchecked")
         public <T> MediaGenerator<T> get(MediaGeneratorVersion v) {
             return switch (v) {
@@ -33,35 +34,39 @@ public class MediaGeneratorRegistry {
                 case V3 -> v3Generator;
             };
         }
+
     }
 
-    private Map<MediaGeneratorType,GeneratorSet> registry = new EnumMap<>(MediaGeneratorType.class);
+    private Map<MediaGeneratorType, GeneratorSet> registry = new EnumMap<>(
+        MediaGeneratorType.class);
 
     public MediaGeneratorRegistry(@SuppressWarnings("rawtypes") NoCanvas noCanvas,
-                                  EUScreenV3 euscreenV3,
-                                  SpecialisedV2 specV2,
-                                  SpecialisedV3 specV3,
-                                  BrowserSupportedV2 suppV2,
-                                  BrowserSupportedV3 suppV3) {
+        EUScreenV3 euscreenV3,
+        SpecialisedV2 specV2,
+        SpecialisedV3 specV3,
+        BrowserSupportedV2 suppV2,
+        BrowserSupportedV3 suppV3) {
 
         registry.put(MediaGeneratorType.EUSCREEN, new GeneratorSet(noCanvas, euscreenV3));
         registry.put(MediaGeneratorType.SPECIALISED, new GeneratorSet(specV2, specV3));
         registry.put(MediaGeneratorType.SUPPORTED, new GeneratorSet(suppV2, suppV3));
         registry.put(MediaGeneratorType.ABSENT, new GeneratorSet(noCanvas, noCanvas));
+        String registryMap = getRegistryDetails();
+        LOG.info(registryMap);
 
-        LOG.info(this.toString());
     }
 
     @SuppressWarnings("unchecked")
-	public <T> MediaGenerator<T> getGenerator(MediaGeneratorType type, MediaGeneratorVersion version) {
+    public <T> MediaGenerator<T> getGenerator(MediaGeneratorType type,
+        MediaGeneratorVersion version) {
         GeneratorSet generatorSet = registry.get(type);
-        if ( generatorSet == null ) {
-            throw new IllegalArgumentException("No Media Generators found for the Type : "+ type);
+        if (generatorSet == null) {
+            throw new IllegalArgumentException("No Media Generators found for the Type : " + type);
         }
         return generatorSet.get(version);
     }
 
-    public String toString() {
+    private String getRegistryDetails() {
         StringBuilder str = new StringBuilder();
         str.append("\n\n");
         for (Map.Entry<MediaGeneratorType, GeneratorSet> e : registry.entrySet()) {
@@ -70,11 +75,12 @@ public class MediaGeneratorRegistry {
             str.append(type + " ->  {");
             for (MediaGeneratorVersion version : MediaGeneratorVersion.values()) {
                 MediaGenerator<?> generator = versionMap.get(version);
-                str.append(" " + version + " -> " 
-                         + generator.getClass().getSimpleName() + " ");
+                str.append(" " + version + " -> "
+                    + generator.getClass().getSimpleName() + " ");
             }
             str.append("}\n");
         }
         return str.toString();
     }
+
 }

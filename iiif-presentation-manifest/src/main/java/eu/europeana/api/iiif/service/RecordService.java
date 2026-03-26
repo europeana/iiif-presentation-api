@@ -125,9 +125,8 @@ public class RecordService extends BaseService {
 
     private RecordResponse parseResponse(HttpResponseHandler rsp) throws RecordRetrievalException {
         try {
-            RecordResponse recordResponse = recordMapper.readValue(rsp.getResponse()
+            return recordMapper.readValue(rsp.getResponse()
                 , RecordResponse.class);
-            return recordResponse;
         } catch (IOException e) {
             throw new RecordRetrievalException(
                 " Error parsing the record response: " + e.getMessage());

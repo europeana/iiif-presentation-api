@@ -57,26 +57,26 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * Generates a IIIF v2 manifest based on the provided (parsed) json document
      * @return IIIF Manifest v2 object
      */
-    public Manifest generateManifest(Record record) {
+    public Manifest generateManifest(Record recordObj) {
 
-        String europeanaId = record.getId();
+        String europeanaId = recordObj.getId();
         Manifest manifest = new Manifest(settings.getManifestId(europeanaId));
         manifest.getServices().add(getServiceDescription(europeanaId));
 
-        Aggregation aggr = record.getProviderAggregation();
-        Proxy proxy = record.getProxy();
+        Aggregation aggr = recordObj.getProviderAggregation();
+        Proxy proxy = recordObj.getProxy();
         manifest.setLabel(getLabels(proxy));
         manifest.getDescription().addAll(getDescription(proxy));
         addMetaDataV2(proxy, manifest.getMetadata());
-        manifest.setThumbnail(getThumbnailImageV2(record));
+        manifest.setThumbnail(getThumbnailImageV2(recordObj));
         manifest.setNavDate(getNavDate(proxy));
-        manifest.setAttribution(getAttribution(record));
+        manifest.setAttribution(getAttribution(recordObj));
         manifest.setLicense(aggr.getRights());
         manifest.setLogo(new Image(ManifestGeneratorConstants.EUROPEANA_LOGO_URL));
-        addRelated(record, manifest);
-        addDataSets(record, manifest);
+        addRelated(recordObj, manifest);
+        addDataSets(recordObj, manifest);
 
-        addSequences(record, manifest);
+        addSequences(recordObj, manifest);
 
         return manifest;
     }
@@ -172,8 +172,8 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     /**
      * We first check all proxies for a title. If there are no titles, then we check the description fields
-     * @param jsonDoc parsed json document
-     * @return array of LanguageObject
+     * @param proxy proxy object from record response
+     * @return LanguageValue object
      */
     private LanguageValue getLabels(Proxy proxy) {
         return LanguageMapUtils.langMapToObject(proxy.getTitleOrDescription());
@@ -181,8 +181,8 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     /**
      * Returns the values from the proxy.dcDescription fields, but only if they aren't used as a label yet.
-     * @param jsonDoc parsed json document
-     * @return
+     * @param proxy proxy object from record response
+     * @return List of Language specific descriptions
      */
     private List<LanguageValue> getDescription(Proxy proxy) {
         return LanguageMapUtils.langMapToObjects(proxy.getDescription());
@@ -190,9 +190,9 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     /**
      * Reads the dcDate, dcFormat, dcRelation, dcType, dcLanguage and dcSource values from all proxies and puts them in a
-     * map with the appropriate label
-     * @param jsonDoc parsed json document
-     * @return
+     * list with the appropriate label
+     * @param proxy proxy object from record response
+     * @param ret list to update
      */
     private void addMetaDataV2(Proxy proxy, List<LabelledValue> ret) {
         addMetaDataV2("date", proxy.getDate(), ret);
@@ -220,40 +220,38 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
 
     /**
-     * Return an with the id of the thumbnail as defined in 'europeanaAggregation.edmPreview'
+     * Return  with the id of the thumbnail as defined in 'europeanaAggregation.edmPreview'
       * @return Image object, or null if no edmPreview was found
      */
-    private Image getThumbnailImageV2(Record record) {
-    	String preview = record.getPreview();
+    private Image getThumbnailImageV2(Record recordObj) {
+    	String preview = recordObj.getPreview();
         return (StringUtils.isEmpty(preview) ? null : new Image(preview) );
     }
 
     /**
-     * Return attribution text as a String
+     * Return attribution text String.
      * We look for the webResource that corresponds to our edmIsShownBy and return the 'textAttributionSnippet' for that.
-     * @param record object having record details
+     * @param recordObj object having recordObj details
      * @return attribution string
      */
-    private String getAttribution(Record  record) {
-        if(record.isArchived()){
-            ChangeLog c = record.getChangeLogByType("Delete");
-            if(c != null && c.getContext() != null) {
-                return settings.getDePubMessages().get(c.getContext());
-            }
+    private String getAttribution(Record  recordObj) {
+        if(recordObj.isArchived()){
+            ChangeLog c = recordObj.getChangeLogByType("Delete");
+            String context = (c != null) ? c.getContext() : "" ;
+            return settings.getDePubMessages().getOrDefault(context,DEFAULT_DELETION_REASON);
         }
         else {
-            Aggregation aggr = record.getProviderAggregation();
+            Aggregation aggr = recordObj.getProviderAggregation();
             WebResource wr = aggr.getIsShownByResource();
             if (wr != null) {
                 wr = aggr.getIsShownAtResource();
             }
             return (wr == null ? null : wr.getTextAttributionSnippet());
         }
-        return  null;
     }
 
-    private void addRelated(Record record, Manifest manifest) {
-        String landingPage = record.getLandingPage();
+    private void addRelated(Record recordObj, Manifest manifest) {
+        String landingPage = recordObj.getLandingPage();
         if ( landingPage == null ) { return; }
 
         manifest.getRelated().add(
@@ -263,12 +261,13 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
 
     /**
-     * Generates 3 datasets with the appropriate ID and format (one for rdf/xml, one for json and one for json-ld)
-     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
+     * Generates 3 datasets with the appropriate ID and format (one for rdf/xml, one for json and one for json-ld) and add to manifest
+     * @param recordObj  record  object with details
+     * @param manifest  manifest object to update
      * @return array of 3 datasets
      */
-    private void addDataSets(Record record, Manifest manifest) {
-        String id = record.getId();
+    private void addDataSets(Record recordObj, Manifest manifest) {
+        String id = recordObj.getId();
         manifest.getSeeAlso().add(new Dataset(settings.getDatasetId(id, ".json-ld")
                                 , AcceptUtils.MEDIA_TYPE_JSONLD
                                 , EDM_SCHEMA_URL));
@@ -280,17 +279,11 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
                                 , EDM_SCHEMA_URL));
     }
 
-    /**
-     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
-     * @param isShownBy
-     * @param jsonDoc parsed json document
-     * @return
-     */
-    private void addSequences(Record record, Manifest manifest) {
+    private void addSequences(Record recordObj, Manifest manifest) {
 
-    	List<WebResource> views = record.getProviderAggregation().getOrderedViews();
+    	List<WebResource> views = recordObj.getProviderAggregation().getOrderedViews();
     	if ( views.isEmpty() ) { 
-            LOG.debug("No Canvas generated for europeanaId {}", record.getId());
+            LOG.debug("No Canvas generated for europeanaId {}", recordObj.getId());
     		return; 
     	}
 

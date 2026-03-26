@@ -102,7 +102,6 @@ public class Record implements SerializationLifecycle {
             master.merge(proxy);
             iter.remove();
         }
-        System.out.println(proxies.size());
     }
 
     public boolean isArchived() {

@@ -97,14 +97,14 @@ public class ManifestSettings {
     @Value("${keycloak.token.grant.params}")
     private String iiifGrantParams;
 
-    @Value("${depublication.reasons.repository}")
-    private String dePubMessagesURI;
+    @Value("${depublication.reasons.url}")
+    private String dePubMessagesURL;
 
     @Value("${depublication.reasons.xml}")
     private String dePubMessagesXml;
 
-    public String getDePubMessagesURI() {
-        return dePubMessagesURI;
+    public String getDePubMessagesURL() {
+        return dePubMessagesURL;
     }
 
     public String getDePubMessagesXml() {
@@ -155,7 +155,7 @@ public class ManifestSettings {
      */
     private DePubReasonResponse loadReasonsFromRemote() {
         try {
-            URI uri = new URIBuilder(getDePubMessagesURI()).build();
+            URI uri = new URIBuilder(getDePubMessagesURL()).build();
             HttpResponseHandler resHandler = new HttpConnection().get(uri.toString(),
                 new HashMap<>(), null);
             if (resHandler != null && HttpStatus.SC_OK == (resHandler.getStatus())) {
@@ -356,8 +356,7 @@ public class ManifestSettings {
      * replace <DATASET_ID>/<RECORD_ID> in the given url pattern with europeana Id
      *               -   {iiifApiBaseUrl}/presentation/<DATASET_ID>/<RECORD_ID>/manifest
      *
-     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading
-     *                    slash and not trailing slash)
+     * @param wr  webresource object
      * @param order       number
      * @return String containing the canvas ID
      */

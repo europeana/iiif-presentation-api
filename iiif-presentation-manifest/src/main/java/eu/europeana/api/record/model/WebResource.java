@@ -107,18 +107,18 @@ public class WebResource {
     }
 
     public Double getDurationInSeconds() {
-        Long duration = getDuration();
-        return ( duration == null ? null : duration / 1000D);
+        Long durationVal = getDuration();
+        return ( durationVal == null ? null : durationVal / 1000D);
     }
 
     public Resolution getResolution() {
-        Integer height = getHeight();
-        Integer width  = getWidth();
+        Integer h = getHeight();
+        Integer w  = getWidth();
 
         // if the WebResource does not have width or height
         // Set width and height to 400 (this is the size of the default icon which is what will likely be displayed)
-        return (height != null && width != null ? new Resolution(width, height)
-                                                : new Resolution(400,400) );
+        return (h != null && w != null ? new Resolution(w, h)
+            : new Resolution(400, 400));
     }
 
     public boolean hasIsFormatOf() {
@@ -137,9 +137,11 @@ public class WebResource {
         if ( !hasServices() ) { return Collections.emptyList(); }
 
         List<SvcsService> ret = new ArrayList<>(this.hasService.size());
-        for ( String hasService : this.hasService ) {
-            SvcsService service = record.getService(hasService);
-            if ( service != null ) { ret.add(service); }
+        for ( String serviceVal : this.hasService ) {
+            SvcsService service = record.getService(serviceVal);
+            if (service != null) {
+                ret.add(service);
+            }
         }
         return ret;
     }
@@ -151,17 +153,17 @@ public class WebResource {
     public SvcsService getServiceByConformsTo(String conformsTo) {
         if ( !hasServices() ) { return null; }
 
-        for ( String hasService : this.hasService ) {
-            SvcsService service = record.getService(hasService);
-            if ( service != null 
-              && conformsTo.equals(service.getConformsTo()) ) {
+        for (String hasServiceVal : this.hasService) {
+            SvcsService service = record.getService(hasServiceVal);
+            if (service != null
+                && conformsTo.equals(service.getConformsTo())) {
                 return service;
             }
         }
         return null;
     }
 
-    protected void setRecord(Record record) {
-        this.record = record;
+    protected void setRecord(Record rec) {
+        this.record = rec;
     }
 }

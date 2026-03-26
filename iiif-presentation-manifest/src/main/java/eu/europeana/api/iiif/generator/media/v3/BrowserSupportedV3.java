@@ -19,33 +19,32 @@ import static eu.europeana.api.iiif.generator.ManifestGeneratorUtils.*;
 import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.*;
 
 
-
-/*
-
-Example:
-{
-  "id": "https://iiif.europeana.eu/presentation/08539/animalia_galerija_php_id_PMSL_DBIP_Media_00249/canvas/p1",
-  "type": "Canvas",
-  ...
-  "items": [
-    {
-      "type": "AnnotationPage",
-      "items": [
-        {
-           "type": "Annotation",
-           "motivation": "painting",
-           "body": {
-             "id": "http://www1.pms-lj.si/animalia/media.php?id=PMSL-DBIP_Media-00249",
-             "type": "Image",
-             "format": "image/gif"
-           },
-           "target": "https://iiif.europeana.eu/presentation/08539/animalia_galerija_php_id_PMSL_DBIP_Media_00249/canvas/p1"
-         }
-      ]
-    }
-  ]
-}
+/**
+ * Example:
+ * {
+ *   "id": "https://iiif.europeana.eu/presentation/08539/animalia_galerija_php_id_PMSL_DBIP_Media_00249/canvas/p1",
+ *   "type": "Canvas",
+ *   ...
+ *   "items": [
+ *     {
+ *       "type": "AnnotationPage",
+ *       "items": [
+ *         {
+ *            "type": "Annotation",
+ *            "motivation": "painting",
+ *            "body": {
+ *              "id": "http://www1.pms-lj.si/animalia/media.php?id=PMSL-DBIP_Media-00249",
+ *              "type": "Image",
+ *              "format": "image/gif"
+ *            },
+ *            "target": "https://iiif.europeana.eu/presentation/08539/animalia_galerija_php_id_PMSL_DBIP_Media_00249/canvas/p1"
+ *          }
+ *       ]
+ *     }
+ *   ]
+ * }
  */
+
 @Component
 public class BrowserSupportedV3 extends AbsMediaGeneratorV3 {
 

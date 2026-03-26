@@ -9,6 +9,10 @@ package eu.europeana.api.iiif.generator;
  */
 public final class ManifestGeneratorConstants {
 
+    private ManifestGeneratorConstants(){
+        //Private constructor to hide implicit public constructor.
+    }
+
     public static final String LINGUISTIC = "zxx";
     /**
      * Place holder for the dataset and record part of an ID. This is used in various places in the manifest
@@ -64,8 +68,12 @@ public final class ManifestGeneratorConstants {
 
     public static final String CANVAS_THUMBNAIL_POSTFIX = "&type=TEXT";
 
+    public static final String MIME_TYPE_TEXT_HTML = "text/html";
+
     public static final String ATTRIBUTION_STRING = "Attribution";
 
     public static final String DEPUBLISHED_STRING = "Depublished";
+
+    public static final String DEFAULT_DELETION_REASON = "Reasons not covered by any of the other cases where depublication needs to happen.";
 
 }

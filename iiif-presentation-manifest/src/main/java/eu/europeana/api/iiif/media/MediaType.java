@@ -3,58 +3,47 @@ package eu.europeana.api.iiif.media;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import eu.europeana.api.iiif.generator.media.MediaGeneratorType;
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * @author Hugo Manguinhas
  * @since 20 Feb 2026
- */
-/*
-
-Example: 
-<format mediaType="image/gif" label="GIF" category="Image" methodV2="supported" methodV3="supported"/>
-
+ *
+ * Represents the xml data for media type mapping.
+ * Example:
+ * <format mediaType="image/gif" label="GIF" category="Image" methodV2="supported" methodV3="supported"/>
  */
 @JacksonXmlRootElement(localName = "format")
 public class MediaType implements Serializable {
-
-    @JacksonXmlProperty(localName =  "mediaType", isAttribute = true)
+    @Serial
+    private static final long serialVersionUID = 3536623038532600461L;
+    @JacksonXmlProperty(localName = "mediaType", isAttribute = true)
     private String mimeType;
-
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(localName = "label", isAttribute = true)
     private String label;
-
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(localName = "category", isAttribute = true)
     private MediaCategory category;
-
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(localName = "methodV2", isAttribute = true)
     private String methodV2;
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(localName = "methodV3", isAttribute = true)
     private String methodV3;
-
-
     public String getMimeType() {
         return mimeType;
     }
-
     public String getLabel() {
         return label;
     }
-
     public MediaCategory getCategory() {
         return category;
     }
-
     public boolean isAudioVisual() {
         return category.isAudioVisual() ;
     }
-
     public MediaGeneratorType getMethodV2() {
         return MediaGeneratorType.valueOf(methodV2.toUpperCase());
     }
-
     public MediaGeneratorType getMethodV3() {
         return MediaGeneratorType.valueOf(methodV3.toUpperCase());
     }
-
 }
