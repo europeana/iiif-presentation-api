@@ -43,13 +43,13 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
     private static final Logger LOG = LogManager.getLogger(EdmManifestMappingV3.class);
     private static final MediaGeneratorVersion VERSION = MediaGeneratorVersion.V3;
 
-    private ManifestSettings       settings;
-    private MediaTypeCatalog       mediaTypes;
+    private ManifestSettings settings;
+    private MediaTypeCatalog mediaTypes;
     private MediaGeneratorRegistry registry;
 
     public EdmManifestMappingV3(ManifestSettings settings
-                              , MediaTypeCatalog mediaTypes
-                              , MediaGeneratorRegistry registry) {
+        , MediaTypeCatalog mediaTypes
+        , MediaGeneratorRegistry registry) {
         this.settings = settings;
         this.mediaTypes = mediaTypes;
         this.registry = registry;
@@ -93,9 +93,13 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
      * motivation = 'painting'
      */
     public void fillWithFullText(Manifest manifest, Map<String, FulltextSummaryCanvas> summary) {
-        if ( summary == null ) { return; }
+        if (summary == null) {
+            return;
+        }
 
-        if ( !manifest.hasItems() ) { return; }
+        if (!manifest.hasItems()) {
+            return;
+        }
 
         for (Canvas canvas : manifest.getItems()) {
             // we need to generate the same annopageId hash based on imageId
@@ -104,36 +108,39 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
             if (ftCanvas == null) {
                 // This warning can be logged for empty pages that do not have a fulltext, but if we get a lot
                 // then Record API and Fulltext API are not in sync (or the hashing algorithm changed).
-                LOG.warn("Inconsistent data! No fulltext annopage found for record {} page {}. Generated hash = {}",
-                        manifest.getID(), canvas.getID(), apHash);
+                LOG.warn(
+                    "Inconsistent data! No fulltext annopage found for record {} page {}. Generated hash = {}",
+                    manifest.getID(), canvas.getID(), apHash);
             } else {
                 addFulltextLinkToCanvas(canvas, ftCanvas);
             }
         }
     }
 
-    private void addFulltextLinkToCanvas(eu.europeana.api.iiif.v3.model.Canvas canvas, FulltextSummaryCanvas summaryCanvas) {
+    private void addFulltextLinkToCanvas(eu.europeana.api.iiif.v3.model.Canvas canvas,
+        FulltextSummaryCanvas summaryCanvas) {
         List<AnnotationPage> summaryAnnoPages = new ArrayList<>();
         createFTSummaryAnnoPages(summaryAnnoPages, summaryCanvas);
         canvas.getAnnotations().addAll(summaryAnnoPages);
         for (eu.europeana.api.iiif.v3.model.AnnotationPage ap : canvas.getItems()) {
             for (eu.europeana.api.iiif.v3.model.Annotation ann : ap.getItems()) {
                 // for translations originalLanguage will be null
-                if (StringUtils.equalsAnyIgnoreCase(ann.getMotivation(), "painting") && summaryCanvas.getOriginalLanguage() != null) {
+                if (StringUtils.equalsAnyIgnoreCase(ann.getMotivation(), "painting")
+                    && summaryCanvas.getOriginalLanguage() != null) {
                     ann.getBody().setLanguage(summaryCanvas.getOriginalLanguage());
                 }
             }
         }
     }
 
-    private void createFTSummaryAnnoPages(List<AnnotationPage> summaryAnnoPages, FulltextSummaryCanvas summaryCanvas) {
+    private void createFTSummaryAnnoPages(List<AnnotationPage> summaryAnnoPages,
+        FulltextSummaryCanvas summaryCanvas) {
         for (FulltextSummaryAnnoPage sap : summaryCanvas.getFTSummaryAnnoPages()) {
-            summaryAnnoPages.add(new FullTextAnnotationPage(sap.getID(), sap.getLanguage(), sap.getTextGranularity(), sap.getSource()));
+            summaryAnnoPages.add(
+                new FullTextAnnotationPage(sap.getID(), sap.getLanguage(), sap.getTextGranularity(),
+                    sap.getSource()));
         }
     }
-
-
-
 
 
     /**
@@ -151,9 +158,9 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
      * with the appropriate label
      */
     private void addMetaDataV3(Proxy proxy, List<LabelledValue> ret) {
-        addMetaDataV3("date",  proxy.getDate(), ret);
+        addMetaDataV3("date", proxy.getDate(), ret);
         addMetaDataV3("format", proxy.getFormat(), ret);
-        addMetaDataV3("relation", proxy.getRelation(), ret );
+        addMetaDataV3("relation", proxy.getRelation(), ret);
         addMetaDataV3("type", proxy.getType(), ret);
         addMetaDataV3("language", proxy.getLanguage(), ret);
         addMetaDataV3("source", proxy.getSource(), ret);
@@ -161,24 +168,26 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
 
     private void addMetaDataV3(String fieldName, LanguageMap map
-                             , List<LabelledValue> dest) {
+        , List<LabelledValue> dest) {
         //TODO
         // We go over all meta data values and check if it's an url or not.
         // Non-url values are always included as is. If it's an url then we wrap that with an html anchor tag.
         // Additionally we check if the url is also present in object.timespans, agents, concepts or places. If so we
         // add the corresponding preflabels (in all available languages) as well.
-        if ( map.isEmpty() ) { return; }
+        if (map.isEmpty()) {
+            return;
+        }
 
         dest.add(new LabelledValue(
-                     new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, fieldName)
-                   , map) );
+            new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, fieldName)
+            , map));
     }
 
     /*
-     * TODO: improve the representation of URLs 
+     * TODO: improve the representation of URLs
      * and the fetching of extra labels from contextual classes
      */
-    
+
     private String asHtmlReference(String url) {
         // 1. add html anchor tag to current value
         return "<a href='" + url + "'>" + url + "</a>";
@@ -191,8 +200,10 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
      * @return Text containing rights information
      */
     private Text getRights(Aggregation aggr) {
-    	String rights = aggr.getRights();
-        if ( StringUtils.isEmpty(rights) ) { return null; }
+        String rights = aggr.getRights();
+        if (StringUtils.isEmpty(rights)) {
+            return null;
+        }
         return new Text(rights, null, MIME_TYPE_TEXT_HTML);
     }
 
@@ -202,17 +213,19 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
      * @return Image object, or null if no edmPreview was found
      */
     private Image getThumbnailImage(Record recordObj) {
-    	String preview = recordObj.getPreview();
-        return ( StringUtils.isEmpty(preview) ? null : new Image(preview) );
+        String preview = recordObj.getPreview();
+        return (StringUtils.isEmpty(preview) ? null : new Image(preview));
     }
 
     private void addHomePage(Record recordObj, Manifest manifest) {
         String landingPage = recordObj.getLandingPage();
-        if ( landingPage == null ) { return; }
+        if (landingPage == null) {
+            return;
+        }
 
         manifest.getHomepage().add(new Text(landingPage
-                                          , new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana")
-                                          , MIME_TYPE_TEXT_HTML) );
+            , new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana")
+            , MIME_TYPE_TEXT_HTML));
     }
 
     /**
@@ -223,7 +236,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
      * @return labeled value
      */
     private LabelledValue getAttribution(Record recordObj) {
-        return  recordObj.isArchived() ? getAttributionForTombstoneRecord(recordObj)
+        return recordObj.isArchived() ? getAttributionForTombstoneRecord(recordObj)
             : getAttributionForRecord(recordObj);
     }
 
@@ -265,14 +278,14 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         String id = recordObj.getId();
         List<Dataset> result = new ArrayList<>(3);
         result.add(new Dataset(settings.getDatasetId(id, ".json-ld")
-                             , AcceptUtils.MEDIA_TYPE_JSONLD
-                             , EDM_SCHEMA_URL));
+            , AcceptUtils.MEDIA_TYPE_JSONLD
+            , EDM_SCHEMA_URL));
         result.add(new Dataset(settings.getDatasetId(id, ".json")
-                             , org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-                             , EDM_SCHEMA_URL));
+            , org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+            , EDM_SCHEMA_URL));
         result.add(new Dataset(settings.getDatasetId(id, ".rdf")
-                             , ManifestGeneratorConstants.MEDIA_TYPE_RDF
-                             , EDM_SCHEMA_URL));
+            , ManifestGeneratorConstants.MEDIA_TYPE_RDF
+            , EDM_SCHEMA_URL));
         return result;
     }
 
@@ -283,8 +296,8 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
      * @return array of Canvases
      */
     private void addItems(Record recordObj, Manifest manifest) {
-        
-    	// generate canvases in a same order as the web resources
+
+        // generate canvases in a same order as the web resources
         List<WebResource> views = recordObj.getProviderAggregation().getOrderedViews();
 
         if (views.isEmpty()) {
@@ -296,14 +309,16 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         for (WebResource view : views) {
             Canvas canvas = getCanvasV3(view, order);
             // for non supported media types we do not create any canvas. Case-4 of media type handling : See-EA-3413
-            if (canvas == null) { continue; }
+            if (canvas == null) {
+                continue;
+            }
 
             manifest.getItems().add(canvas);
             order++;
         }
 
-        if ( order > 1 ) {
-        	manifest.setStart(manifest.getItems().get(0));
+        if (order > 1) {
+            manifest.setStart(manifest.getItems().get(0));
         }
     }
 
@@ -325,7 +340,9 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         // get the configured media type of the mimetype
         String mimeType = wr.getMimeType();
         Optional<MediaType> media = mediaTypes.getMediaType(mimeType);
-        if (media.isEmpty()) { return null; }
+        if (media.isEmpty()) {
+            return null;
+        }
 
         wr.setMediaType(media.get());
 
@@ -335,9 +352,10 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
 
     private void addProvider(Manifest manifest) {
         manifest.getProvider().add(new Agent("https://www.europeana.eu/en/about-us",
-                new Image(ManifestGeneratorConstants.EUROPEANA_LOGO_URL),
-                new Text("https://www.europeana.eu",
-                        new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana"),
-                    MIME_TYPE_TEXT_HTML)));
+            new Image(ManifestGeneratorConstants.EUROPEANA_LOGO_URL),
+            new Text("https://www.europeana.eu",
+                new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, "Europeana"),
+                MIME_TYPE_TEXT_HTML)));
     }
+
 }

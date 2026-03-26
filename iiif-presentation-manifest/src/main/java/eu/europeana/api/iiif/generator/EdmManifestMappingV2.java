@@ -42,15 +42,15 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
     private static final Logger LOG = LogManager.getLogger(EdmManifestMappingV2.class);
     private static final MediaGeneratorVersion VERSION = MediaGeneratorVersion.V2;
 
-    private ManifestSettings       settings;
-    private MediaTypeCatalog       mediaTypes;
+    private ManifestSettings settings;
+    private MediaTypeCatalog mediaTypes;
     private MediaGeneratorRegistry registry;
 
     public EdmManifestMappingV2(ManifestSettings settings
-                              , MediaTypeCatalog mediaTypes, MediaGeneratorRegistry registry) {
-        this.settings   = settings;
+        , MediaTypeCatalog mediaTypes, MediaGeneratorRegistry registry) {
+        this.settings = settings;
         this.mediaTypes = mediaTypes;
-        this.registry   = registry;
+        this.registry = registry;
     }
 
     /**
@@ -88,7 +88,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * motivation = 'sc:painting'
      */
     public void fillWithFullText(Manifest manifest
-                               , Map<String, FulltextSummaryCanvas> summary) {
+        , Map<String, FulltextSummaryCanvas> summary) {
 
         if (manifest.getSequences() == null || manifest.getSequences().isEmpty()) {
             LOG.debug("Not checking for fulltext because record doesn't have any sequences");
@@ -97,8 +97,10 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
         // there is always only 1 sequence
         Sequence sequence = manifest.getSequences().get(0);
-        if ( summary == null ) { return; }
-            
+        if (summary == null) {
+            return;
+        }
+
         // loop over canvases to add full-text link(s) to all
         for (Canvas canvas : sequence.getCanvases()) {
             // we need to generate the same annopageId hash based on imageId
@@ -107,8 +109,9 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
             if (ftCanvas == null) {
                 // This warning can be logged for empty pages that do not have a fulltext, but if we get a lot
                 // then Record API and Fulltext API are not in sync (or the hashing algorithm changed)
-                LOG.warn("Possible inconsistent data. No fulltext annopage found for record {} page {}. Generated hash = {}",
-                        manifest.getID(), canvas.getID(), apHash);
+                LOG.warn(
+                    "Possible inconsistent data. No fulltext annopage found for record {} page {}. Generated hash = {}",
+                    manifest.getID(), canvas.getID(), apHash);
             } else {
                 addFulltextLinkToCanvas(canvas, ftCanvas);
             }
@@ -148,7 +151,8 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         canvas.getOtherContent().addAll(summaryCanvas.getAnnoPageIDs());
         for (eu.europeana.api.iiif.v2.model.Annotation ann : canvas.getImages()) {
             // original language will be null for translation
-            if (StringUtils.equalsAnyIgnoreCase(ann.getMotivation(), "sc:painting") && summaryCanvas.getOriginalLanguage() != null) {
+            if (StringUtils.equalsAnyIgnoreCase(ann.getMotivation(), "sc:painting")
+                && summaryCanvas.getOriginalLanguage() != null) {
                 ann.getBody().setLanguage(summaryCanvas.getOriginalLanguage());
             }
         }
@@ -204,14 +208,16 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
     }
 
     private void addMetaDataV2(String fieldName, LanguageMap map
-                             , List<LabelledValue> dest) {
-        if ( map.isEmpty() ) { return; }
+        , List<LabelledValue> dest) {
+        if (map.isEmpty()) {
+            return;
+        }
 
         List<LanguageValue> list = new ArrayList<>();
         for (Map.Entry<String, List<String>> entry : map.entrySet()) {
             String lang = entry.getKey();
             List<String> values = entry.getValue();
-            for ( String value : values ) {
+            for (String value : values) {
                 list.add(new LanguageValue(lang, value));
             }
         }
@@ -221,11 +227,11 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     /**
      * Return  with the id of the thumbnail as defined in 'europeanaAggregation.edmPreview'
-      * @return Image object, or null if no edmPreview was found
+     * @return Image object, or null if no edmPreview was found
      */
     private Image getThumbnailImageV2(Record recordObj) {
-    	String preview = recordObj.getPreview();
-        return (StringUtils.isEmpty(preview) ? null : new Image(preview) );
+        String preview = recordObj.getPreview();
+        return (StringUtils.isEmpty(preview) ? null : new Image(preview));
     }
 
     /**
@@ -234,13 +240,12 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
      * @param recordObj object having recordObj details
      * @return attribution string
      */
-    private String getAttribution(Record  recordObj) {
-        if(recordObj.isArchived()){
+    private String getAttribution(Record recordObj) {
+        if (recordObj.isArchived()) {
             ChangeLog c = recordObj.getChangeLogByType("Delete");
-            String context = (c != null) ? c.getContext() : "" ;
-            return settings.getDePubMessages().getOrDefault(context,DEFAULT_DELETION_REASON);
-        }
-        else {
+            String context = (c != null) ? c.getContext() : "";
+            return settings.getDePubMessages().getOrDefault(context, DEFAULT_DELETION_REASON);
+        } else {
             Aggregation aggr = recordObj.getProviderAggregation();
             WebResource wr = aggr.getIsShownByResource();
             if (wr != null) {
@@ -252,11 +257,13 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
 
     private void addRelated(Record recordObj, Manifest manifest) {
         String landingPage = recordObj.getLandingPage();
-        if ( landingPage == null ) { return; }
+        if (landingPage == null) {
+            return;
+        }
 
         manifest.getRelated().add(
             new ResourceReference(landingPage, "Europeana Website"
-                               , "text/html") );
+                , "text/html"));
     }
 
 
@@ -269,30 +276,32 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
     private void addDataSets(Record recordObj, Manifest manifest) {
         String id = recordObj.getId();
         manifest.getSeeAlso().add(new Dataset(settings.getDatasetId(id, ".json-ld")
-                                , AcceptUtils.MEDIA_TYPE_JSONLD
-                                , EDM_SCHEMA_URL));
+            , AcceptUtils.MEDIA_TYPE_JSONLD
+            , EDM_SCHEMA_URL));
         manifest.getSeeAlso().add(new Dataset(settings.getDatasetId(id, ".json")
-                                , org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-                                , EDM_SCHEMA_URL));
+            , org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+            , EDM_SCHEMA_URL));
         manifest.getSeeAlso().add(new Dataset(settings.getDatasetId(id, ".rdf")
-                                , ManifestGeneratorConstants.MEDIA_TYPE_RDF
-                                , EDM_SCHEMA_URL));
+            , ManifestGeneratorConstants.MEDIA_TYPE_RDF
+            , EDM_SCHEMA_URL));
     }
 
     private void addSequences(Record recordObj, Manifest manifest) {
 
-    	List<WebResource> views = recordObj.getProviderAggregation().getOrderedViews();
-    	if ( views.isEmpty() ) { 
+        List<WebResource> views = recordObj.getProviderAggregation().getOrderedViews();
+        if (views.isEmpty()) {
             LOG.debug("No Canvas generated for europeanaId {}", recordObj.getId());
-    		return; 
-    	}
+            return;
+        }
 
         int order = 1;
         List<Canvas> canvases = new ArrayList<>(views.size());
         for (WebResource webResource : views) {
             Canvas canvas = getCanvas(webResource, order);
             // for non supported media types we do not create any canvas. Case-4 of media type handling : See-EA-3413
-            if (canvas == null) { continue; }
+            if (canvas == null) {
+                continue;
+            }
 
             canvases.add(canvas);
             order++;
@@ -305,7 +314,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
             sequence.setStartCanvas(canvases.get(0).getID());
             sequence.setCanvases(canvases);
             sequence.setLabel(new LanguageValue("Current Page Order"));
-        	manifest.getSequences().add(sequence);
+            manifest.getSequences().add(sequence);
         }
     }
 
@@ -319,18 +328,21 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         c.setLabel(new LanguageValue("p. " + order));
 
         if (isEuScreen(wr.getId())) {
-            return (Canvas)registry.getGenerator(MediaGeneratorType.EUSCREEN,VERSION)
-                                   .generate(c, wr);
+            return (Canvas) registry.getGenerator(MediaGeneratorType.EUSCREEN, VERSION)
+                .generate(c, wr);
         }
 
         // get the configured media type of the mimetype
         String mimeType = wr.getMimeType();
         Optional<MediaType> media = mediaTypes.getMediaType(mimeType);
-        if (media.isEmpty()) { return null; }
+        if (media.isEmpty()) {
+            return null;
+        }
 
         wr.setMediaType(media.get());
 
-        return (Canvas)registry.getGenerator(mediaTypes.getGeneratorMethodV2(mimeType), VERSION)
-                               .generate(c, wr);
+        return (Canvas) registry.getGenerator(mediaTypes.getGeneratorMethodV2(mimeType), VERSION)
+            .generate(c, wr);
     }
+
 }

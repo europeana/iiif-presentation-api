@@ -97,7 +97,9 @@ public class Aggregation implements SerializationLifecycle {
 
     private WebResource searchForWebResource(String id
                                            , Collection<WebResource> col) {
-        if ( id == null || col== null ) { return null; }
+        if (id == null || col == null) {
+            return null;
+        }
 
         for ( WebResource wr : col ) {
             if ( id.equals(wr.getId()) ) { return wr; }

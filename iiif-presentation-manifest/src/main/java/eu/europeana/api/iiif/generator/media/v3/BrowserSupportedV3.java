@@ -66,7 +66,9 @@ public class BrowserSupportedV3 extends AbsMediaGeneratorV3 {
         }
         Annotation anno = newContentAnnotation(canvas);
         MediaType mediaType = wr.getMediaType();
-        if (mediaType.isAudioVisual()) { anno.setTimeMode(TimeMode.trim); }
+        if (mediaType.isAudioVisual()) {
+            anno.setTimeMode(TimeMode.trim);
+        }
 
         // Now create the annotation body based on the media type 
         // Note: An annotation has 1 annotationBody
@@ -82,12 +84,16 @@ public class BrowserSupportedV3 extends AbsMediaGeneratorV3 {
     }
 
     protected void handleServices(ContentResource annoBody, WebResource wr) {
-        if ( !wr.hasServices() ) { return; }
+        if (!wr.hasServices()) {
+            return;
+        }
 
         for ( SvcsService s : wr.getServicesAsResources() ) {
 
             String type = getServiceType(s.getConformsTo());
-            if ( type == null ) { continue; }
+            if (type == null) {
+                continue;
+            }
 
             Service service = new Service(s.getId(), type);
             service.setProfile(s.getImplements());

@@ -1,6 +1,6 @@
 package eu.europeana.api.iiif.generator.media.v2;
 
- import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
+import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
 import eu.europeana.api.iiif.generator.ManifestSettings;
 
 import eu.europeana.api.iiif.v2.model.AnnotationBody;
@@ -48,7 +48,7 @@ public class BrowserSupportedV2 extends AbsMediaGeneratorV2 {
         canvas.setHeight(wr.getHeight());
         addCanvasMetadata(canvas, wr);
 
-        if ( wr.hasServiceByConformsTo(SERVICE_TYPE_IMAGE) ) {
+        if (wr.hasServiceByConformsTo(SERVICE_TYPE_IMAGE)) {
             String url = ManifestGeneratorUtils.getThumbnailV2(settings, wr);
             canvas.setThumbnail(new Image(url));
         }
@@ -67,11 +67,13 @@ public class BrowserSupportedV2 extends AbsMediaGeneratorV2 {
     }
 
     protected void handleServices(AnnotationBody annoBody, WebResource wr) {
-    	SvcsService service = wr.getServiceByConformsTo(SERVICE_TYPE_IMAGE);
-        if( service == null) { return; }
-
+        SvcsService service = wr.getServiceByConformsTo(SERVICE_TYPE_IMAGE);
+        if (service == null) {
+            return;
+        }
         Service s = new Service(service.getId(), IMAGE_CONTEXT_VALUE);
         s.setProfile(service.getImplements());
         annoBody.setService(s);
     }
+
 }

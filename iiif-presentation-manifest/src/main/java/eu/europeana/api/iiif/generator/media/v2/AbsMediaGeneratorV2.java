@@ -48,22 +48,29 @@ public abstract class AbsMediaGeneratorV2 implements MediaGenerator<Canvas> {
     }
 
     protected void addRendering(WebResource wr, Canvas canvas) {
-        if ( wr == null ) { return; }
-
+        if (wr == null) {
+            return;
+        }
         MediaType mediaType = wr.getMediaType();
         Image renderingImage = new Image(wr.getId());
         renderingImage.setFormat(mediaType.getMimeType());
         String label = mediaType.getLabel();
-        if ( label != null ) { renderingImage.setLabel(new LanguageValue(label)); }
+        if (label != null) {
+            renderingImage.setLabel(new LanguageValue(label));
+        }
         canvas.getRendering().add(renderingImage);
     }
 
     protected void handleIsFormatOf(WebResource wr, Canvas canvas) {
-        if ( !wr.hasIsFormatOf() ) { return; }
+        if (!wr.hasIsFormatOf()) {
+            return;
+        }
 
         Aggregation aggr = wr.getRecord().getProviderAggregation();
         for ( String isFormatOf : wr.getIsFormatOf() ) {
-            if ( aggr.getView(isFormatOf) != null ) { continue; }
+            if (aggr.getView(isFormatOf) != null) {
+                continue;
+            }
 
             addRendering(aggr.getWebResource(isFormatOf), canvas);
         }

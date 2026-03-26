@@ -11,12 +11,20 @@ import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerBase;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 
+/**
+ * Modification for the bean deserialization process to call the custom method after
+ * initial deserialization is done.
+ */
 public class BeanLifecycleModifier extends BeanDeserializerModifier {
 
+    /** Method applies custom deserializer for specific case -
+     *  If JsonDeserializer is  of type {@link BeanDeserializer} then
+     *  use custom deserializer {@link BeanLifecycleDeserializer}     *
+     */
     @Override
     public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config
-    		                                    , BeanDescription beanDesc
-    		                                    , JsonDeserializer<?> deserializer) {
+        , BeanDescription beanDesc
+        , JsonDeserializer<?> deserializer) {
         if (deserializer instanceof BeanDeserializer beanDeserializer) {
             return new BeanLifecycleDeserializer(beanDeserializer);
         }
@@ -25,7 +33,7 @@ public class BeanLifecycleModifier extends BeanDeserializerModifier {
     }
 
     @SuppressWarnings("serial")
-	public static class BeanLifecycleDeserializer extends BeanDeserializer { 
+    public static class BeanLifecycleDeserializer extends BeanDeserializer {
 
         public BeanLifecycleDeserializer(BeanDeserializerBase src) {
             super(src);
@@ -34,10 +42,11 @@ public class BeanLifecycleModifier extends BeanDeserializerModifier {
         @Override
         public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             Object obj = super.deserialize(p, ctxt);
-            if ( obj instanceof SerializationLifecycle serializationLifecycle ) {
+            if (obj instanceof SerializationLifecycle serializationLifecycle) {
                 serializationLifecycle.postDeserialize();
             }
             return obj;
         }
+
     }
 }

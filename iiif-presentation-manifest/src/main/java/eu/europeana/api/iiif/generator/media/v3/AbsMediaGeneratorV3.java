@@ -104,7 +104,9 @@ public abstract class AbsMediaGeneratorV3 implements  MediaGenerator<Canvas> {
     }
 
     protected void addRendering(WebResource wr, Canvas canvas) {
-        if ( wr == null ) { return; }
+        if (wr == null) {
+            return;
+        }
 
         MediaType mediaType = wr.getMediaType();
         Rendering renderingImage = new Rendering(wr.getId()

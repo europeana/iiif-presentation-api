@@ -21,6 +21,9 @@ public class DePubReasonResponse {
         return conceptList;
     }
 
+    /**
+     * DTO for mapping the concept element present in record response
+     */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Concept {
 
