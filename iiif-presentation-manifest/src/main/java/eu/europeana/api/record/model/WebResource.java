@@ -122,7 +122,7 @@ public class WebResource {
     }
 
     public boolean hasIsFormatOf() {
-        return ( isFormatOf != null || !isFormatOf.isEmpty() );
+        return ( isFormatOf != null && !isFormatOf.isEmpty() );
     }
 
     public List<String> getIsFormatOf() {

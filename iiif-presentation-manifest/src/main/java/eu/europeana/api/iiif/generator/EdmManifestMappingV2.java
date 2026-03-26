@@ -11,6 +11,7 @@ import eu.europeana.api.iiif.utils.LanguageMapUtils;
 import eu.europeana.api.iiif.v2.model.*;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
 import eu.europeana.api.record.model.Aggregation;
+import eu.europeana.api.record.model.ChangeLog;
 import eu.europeana.api.record.model.Proxy;
 import eu.europeana.api.record.model.Record;
 import eu.europeana.api.record.model.WebResource;
@@ -69,7 +70,7 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
         addMetaDataV2(proxy, manifest.getMetadata());
         manifest.setThumbnail(getThumbnailImageV2(record));
         manifest.setNavDate(getNavDate(proxy));
-        manifest.setAttribution(getAttribution(aggr));
+        manifest.setAttribution(getAttribution(record));
         manifest.setLicense(aggr.getRights());
         manifest.setLogo(new Image(ManifestGeneratorConstants.EUROPEANA_LOGO_URL));
         addRelated(record, manifest);
@@ -230,16 +231,25 @@ public final class EdmManifestMappingV2 implements ManifestGenerator<Manifest> {
     /**
      * Return attribution text as a String
      * We look for the webResource that corresponds to our edmIsShownBy and return the 'textAttributionSnippet' for that.
-     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
-     * @param isShownBy edmIsShownBy value
-     * @param jsonDoc parsed json document
-     * @return
+     * @param record object having record details
+     * @return attribution string
      */
-    private String getAttribution(Aggregation aggr) {
-        WebResource wr = aggr.getIsShownByResource();
-        if ( wr != null ) { wr = aggr.getIsShownAtResource(); }
-
-        return ( wr == null ? null : wr.getTextAttributionSnippet() );
+    private String getAttribution(Record  record) {
+        if(record.isArchived()){
+            ChangeLog c = record.getChangeLogByType("Delete");
+            if(c != null && c.getContext() != null) {
+                return settings.getDePubMessages().get(c.getContext());
+            }
+        }
+        else {
+            Aggregation aggr = record.getProviderAggregation();
+            WebResource wr = aggr.getIsShownByResource();
+            if (wr != null) {
+                wr = aggr.getIsShownAtResource();
+            }
+            return (wr == null ? null : wr.getTextAttributionSnippet());
+        }
+        return  null;
     }
 
     private void addRelated(Record record, Manifest manifest) {

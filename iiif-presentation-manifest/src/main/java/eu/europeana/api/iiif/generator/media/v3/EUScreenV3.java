@@ -1,6 +1,5 @@
 package eu.europeana.api.iiif.generator.media.v3;
 
-import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
 import eu.europeana.api.iiif.generator.ManifestSettings;
 import eu.europeana.api.iiif.v3.model.Annotation;
 import eu.europeana.api.iiif.v3.model.Canvas;
@@ -45,7 +44,6 @@ public class EUScreenV3 extends AbsMediaGeneratorV3 {
     public EUScreenV3(ManifestSettings settings) {
         super(settings);
     }
-
 
     @Override
     public Canvas generate(Canvas canvas, WebResource wr) {

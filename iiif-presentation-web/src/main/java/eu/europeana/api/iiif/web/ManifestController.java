@@ -91,8 +91,6 @@ public class ManifestController {
      *
      * @param datasetId    (required field)
      * @param recordId     (required field)
-     * @param wskey        apikey (required field)
-     * @param version      (optional) indicates which IIIF version to generate, either '2' or '3'
      * @param recordApi    (optional) alternative recordApi baseUrl to use for retrieving record data
      * @param addFullText  (optional) perform fulltext exists check or not`1
      * @param fullTextApi  (optional) alternative fullTextApi baseUrl to use for retrieving record data
@@ -164,8 +162,9 @@ public class ManifestController {
                     String endpoint 
                         = ( recordApi == null ? settings.getRecordApiEndpoint() 
                                               : recordApi + settings.getRecordApiPath());
-                    data.record = recordService.getRecordJson(endpoint, id, auth, reqHeaders, caching).getRecord();
-                    return true;
+                    data.record =recordService.getRecordJson(endpoint, id, auth,
+                        reqHeaders, caching).getRecord();
+                     return true;
                 }
             },
             new AbsChainCachingStrategy.Service() {
@@ -195,7 +194,8 @@ public class ManifestController {
                 out.flush();
             }
         };
-        return new ResponseEntity<>(responseBody, rspHeaders, HttpStatus.OK);
+        HttpStatus status = data.record.isArchived() ? HttpStatus.GONE: HttpStatus.OK;
+        return new ResponseEntity<>(responseBody, rspHeaders, status);
     }
 
     private static class SourceData {

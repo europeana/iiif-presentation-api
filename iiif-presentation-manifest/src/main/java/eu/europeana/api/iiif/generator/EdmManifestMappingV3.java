@@ -12,6 +12,7 @@ import eu.europeana.api.iiif.v3.model.*;
 import eu.europeana.api.iiif.v3.model.content.*;
 import eu.europeana.api.iiif.v3.model.fulltext.FullTextAnnotationPage;
 import eu.europeana.api.record.model.Aggregation;
+import eu.europeana.api.record.model.ChangeLog;
 import eu.europeana.api.record.model.Proxy;
 import eu.europeana.api.record.model.Record;
 import eu.europeana.api.record.model.WebResource;
@@ -73,7 +74,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         manifest.getThumbnail().add(getThumbnailImage(record));
         manifest.setNavDate(getNavDate(proxy));
         addHomePage(record, manifest);
-        manifest.setRequiredStatement(getAttribution(aggr));
+        manifest.setRequiredStatement(getAttribution(record));
         manifest.setRights(getRights(aggr));
         manifest.setSeeAlso(getDataSets(record));
 
@@ -222,24 +223,45 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
     }
 
     /**
-     * Return attribution text as a String
+     * Return attribution text  as labeled value
      * We look for the webResource that corresponds to our edmIsShownBy and return the attribution snippet for that.
-     * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading slash and not trailing slash)
-     * @param isShownBy edmIsShownBy value
-     * @param jsonDoc parsed json document
-     * @return
+     * For tombstone records, the attribution fetched from change log of deletion if present.
+     * @param record record object
+     * @return labeled value
      */
-    private LabelledValue getAttribution(Aggregation aggr) {
-    	WebResource wr = aggr.getIsShownByResource();
-        if ( wr != null ) { wr = aggr.getIsShownAtResource(); }
+    private LabelledValue getAttribution(Record record) {
+        return  record.isArchived() ? getAttributionForTombstoneRecord(record)
+            : getAttributionForRecord(record);
+    }
 
-        if ( wr == null ) { return null; }
+    private LabelledValue getAttributionForTombstoneRecord(Record record) {
+        ChangeLog c = record.getChangeLogByType("Delete");
+        if (c == null || c.getContext() == null) {
+            return null;
+        }
+        return new LabelledValue(
+            new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, DEPUBLISHED_STRING),
+            new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY,
+                settings.getDePubMessages().get(c.getContext())));
+    }
 
+    private LabelledValue getAttributionForRecord(Record record) {
+        Aggregation aggr = record.getProviderAggregation();
+
+        WebResource wr = aggr.getIsShownByResource();
+        if (wr == null) {
+            return null;
+        }
+        if (wr != null) {
+            wr = aggr.getIsShownAtResource();
+        }
         String attribution = wr.getTextAttributionSnippet();
-        if (StringUtils.isEmpty(attribution)) { return null; }
-
-        return new LabelledValue(new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, ATTRIBUTION_STRING),
-                                 new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, attribution));
+        if (StringUtils.isEmpty(attribution)) {
+            return null;
+        }
+        return new LabelledValue(
+            new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, ATTRIBUTION_STRING),
+            new LanguageMap(LanguageMap.DEFAULT_METADATA_KEY, attribution));
     }
 
     /**
@@ -305,9 +327,9 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         c.setLabel(new LanguageMap(null, "p. " + order));
 
         //special exception for euscreen which is not mimetype specific
-        if ( isEuScreen(wr.getId()) ) {
-            return (Canvas)registry.getGenerator(MediaGeneratorType.EUSCREEN, VERSION)
-                                   .generate(c, wr);
+        if (isEuScreen(wr.getId())) {
+            return (Canvas) registry.getGenerator(MediaGeneratorType.EUSCREEN, VERSION)
+                .generate(c, wr);
         }
 
         // get the configured media type of the mimetype

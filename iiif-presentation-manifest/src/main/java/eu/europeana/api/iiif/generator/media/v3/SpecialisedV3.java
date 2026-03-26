@@ -2,12 +2,10 @@ package eu.europeana.api.iiif.generator.media.v3;
 
 import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
 import eu.europeana.api.iiif.generator.ManifestSettings;
-import eu.europeana.api.iiif.media.MediaType;
+
 import eu.europeana.api.iiif.v3.model.Canvas;
 import eu.europeana.api.iiif.v3.model.ContentResource;
-import eu.europeana.api.iiif.v3.model.LanguageMap;
 import eu.europeana.api.iiif.v3.model.content.Image;
-import eu.europeana.api.iiif.v3.model.content.Rendering;
 import eu.europeana.api.record.model.Resolution;
 import eu.europeana.api.record.model.WebResource;
 
@@ -51,11 +49,9 @@ Example:
  */
 @Component
 public class SpecialisedV3 extends AbsMediaGeneratorV3 {
-
     public SpecialisedV3(ManifestSettings settings) {
         super(settings);
     }
-
     @Override
     public Canvas generate(Canvas canvas, WebResource wr) {
 

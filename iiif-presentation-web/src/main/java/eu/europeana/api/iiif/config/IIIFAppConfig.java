@@ -80,7 +80,7 @@ public class IIIFAppConfig {
         if (!mediaTypes.mediaTypeCategories.isEmpty()) {
             mediaTypes.getMap().putAll(mediaTypes.mediaTypeCategories.stream().collect(Collectors.toMap(MediaType::getMimeType, e-> e)));
         } else {
-            LOG.error("media Categories not configured at startup. mediaTypes.xml file not added or is empty");
+            LOG.error("media Categories not configured at startup. " +mediaTypeXMLConfigFile+" file not added or is empty");
         }
         return mediaTypes;
     }

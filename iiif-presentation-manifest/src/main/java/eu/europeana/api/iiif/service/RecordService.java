@@ -56,16 +56,23 @@ public class RecordService extends BaseService {
      *                               RecordRetrieveException on all other problems)
      */
     public RecordResponse getRecordJson(String recordApiUrl, String recordId
-                              , AuthenticationHandler auth, HttpHeaders reqHeaders
-                              , ResourceCaching caching) throws EuropeanaApiException {
+        , AuthenticationHandler auth, HttpHeaders reqHeaders
+        , ResourceCaching caching) throws EuropeanaApiException {
         try {
             HttpResponseHandler rsp = recordClient.get(buildRecordApiUrl(recordApiUrl, recordId)
-                                                     , getHeaderMap(reqHeaders)
-                                                     , auth);
+                , getHeaderMap(reqHeaders)
+                , auth);
             int responseCode = rsp.getStatus();
             if (responseCode == HttpStatus.SC_OK) {
                 caching.getHeaders(getHeaders(rsp.getCachingHeaders()));
-                return parseResponse(rsp);
+                RecordResponse recordResponse = parseResponse(rsp);
+                recordResponse.getRecord().setArchived(false);
+                return recordResponse;
+            }
+            if (responseCode == HttpStatus.SC_GONE) {
+                RecordResponse recordResponse = parseResponse(rsp);
+                recordResponse.getRecord().setArchived(true);
+                return recordResponse;
             }
 
             if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
@@ -76,18 +83,18 @@ public class RecordService extends BaseService {
             //TODO replace it once we start using record api v3
             // recordMapper.readValue(responseBody, EuropeanaApiErrorResponse.class);
 
-            if (responseCode == HttpStatus.SC_UNAUTHORIZED || responseCode == HttpStatus.SC_FORBIDDEN) {
+            if (responseCode == HttpStatus.SC_UNAUTHORIZED
+                || responseCode == HttpStatus.SC_FORBIDDEN) {
                 throw new RecordRetrievalException(errorResponse, rsp.getStatus());
             }
             if (responseCode == HttpStatus.SC_NOT_FOUND) {
                 throw new RecordNotFoundException("Record with id '" + recordId + "' not found");
             }
 
-            LOG.error("Error retrieving record {}, reason {}", recordId, errorResponse.getMessage());
+            LOG.error("Error retrieving record {}, reason {}", recordId,errorResponse.getMessage());
             throw new RecordRetrievalException("Error retrieving record: " + errorResponse.getMessage(),
-                    errorResponse.getError(), errorResponse.getCode(), errorResponse.getStatus());
-        }
-        catch (InvalidArgumentException | IOException e) {
+                errorResponse.getError(), errorResponse.getCode(), errorResponse.getStatus());
+        } catch (InvalidArgumentException | IOException e) {
             throw new RecordRetrievalException(" Error retrieving the record : " + e.getMessage());
         }
     }
@@ -99,8 +106,8 @@ public class RecordService extends BaseService {
      * @return URL
      * @throws InvalidArgumentException
      */
-    private String buildRecordApiUrl(String recordApiUrl, String recordId) 
-            throws InvalidArgumentException {
+    private String buildRecordApiUrl(String recordApiUrl, String recordId)
+        throws InvalidArgumentException {
         if (StringUtils.isEmpty(recordApiUrl)) {
             throw new InvalidArgumentException("Record api url must NOT be empty!!");
         }
@@ -109,8 +116,8 @@ public class RecordService extends BaseService {
         }
         try {
             return new URIBuilder(recordApiUrl)
-                    .appendPath(recordId + ".json")
-                    .build().toString();
+                .appendPath(recordId + ".json")
+                .build().toString();
         } catch (URISyntaxException e) {
             throw new InvalidArgumentException("Error building the record api url - " + e.getMessage(), e);
         }
@@ -118,10 +125,12 @@ public class RecordService extends BaseService {
 
     private RecordResponse parseResponse(HttpResponseHandler rsp) throws RecordRetrievalException {
         try {
-            return recordMapper.readValue(rsp.getResponse()
-                                        , RecordResponse.class);
+            RecordResponse recordResponse = recordMapper.readValue(rsp.getResponse()
+                , RecordResponse.class);
+            return recordResponse;
         } catch (IOException e) {
-            throw new RecordRetrievalException(" Error parsing the record response: " + e.getMessage());
+            throw new RecordRetrievalException(
+                " Error parsing the record response: " + e.getMessage());
         }
     }
 
@@ -131,16 +140,17 @@ public class RecordService extends BaseService {
      * @param json
      * @return
      */
-    private EuropeanaApiErrorResponse constructErrorResponse(int responseCode, String json) throws RecordRetrievalException {
+    private EuropeanaApiErrorResponse constructErrorResponse(int responseCode, String json)
+        throws RecordRetrievalException {
         try {
             JsonNode node = recordMapper.readTree(json);
             return new EuropeanaApiErrorResponse(
-                    responseCode,
-                    node.has(error) ? node.get(error).asText() : "",
-                    node.has(message) ? node.get(message).asText() : "Error retrieving record",
-                    null,
-                    null,
-                    node.has(code) ? node.get(code).asText() : "");
+                responseCode,
+                node.has(error) ? node.get(error).asText() : "",
+                node.has(message) ? node.get(message).asText() : "Error retrieving record",
+                null,
+                null,
+                node.has(code) ? node.get(code).asText() : "");
         } catch (JsonProcessingException e) {
             throw new RecordRetrievalException(" Error parsing the record response: " + e.getMessage());
         }

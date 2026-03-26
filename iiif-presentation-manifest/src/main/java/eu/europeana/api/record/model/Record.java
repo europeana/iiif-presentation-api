@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import eu.europeana.api.record.serialization.SerializationLifecycle;
+import org.apache.commons.lang3.StringUtils;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
@@ -36,6 +37,8 @@ public class Record implements SerializationLifecycle {
         return id;
     }
 
+    private boolean isArchived;
+
     public Aggregation getProviderAggregation() {
         return aggregations.get(0);
     }
@@ -47,19 +50,31 @@ public class Record implements SerializationLifecycle {
     public SvcsService getService(String id) {
         if ( services == null || id == null ) { return null; }
 
-        for ( SvcsService s : services ) {
-            if ( id.equals(s.getId()) ) { return s; }
+        for ( SvcsService service : services ) {
+            if ( id.equals(service.getId()) ) { return service; }
         }
         return null;
     }
 
     public String getPreview() {
-        return europeanaAggr.getPreview();
+        return (europeanaAggr != null) ? europeanaAggr.getPreview() : null;
     }
 
     public String getLandingPage() {
-        return europeanaAggr.getLandingPage();
+        return (europeanaAggr != null) ? europeanaAggr.getLandingPage() : null;
     }
+
+    public ChangeLog getChangeLogByType(String type) {
+        if (StringUtils.isNotEmpty(type) && europeanaAggr != null ) {
+            for (ChangeLog c : europeanaAggr.getChangeLogs()) {
+                if (type.equals(c.getType())) {
+                    return c;
+                }
+            }
+        }
+        return null;
+    }
+
 
     @Override
     public void postDeserialize() {
@@ -88,5 +103,13 @@ public class Record implements SerializationLifecycle {
             iter.remove();
         }
         System.out.println(proxies.size());
+    }
+
+    public boolean isArchived() {
+        return isArchived;
+    }
+
+    public void setArchived(boolean archived) {
+        isArchived = archived;
     }
 }

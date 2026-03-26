@@ -88,14 +88,16 @@ public class Aggregation implements SerializationLifecycle {
     }
 
     protected void setRecord(Record record) {
-        for ( WebResource wr : webResources ) {
-            wr.setRecord(record);
+        if(webResources != null) {
+            for (WebResource wr : webResources) {
+                wr.setRecord(record);
+            }
         }
     }
 
     private WebResource searchForWebResource(String id
                                            , Collection<WebResource> col) {
-        if ( id == null ) { return null; }
+        if ( id == null || col== null ) { return null; }
 
         for ( WebResource wr : col ) {
             if ( id.equals(wr.getId()) ) { return wr; }

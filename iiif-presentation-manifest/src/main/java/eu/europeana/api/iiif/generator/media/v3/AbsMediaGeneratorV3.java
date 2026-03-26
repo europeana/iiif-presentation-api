@@ -18,7 +18,6 @@ import eu.europeana.api.iiif.v3.model.content.Sound;
 import eu.europeana.api.iiif.v3.model.content.Text;
 import eu.europeana.api.iiif.v3.model.content.Video;
 import eu.europeana.api.record.model.Aggregation;
-import eu.europeana.api.record.model.Record;
 import eu.europeana.api.record.model.WebResource;
 
 import org.apache.commons.lang3.StringUtils;
@@ -119,12 +118,14 @@ public abstract class AbsMediaGeneratorV3 implements  MediaGenerator<Canvas> {
     }
 
     protected void handleIsFormatOf(WebResource wr, Canvas canvas) {
-        if ( !wr.hasIsFormatOf() ) { return; }
-
+        if (!wr.hasIsFormatOf()) {
+            return;
+        }
         Aggregation aggr = wr.getRecord().getProviderAggregation();
-        for ( String isFormatOf : wr.getIsFormatOf() ) {
-            if ( aggr.getView(isFormatOf) != null ) { continue; }
-
+        for (String isFormatOf : wr.getIsFormatOf()) {
+            if (aggr.getView(isFormatOf) != null) {
+                continue;
+            }
             addRendering(aggr.getWebResource(isFormatOf), canvas);
         }
     }

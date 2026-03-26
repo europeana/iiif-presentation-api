@@ -1,18 +1,32 @@
 package eu.europeana.api.iiif.generator;
 
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
+import eu.europeana.api.commons_sb3.http.HttpConnection;
+import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
+import eu.europeana.api.iiif.dto.DePubReasonResponse;
+import eu.europeana.api.iiif.dto.DePubReasonResponse.Concept;
 import eu.europeana.api.record.model.WebResource;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.io.ClassPathResource;
 
 @Configuration
 @PropertySource("classpath:iiif.properties")
@@ -20,6 +34,8 @@ import org.springframework.context.annotation.PropertySource;
 public class ManifestSettings {
 
     private static final Logger LOG = LogManager.getLogger(ManifestSettings.class);
+
+    private Map<String,String> dePubMessages = new HashMap<>();
 
     @Value("${iiif-api.base.url:}")
     private String iiifApiBaseUrl;
@@ -80,6 +96,83 @@ public class ManifestSettings {
 
     @Value("${keycloak.token.grant.params}")
     private String iiifGrantParams;
+
+    @Value("${depublication.reasons.repository}")
+    private String dePubMessagesURI;
+
+    @Value("${depublication.reasons.xml}")
+    private String dePubMessagesXml;
+
+    public String getDePubMessagesURI() {
+        return dePubMessagesURI;
+    }
+
+    public String getDePubMessagesXml() {
+        return dePubMessagesXml;
+    }
+
+
+    /**
+     * Method loads the de-publication reasons into map ,later used for populating on manifests of tombstone records.
+     * The data is fetched from remote location and in case of any failures /unavailability ,
+     * the details are fetched from local file.
+     */
+    @PostConstruct
+    public void loadMessagesForDePublication() {
+        //If the dePubMessages are empty , load them from local file
+        DePubReasonResponse res = (loadReasonsFromRemote() == null) ? loadReasonsFromLocal() : null;
+        if(res != null) {
+            List<Concept> concepts = res.getConceptList();
+            if (concepts != null) {
+                concepts.forEach(p -> dePubMessages.put(p.getAbout(), p.getNote()));
+            }
+        }
+        else{
+            LOG.error("De-publication messages are not loaded !! ");
+        }
+    }
+
+    /**
+     * Fetch De-publication reasons details from local file.
+     * @return  Object containing De-Pub Reasons details  else null;
+     */
+    private DePubReasonResponse loadReasonsFromLocal() {
+        try {
+            InputStreamReader reader = new InputStreamReader(
+                new ClassPathResource(getDePubMessagesXml()).getInputStream());
+            XmlMapper map = new XmlMapper();
+            return map.readValue(reader, DePubReasonResponse.class);
+        }
+        catch (Exception e){
+            LOG.error("Critical Error while loading local de-publication reasons !! ",e);
+        }
+        return null;
+    }
+
+    /**
+     * Fetch the de-publication reasons data from configured remote file URL .
+     * @return Object containing De-Pub Reasons details  else null;
+     */
+    private DePubReasonResponse loadReasonsFromRemote() {
+        try {
+            URI uri = new URIBuilder(getDePubMessagesURI()).build();
+            HttpResponseHandler resHandler = new HttpConnection().get(uri.toString(),
+                new HashMap<>(), null);
+            if (resHandler != null && HttpStatus.SC_OK == (resHandler.getStatus())) {
+                XmlMapper map = new XmlMapper();
+                return map.readValue(resHandler.getResponse(),
+                    DePubReasonResponse.class);
+            }
+        } catch (IOException | URISyntaxException ex) {
+            LOG.warn("Error while fetching the dePublication messages "
+                + "from remote location for tombstone records.");
+        }
+        return null;
+    }
+
+    public Map<String, String> getDePubMessages() {
+        return dePubMessages;
+    }
 
     public String getMediaXMLConfig() {
         return mediaXMLConfig;
