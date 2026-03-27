@@ -70,7 +70,8 @@ public class Manifest extends PresentationResource {
     }
 
     public void setStart(Canvas start) {
-        this.start = start;
+        //Generate new canvas object with the of the intended canvas for indicating the start
+        this.start = new Canvas(start.getID());
     }
 
 
