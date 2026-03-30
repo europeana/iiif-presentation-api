@@ -75,7 +75,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         manifest.setNavDate(getNavDate(proxy));
         addHomePage(recordObj, manifest);
         manifest.setRequiredStatement(getAttribution(recordObj));
-        manifest.setRights(getRights(aggr));
+        manifest.setRightsUrl(getRights(aggr));
         manifest.setSeeAlso(getDataSets(recordObj));
 
         // get the canvas items and if present add to manifest
@@ -194,17 +194,16 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
     }
 
     /**
-     * Return the first license description we find in any 'aggregation.edmRights' field. Note that we first try the europeanaAggregation and if
-     * that doesn't contain an edmRights, we check the other aggregations
+     * Return the first license description we find in any 'aggregation.edmRights' field.
      * @param aggr Aggregation object
      * @return Text containing rights information
      */
-    private Text getRights(Aggregation aggr) {
+    private String getRights(Aggregation aggr) {
         String rights = aggr.getRights();
         if (StringUtils.isEmpty(rights)) {
             return null;
         }
-        return new Text(rights, null, MIME_TYPE_TEXT_HTML);
+        return rights;
     }
 
     /**
@@ -272,7 +271,7 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
     /**
      * Generates 3 datasets with the appropriate ID and format (one for rdf/xml, one for json and one for json-ld)
      * @param recordObj record object
-     * @return array of 3 datasets
+     * @return List of 3 datasets
      */
     private List<Dataset> getDataSets(Record recordObj) {
         String id = recordObj.getId();
@@ -293,7 +292,6 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
      * Generates an ordered array of {@link Canvas}es referring to edmIsShownBy and hasView {@link WebResource}s.
      * @param recordObj record Object
      * @param manifest manifest object to update
-     * @return array of Canvases
      */
     private void addItems(Record recordObj, Manifest manifest) {
 
