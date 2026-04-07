@@ -77,7 +77,6 @@ public class ManifestController {
      * handles Invalid Urls like '/x/y/', '/x/manifest' , '/manifest'
      * Returns 400 bad Request
      * @return responseEntity
-     * @return
      * @throws ManifestInvalidUrlException
      */
     @GetMapping(value = {"/{datasetId}/{recordId}", "/{Id}/manifest", "/manifest"})
