@@ -11,40 +11,41 @@ import eu.europeana.api.iiif.v3.model.LanguageMap;
 import eu.europeana.api.record.serialization.ConverterUtils;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = Visibility.NONE
-              , getterVisibility = Visibility.NONE)
+    , getterVisibility = Visibility.NONE)
 public class SvcsService {
 
-	@JsonProperty("about")
-	private String id;
+    @JsonProperty("about")
+    private String id;
 
-	@JsonProperty("label")
-	@JsonDeserialize(converter = ConverterUtils.ToLanguageMap.class)
-	private LanguageMap label = new LanguageMap();
+    @JsonProperty("label")
+    @JsonDeserialize(converter = ConverterUtils.ToLanguageMap.class)
+    private LanguageMap label = new LanguageMap();
 
-	@JsonProperty("dctermsConformsTo")
-	@JsonDeserialize(converter = ConverterUtils.ToString.class)
-	private String conformsTo;
+    @JsonProperty("dctermsConformsTo")
+    @JsonDeserialize(converter = ConverterUtils.ToString.class)
+    private String conformsTo;
 
-	@JsonProperty("doapImplements")
-	@JsonDeserialize(converter = ConverterUtils.ToString.class)
-	private String impls;
+    @JsonProperty("doapImplements")
+    @JsonDeserialize(converter = ConverterUtils.ToString.class)
+    private String impls;
 
 
     public String getId() {
         return id;
     }
 
-	public String getImplements() { 
-		return impls;
-	}
+    public String getImplements() {
+        return impls;
+    }
 
-	public String getConformsTo() {
-		return conformsTo;
-	}
+    public String getConformsTo() {
+        return conformsTo;
+    }
 
-	public LanguageMap getLabel() {
-		return label;
-	}
+    public LanguageMap getLabel() {
+        return label;
+    }
+
 }

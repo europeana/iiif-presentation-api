@@ -8,11 +8,6 @@ package eu.europeana.api.iiif.generator;
  * @see eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions class
  */
 public final class ManifestGeneratorConstants {
-
-    private ManifestGeneratorConstants(){
-        //Private constructor to hide implicit public constructor.
-    }
-
     public static final String LINGUISTIC = "zxx";
     /**
      * Place holder for the dataset and record part of an ID. This is used in various places in the manifest
@@ -76,4 +71,7 @@ public final class ManifestGeneratorConstants {
 
     public static final String DEFAULT_DELETION_REASON = "Reasons not covered by any of the other cases where depublication needs to happen.";
 
+    private ManifestGeneratorConstants(){
+        //Private constructor to hide implicit public constructor.
+    }
 }

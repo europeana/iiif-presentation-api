@@ -17,21 +17,22 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 import java.util.Map;
 
+import static eu.europeana.api.iiif.generator.CollectionGenConstants.*;
 /**
  * Collection  Generator class for V2
  * @author Hugo
  * @since 14 Oct 2024
  */
-public class CollectionV2Generator extends CollectionGenConstants implements CollectionGenerator<Collection> {
+public class CollectionV2Generator  implements CollectionGenerator<Collection> {
 
     private static LanguageValue rootLabel
-        = new LanguageValue(CollectionGenConstants.ROOT_LABEL, LANG_META);
+        = new LanguageValue(ROOT_LABEL, LANG_META);
     private static LanguageValue rootDescription
-        = new LanguageValue(CollectionGenConstants.ROOT_DESCRIPTION, LANG_META);
+        = new LanguageValue(ROOT_DESCRIPTION, LANG_META);
     private static LanguageValue rootGallerylabel
-        = new LanguageValue(CollectionGenConstants.ROOT_GALLERY_LABEL, LANG_META);
+        = new LanguageValue(ROOT_GALLERY_LABEL, LANG_META);
     private static LanguageValue rootGalleryDescription
-        = new LanguageValue(CollectionGenConstants.ROOT_GALLERY_DESCRIPTION, LANG_META);
+        = new LanguageValue(ROOT_GALLERY_DESCRIPTION, LANG_META);
     private static Image europeanaLogo
         = new Image(EUROPEANA_LOGO);
 

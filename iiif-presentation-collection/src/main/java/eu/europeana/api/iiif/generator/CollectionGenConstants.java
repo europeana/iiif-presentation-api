@@ -5,7 +5,7 @@ package eu.europeana.api.iiif.generator;
  * @author Hugo
  * @since 14 Oct 2024
  */
-public class CollectionGenConstants {
+public final class CollectionGenConstants {
     public static final String LANG_META = "en";
     public static final String ROOT_LABEL = "Top-level Collection";
     public static final String ROOT_DESCRIPTION = "Top-level Collection for the Data Space for Cultural Heritage";
@@ -21,4 +21,8 @@ public class CollectionGenConstants {
     public static final String MIMETYPE_HTML = "text/html";
     public static final String EXTENSION_JSONLD = "jsonld";
     public static final String SET_JSONLD_CONTEXT = "https://api.europeana.eu/schema/context/set.jsonld";
+
+    private CollectionGenConstants(){
+        //Private constructor to hide implicit public constructor.
+    }
 }

@@ -33,11 +33,11 @@ public class Record implements SerializationLifecycle {
     @JsonProperty("services")
     private List<SvcsService> services;
 
+    private boolean isArchived;
+
     public String getId() {
         return id;
     }
-
-    private boolean isArchived;
 
     public Aggregation getProviderAggregation() {
         return aggregations.get(0);
@@ -48,10 +48,14 @@ public class Record implements SerializationLifecycle {
     }
 
     public SvcsService getService(String id) {
-        if ( services == null || id == null ) { return null; }
+        if (services == null || id == null) {
+            return null;
+        }
 
         for ( SvcsService service : services ) {
-            if ( id.equals(service.getId()) ) { return service; }
+            if (id.equals(service.getId())) {
+                return service;
+            }
         }
         return null;
     }
