@@ -36,7 +36,7 @@ import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.*;
  * }
  */
 @Component
-public class BrowserSupportedV2 extends AbsMediaGeneratorV2 {
+public class BrowserSupportedV2 extends AbstractMediaGeneratorV2 {
 
     public BrowserSupportedV2(ManifestSettings settings) {
         super(settings);

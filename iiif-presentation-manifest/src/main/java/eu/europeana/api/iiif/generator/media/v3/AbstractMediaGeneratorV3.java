@@ -24,11 +24,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.*;
 
-public abstract class AbsMediaGeneratorV3 implements  MediaGenerator<Canvas> {
+public abstract class AbstractMediaGeneratorV3 implements  MediaGenerator<Canvas> {
 
     protected ManifestSettings settings;
 
-    protected AbsMediaGeneratorV3(ManifestSettings settings) {
+    protected AbstractMediaGeneratorV3(ManifestSettings settings) {
         this.settings = settings;
     }
 
@@ -83,8 +83,8 @@ public abstract class AbsMediaGeneratorV3 implements  MediaGenerator<Canvas> {
 
     /**
      * Adds the technical metadata in the annotation body of the canvas
-     * @param canvas
-     * @param body
+     * @param canvas Canvas
+     * @param body ContentResource
      */
     protected void addTechnicalMetadata(Canvas canvas, ContentResource body) {
         if (body instanceof Image img) {

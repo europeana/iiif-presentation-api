@@ -40,6 +40,14 @@ public class MediaGeneratorRegistry {
     private Map<MediaGeneratorType, GeneratorSet> registry = new EnumMap<>(
         MediaGeneratorType.class);
 
+    /** Load the Generator beans in registry map
+     * @param noCanvas NoCanvas
+     * @param euscreenV3 EUScreenV3
+     * @param specV2 SpecialisedV2
+     * @param specV3 SpecialisedV3
+     * @param suppV2 BrowserSupportedV2
+     * @param suppV3 BrowserSupportedV3
+     */
     public MediaGeneratorRegistry(@SuppressWarnings("rawtypes") NoCanvas noCanvas,
         EUScreenV3 euscreenV3,
         SpecialisedV2 specV2,
@@ -72,11 +80,11 @@ public class MediaGeneratorRegistry {
         for (Map.Entry<MediaGeneratorType, GeneratorSet> e : registry.entrySet()) {
             MediaGeneratorType type = e.getKey();
             GeneratorSet versionMap = e.getValue();
-            str.append(type + " ->  {");
+            str.append(type).append(" ->  {");
             for (MediaGeneratorVersion version : MediaGeneratorVersion.values()) {
                 MediaGenerator<?> generator = versionMap.get(version);
-                str.append(" " + version + " -> "
-                    + generator.getClass().getSimpleName() + " ");
+                str.append(" ").append(version).append(" -> ").append(
+                     generator.getClass().getSimpleName()).append(" ");
             }
             str.append("}\n");
         }

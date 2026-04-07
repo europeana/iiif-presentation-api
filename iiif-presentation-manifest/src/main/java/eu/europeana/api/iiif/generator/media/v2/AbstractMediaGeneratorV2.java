@@ -13,18 +13,18 @@ import eu.europeana.api.record.model.WebResource;
 
 import java.util.Collections;
 
-public abstract class AbsMediaGeneratorV2 implements MediaGenerator<Canvas> {
+public abstract class AbstractMediaGeneratorV2 implements MediaGenerator<Canvas> {
 
     protected ManifestSettings settings;
 
-    protected AbsMediaGeneratorV2(ManifestSettings settings) {
+    protected AbstractMediaGeneratorV2(ManifestSettings settings) {
         this.settings = settings;
     }
 
     /**
      * Adds the technical metadata in the annotation body of the canvas
-     * @param canvas
-     * @param body
+     * @param canvas Canvas
+     * @param body AnnotationBody
      */
     protected void addTechnicalMetadata(Canvas canvas, AnnotationBody body) {
         body.setHeight(canvas.getHeight());

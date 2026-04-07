@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 import eu.europeana.api.record.model.WebResource;
 
 @Component
-public class NoCanvas<Canvas> implements MediaGenerator<Canvas> {
+public class NoCanvas<T> implements MediaGenerator<T> {
     @Override
-    public Canvas generate(Canvas canvas, WebResource webResource) {
+    public T generate(T canvas, WebResource webResource) {
         return null;
     }
 }

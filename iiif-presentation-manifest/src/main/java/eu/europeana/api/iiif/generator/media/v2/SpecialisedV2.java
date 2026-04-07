@@ -42,7 +42,7 @@ import org.springframework.stereotype.Component;
  }
  **/
 @Component
-public class SpecialisedV2 extends AbsMediaGeneratorV2 {
+public class SpecialisedV2 extends AbstractMediaGeneratorV2 {
 
     public SpecialisedV2(ManifestSettings settings) {
         super(settings);

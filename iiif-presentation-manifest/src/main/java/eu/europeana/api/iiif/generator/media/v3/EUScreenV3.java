@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-public class EUScreenV3 extends AbsMediaGeneratorV3 {
+public class EUScreenV3 extends AbstractMediaGeneratorV3 {
 
     public EUScreenV3(ManifestSettings settings) {
         super(settings);

@@ -1,6 +1,5 @@
 package eu.europeana.api.iiif.generator;
 
-
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
 import eu.europeana.api.commons_sb3.http.HttpConnection;
@@ -126,8 +125,7 @@ public class ManifestSettings {
             if (concepts != null) {
                 concepts.forEach(p -> dePubMessages.put(p.getAbout(), p.getNote()));
             }
-        }
-        else{
+        } else {
             LOG.error("De-publication messages are not loaded !! ");
         }
     }
@@ -142,9 +140,8 @@ public class ManifestSettings {
                 new ClassPathResource(getDePubMessagesXml()).getInputStream());
             XmlMapper map = new XmlMapper();
             return map.readValue(reader, DePubReasonResponse.class);
-        }
-        catch (Exception e){
-            LOG.error("Critical Error while loading local de-publication reasons !! ",e);
+        } catch (IOException e) {
+            LOG.error("Critical Error while loading local de-publication reasons !! ", e);
         }
         return null;
     }
@@ -379,7 +376,7 @@ public class ManifestSettings {
 
     /**
      * Get the Content Search URL used in the Manifest Service Description
-     * @param europeanaId
+     * @param europeanaId id of the record in europeana
      * @return URL built from Content search base URL, manifest API presentation path, Europeana ID and Fulltext search path
      */
     public String getContentSearchURL(String europeanaId){
