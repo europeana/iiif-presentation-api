@@ -38,7 +38,7 @@ public final class LanguageMapUtils {
     /**
      * This converts a LanguageMap array (v3) to a LanguageObject array (v2).
      * @param map language map to change into language object
-     * @return array of language objects
+     * @return list of language objects
      */
     public static List<LanguageValue> langMapToObjects(LanguageMap map) {
         if (map == null) {
@@ -48,7 +48,7 @@ public final class LanguageMapUtils {
         for (Map.Entry<String, List<String>> entry : map.entrySet()) {
             String language = entry.getKey();
             List<String> values = entry.getValue();
-            for (String value: values) {
+            for (String value : values) {
                 result.add(new LanguageValue(value, language));
             }
         }
@@ -65,10 +65,15 @@ public final class LanguageMapUtils {
      * @return first language object
      */
     public static LanguageValue langMapToObject(LanguageMap map) {
-        if ( map == null ) { return null; }
+        if (map == null) {
+            return null;
+        }
 
         List<LanguageValue> result = langMapToObjects(map);
-        if (result.isEmpty()) { return new LanguageValue(); }
+        if (result.isEmpty()) {
+            return new LanguageValue();
+        }
         return result.get(0);
     }
+
 }

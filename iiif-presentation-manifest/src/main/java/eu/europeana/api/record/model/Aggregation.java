@@ -20,9 +20,9 @@ import eu.europeana.api.record.serialization.SerializationLifecycle;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = Visibility.NONE
-              , getterVisibility = Visibility.NONE)
+    , getterVisibility = Visibility.NONE)
 public class Aggregation implements SerializationLifecycle {
 
     @JsonProperty("about")
@@ -88,7 +88,7 @@ public class Aggregation implements SerializationLifecycle {
     }
 
     protected void setRecord(Record recordObj) {
-        if(webResources != null) {
+        if (webResources != null) {
             for (WebResource wr : webResources) {
                 wr.setRecord(recordObj);
             }
@@ -96,13 +96,15 @@ public class Aggregation implements SerializationLifecycle {
     }
 
     private WebResource searchForWebResource(String id
-                                           , Collection<WebResource> col) {
+        , Collection<WebResource> col) {
         if (id == null || col == null) {
             return null;
         }
 
-        for ( WebResource wr : col ) {
-            if ( id.equals(wr.getId()) ) { return wr; }
+        for (WebResource wr : col) {
+            if (id.equals(wr.getId())) {
+                return wr;
+            }
         }
         return null;
     }
@@ -130,8 +132,9 @@ public class Aggregation implements SerializationLifecycle {
         try {
             sorted = WebResourceSorter.sort(unsorted, views);
         } catch (DataInconsistentException e) {
-             sorted = unsorted;
+            sorted = unsorted;
         }
         return sorted;
     }
+
 }

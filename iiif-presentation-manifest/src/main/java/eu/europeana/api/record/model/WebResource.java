@@ -16,9 +16,9 @@ import eu.europeana.api.iiif.media.MediaType;
 import eu.europeana.api.record.serialization.ConverterUtils;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = Visibility.NONE
-              , getterVisibility = Visibility.NONE)
+    , getterVisibility = Visibility.NONE)
 public class WebResource {
 
     @JsonProperty("about")
@@ -108,12 +108,12 @@ public class WebResource {
 
     public Double getDurationInSeconds() {
         Long durationVal = getDuration();
-        return ( durationVal == null ? null : durationVal / 1000D);
+        return (durationVal == null ? null : durationVal / 1000D);
     }
 
     public Resolution getResolution() {
         Integer h = getHeight();
-        Integer w  = getWidth();
+        Integer w = getWidth();
 
         // if the WebResource does not have width or height
         // Set width and height to 400 (this is the size of the default icon which is what will likely be displayed)
@@ -122,7 +122,7 @@ public class WebResource {
     }
 
     public boolean hasIsFormatOf() {
-        return ( isFormatOf != null && !isFormatOf.isEmpty() );
+        return (isFormatOf != null && !isFormatOf.isEmpty());
     }
 
     public List<String> getIsFormatOf() {
@@ -130,14 +130,16 @@ public class WebResource {
     }
 
     public boolean hasServices() {
-        return ( hasService != null && !hasService.isEmpty() );
+        return (hasService != null && !hasService.isEmpty());
     }
 
     public Collection<SvcsService> getServicesAsResources() {
-        if ( !hasServices() ) { return Collections.emptyList(); }
+        if (!hasServices()) {
+            return Collections.emptyList();
+        }
 
         List<SvcsService> ret = new ArrayList<>(this.hasService.size());
-        for ( String serviceVal : this.hasService ) {
+        for (String serviceVal : this.hasService) {
             SvcsService service = record.getService(serviceVal);
             if (service != null) {
                 ret.add(service);
@@ -147,11 +149,13 @@ public class WebResource {
     }
 
     public boolean hasServiceByConformsTo(String conformsTo) {
-        return ( getServiceByConformsTo(conformsTo) != null );
+        return (getServiceByConformsTo(conformsTo) != null);
     }
 
     public SvcsService getServiceByConformsTo(String conformsTo) {
-        if ( !hasServices() ) { return null; }
+        if (!hasServices()) {
+            return null;
+        }
 
         for (String hasServiceVal : this.hasService) {
             SvcsService service = record.getService(hasServiceVal);
@@ -166,4 +170,5 @@ public class WebResource {
     protected void setRecord(Record rec) {
         this.record = rec;
     }
+
 }

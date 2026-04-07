@@ -8,10 +8,11 @@ import com.fasterxml.jackson.databind.util.StdConverter;
 import eu.europeana.api.iiif.v3.model.LanguageMap;
 
 public class ConverterUtils {
-    private ConverterUtils(){
+
+    private ConverterUtils() {
         //Private constructor to hide implicit public constructor for utility class.
     }
-    
+
     public static class ToListString extends StdConverter<Object, List<String>> {
 
         @Override
@@ -36,19 +37,22 @@ public class ConverterUtils {
         @Override
         public LanguageMap convert(Object value) {
             LanguageMap langMap = new LanguageMap();
-            if ( !(value instanceof Map) ) { return langMap; }
+            if (!(value instanceof Map)) {
+                return langMap;
+            }
 
-            Map<String,Object> map = (Map<String,Object>)value;
+            Map<String, Object> map = (Map<String, Object>) value;
             Object def = map.remove("def");
-            for ( String key : map.keySet() ) {
+            for (String key : map.keySet()) {
                 langMap.add(key, JsonUtils.asListString(map.get(key)));
             }
-            if ( def != null ) { 
+            if (def != null) {
                 langMap.add(LanguageMap.NO_LANGUAGE_KEY
-                          , JsonUtils.asListString(def));
+                    , JsonUtils.asListString(def));
             }
             return langMap;
         }
 
     }
+
 }
