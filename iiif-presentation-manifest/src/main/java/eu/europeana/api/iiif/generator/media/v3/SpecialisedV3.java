@@ -53,7 +53,7 @@ public class SpecialisedV3 extends AbstractMediaGeneratorV3 {
     @Override
     public Canvas generate(Canvas canvas, WebResource wr) {
 
-        String thumbnailUrl = ManifestGeneratorUtils.getThumbnailV2(settings, wr);
+        String thumbnailUrl = ManifestGeneratorUtils.getThumbnail(settings, wr);
         Resolution res = wr.getResolution().scaleToWidth(400);
 
         canvas.setWidth(res.width());

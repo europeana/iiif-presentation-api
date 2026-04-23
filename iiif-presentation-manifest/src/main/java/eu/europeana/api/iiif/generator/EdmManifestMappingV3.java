@@ -329,20 +329,21 @@ public final class EdmManifestMappingV3 implements ManifestGenerator<Manifest> {
         Canvas c = new Canvas(settings.getCanvasId(wr, order));
         c.setLabel(new LanguageMap(null, "p. " + order));
 
+
+        // get the configured media type of the mimetype
+        String mimeType = wr.getMimeType();
+        Optional<MediaType> media = mediaTypes.getMediaType(mimeType);
+        media.ifPresent(wr::setMediaType);
+
         //special exception for euscreen which is not mimetype specific
         if (isEuScreen(wr.getId())) {
             return (Canvas) registry.getGenerator(MediaGeneratorType.EUSCREEN, VERSION)
                 .generate(c, wr);
         }
 
-        // get the configured media type of the mimetype
-        String mimeType = wr.getMimeType();
-        Optional<MediaType> media = mediaTypes.getMediaType(mimeType);
         if (media.isEmpty()) {
             return null;
         }
-
-        wr.setMediaType(media.get());
 
         return (Canvas) registry.getGenerator(mediaTypes.getGeneratorMethodV3(mimeType), VERSION)
             .generate(c, wr);

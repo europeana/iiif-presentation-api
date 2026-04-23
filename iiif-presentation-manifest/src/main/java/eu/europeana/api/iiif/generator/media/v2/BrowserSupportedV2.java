@@ -49,7 +49,7 @@ public class BrowserSupportedV2 extends AbstractMediaGeneratorV2 {
         addCanvasMetadata(canvas, wr);
 
         if (wr.hasServiceByConformsTo(SERVICE_TYPE_IMAGE)) {
-            String url = ManifestGeneratorUtils.getThumbnailV2(settings, wr);
+            String url = ManifestGeneratorUtils.getThumbnail(settings, wr);
             canvas.setThumbnail(new Image(url));
         }
 

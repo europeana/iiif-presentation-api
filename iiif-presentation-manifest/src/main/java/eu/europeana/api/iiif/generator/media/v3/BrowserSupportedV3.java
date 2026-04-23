@@ -60,8 +60,8 @@ public class BrowserSupportedV3 extends AbstractMediaGeneratorV3 {
         addCanvasMetadata(canvas, wr);
 
         // Add thumbnail but only if it is not a IIIF image
-        if ( wr.hasServiceByConformsTo(SERVICE_TYPE_IMAGE) ) {
-            String url = getThumbnailV2(settings, wr);
+        if (!wr.hasServiceByConformsTo(SERVICE_TYPE_IMAGE) ) {
+            String url = getThumbnail(settings, wr);
             canvas.getThumbnail().add(new Image(url));
         }
         Annotation anno = newContentAnnotation(canvas);

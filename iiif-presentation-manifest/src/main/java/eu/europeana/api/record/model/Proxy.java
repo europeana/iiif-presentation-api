@@ -52,6 +52,13 @@ public class Proxy {
     @JsonDeserialize(converter = ConverterUtils.ToLanguageMap.class)
     private LanguageMap source = new LanguageMap();
 
+    @JsonProperty("edmType")
+    private String edmType;
+
+    public String getEdmType() {
+        return edmType;
+    }
+
     public LanguageMap getTitleOrDescription() {
         return ( title.isEmpty() ? description : title );
     }

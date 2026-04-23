@@ -1,9 +1,13 @@
 package eu.europeana.api.iiif.generator.media.v3;
 
+import static eu.europeana.api.iiif.generator.ManifestGeneratorConstants.SERVICE_TYPE_IMAGE;
+import static eu.europeana.api.iiif.generator.ManifestGeneratorUtils.*;
+
 import eu.europeana.api.iiif.generator.ManifestSettings;
 import eu.europeana.api.iiif.v3.model.Annotation;
 import eu.europeana.api.iiif.v3.model.Canvas;
 import eu.europeana.api.iiif.v3.model.TimeMode;
+import eu.europeana.api.iiif.v3.model.content.Image;
 import eu.europeana.api.iiif.v3.model.content.Video;
 import eu.europeana.api.record.model.WebResource;
 
@@ -47,6 +51,12 @@ public class EUScreenV3 extends AbstractMediaGeneratorV3 {
     public Canvas generate(Canvas canvas, WebResource wr) {
 
         addCanvasMetadata(canvas, wr);
+
+        // Add thumbnail but only if it is not a IIIF image
+        if (!wr.hasServiceByConformsTo(SERVICE_TYPE_IMAGE) ) {
+            String url = getThumbnail(settings.getThumbnailApiUrl(), wr.getId(),wr.getProviderProxyEdmType());
+            canvas.getThumbnail().add(new Image(url));
+        }
 
         Annotation anno = newContentAnnotation(canvas);
         anno.setTimeMode(TimeMode.trim);

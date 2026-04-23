@@ -133,6 +133,10 @@ public class WebResource {
         return (hasService != null && !hasService.isEmpty());
     }
 
+    public String getProviderProxyEdmType() {
+        return record.getProxy().getEdmType();
+    }
+
     public Collection<SvcsService> getServicesAsResources() {
         if (!hasServices()) {
             return Collections.emptyList();

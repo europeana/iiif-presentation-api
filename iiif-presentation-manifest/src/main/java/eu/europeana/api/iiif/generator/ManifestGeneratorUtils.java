@@ -80,10 +80,16 @@ public class ManifestGeneratorUtils extends RecordUtils {
     }
 
 
-    public static String getThumbnailV2(ManifestSettings settings, WebResource wr) {
+    public static String getThumbnail(ManifestSettings settings, WebResource wr) {
         String url = URLEncoder.encode(wr.getId(), StandardCharsets.UTF_8);
         return (settings.getThumbnailApiUrl() + url
             + "&type=" + wr.getMediaType().getCategory().name());
+    }
+
+    public static String getThumbnail(String thumbnailApiUrl,String webResourceID, String mediaCategory){
+        String url = URLEncoder.encode(webResourceID, StandardCharsets.UTF_8);
+        return (thumbnailApiUrl + url
+            + "&type=" + mediaCategory);
     }
 
     /**
