@@ -11,24 +11,24 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 import static eu.europeana.api.iiif.generator.GeneratorUtils.*;
+import static eu.europeana.api.iiif.generator.CollectionGenConstants.*;
 
 /**
  *  * Collection  Generator class for V3
  * @author Hugo
  * @since 14 Oct 2024
  */
-public class CollectionV3Generator extends GeneratorConstants implements CollectionGenerator<Collection> {
-
+public class CollectionV3Generator implements CollectionGenerator<Collection> {
     private static LanguageMap rootLabel
-        = new LanguageMap(LANG_META, GeneratorConstants.ROOT_LABEL);
+        = new LanguageMap(LANG_META, ROOT_LABEL);
     private static LanguageMap rootSummary
         = new LanguageMap(LANG_META, ROOT_DESCRIPTION);
     private static LanguageMap rootGalleryLabel
-        = new LanguageMap(LANG_META, GeneratorConstants.ROOT_GALLERY_LABEL);
+        = new LanguageMap(LANG_META, ROOT_GALLERY_LABEL);
     private static LanguageMap rootGallerySummary
         = new LanguageMap(LANG_META, ROOT_GALLERY_DESCRIPTION);
     private static LanguageMap websiteTitleGallery
-        = new LanguageMap(LANG_META, GeneratorConstants.WEBSITE_TITLE_GALLERY);
+        = new LanguageMap(LANG_META, WEBSITE_TITLE_GALLERY);
 
     private static Agent europeana = newEuropeanaProvider();
 

@@ -4,6 +4,7 @@ import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.CachingUtils;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.record.model.Record;
 import eu.europeana.api.iiif.config.BuildInfo;
 import eu.europeana.api.iiif.exceptions.InvalidIIIFVersionException;
 import eu.europeana.api.iiif.exceptions.ManifestInvalidUrlException;
@@ -52,7 +53,7 @@ public class ManifestController {
     private final BuildInfo           buildInfo;
     private ManifestSettings          settings;
     private IIIFAuthorizationService  authService;
-    private IIIFJsonHandler iiifJsonHandler;
+    private IIIFJsonHandler           iiifJsonHandler;
 
     @Autowired
     public ManifestController(BuildInfo buildInfo
@@ -76,7 +77,6 @@ public class ManifestController {
      * handles Invalid Urls like '/x/y/', '/x/manifest' , '/manifest'
      * Returns 400 bad Request
      * @return responseEntity
-     * @return
      * @throws ManifestInvalidUrlException
      */
     @GetMapping(value = {"/{datasetId}/{recordId}", "/{Id}/manifest", "/manifest"})
@@ -90,8 +90,6 @@ public class ManifestController {
      *
      * @param datasetId    (required field)
      * @param recordId     (required field)
-     * @param wskey        apikey (required field)
-     * @param version      (optional) indicates which IIIF version to generate, either '2' or '3'
      * @param recordApi    (optional) alternative recordApi baseUrl to use for retrieving record data
      * @param addFullText  (optional) perform fulltext exists check or not`1
      * @param fullTextApi  (optional) alternative fullTextApi baseUrl to use for retrieving record data
@@ -163,8 +161,9 @@ public class ManifestController {
                     String endpoint 
                         = ( recordApi == null ? settings.getRecordApiEndpoint() 
                                               : recordApi + settings.getRecordApiPath());
-                    data.record = recordService.getRecordJson(endpoint, id, auth, reqHeaders, caching);
-                    return true;
+                    data.record =recordService.getRecordJson(endpoint, id, auth,
+                        reqHeaders, caching).getRecord();
+                     return true;
                 }
             },
             new AbsChainCachingStrategy.Service() {
@@ -194,11 +193,12 @@ public class ManifestController {
                 out.flush();
             }
         };
-        return new ResponseEntity<>(responseBody, rspHeaders, HttpStatus.OK);
+        HttpStatus status = data.record.isArchived() ? HttpStatus.GONE: HttpStatus.OK;
+        return new ResponseEntity<>(responseBody, rspHeaders, status);
     }
 
     private static class SourceData {
-        public Object                             record   = null;
+        public Record                             record   = null;
         public Map<String, FulltextSummaryCanvas> fulltext = null;
     }
 

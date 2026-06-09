@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package eu.europeana.api.iiif.v3.model;
 
@@ -17,8 +17,8 @@ import eu.europeana.api.iiif.v3.io.JsonConstants;
  * @since 29 Oct 2024
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonIgnoreProperties(ignoreUnknown=true)
-@JsonPropertyOrder({ context, id, type, profile })
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonPropertyOrder({context, id, type, profile, label})
 public class Service extends IIIFv3Resource {
 
     @JsonProperty(JsonConstants.context)
@@ -30,12 +30,16 @@ public class Service extends IIIFv3Resource {
     @JsonProperty(JsonConstants.profile)
     private String profile;
 
+    @JsonProperty(JsonConstants.label)
+    private LanguageMap label;
+
     public Service(String id, String type) {
         super(id);
         this.type = type;
     }
 
-    protected Service() {}
+    protected Service() {
+    }
 
     public String getContext() {
         return context;
@@ -61,4 +65,16 @@ public class Service extends IIIFv3Resource {
     public void setProfile(String profile) {
         this.profile = profile;
     }
+
+    public LanguageMap getLabel() {
+        if (label == null) {
+            label = new LanguageMap();
+        }
+        return this.label;
+    }
+
+    public void setLabel(LanguageMap label) {
+        this.label = label;
+    }
+
 }

@@ -7,7 +7,6 @@ import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 
 import com.fasterxml.jackson.annotation.*;
 
-import eu.europeana.api.iiif.model.ManifestDefinitions;
 import eu.europeana.api.iiif.v3.io.JsonConstants;
 import eu.europeana.api.iiif.v3.model.ContentResource;
 
@@ -27,9 +26,9 @@ public class Dataset extends ContentResource {
         super(id);
     }
 
-    public Dataset(String id, String format) {
+    public Dataset(String id, String format, String profile) {
         super(id, null, format);
-        this.profile = ManifestDefinitions.EDM_SCHEMA_URL;
+        this.profile = profile;
     }
 
     protected Dataset() {}

@@ -2,7 +2,7 @@ package eu.europeana.api.iiif.utils;
 
 import org.springframework.util.StringUtils;
 
-import java.net.URL;
+
 import java.util.regex.Pattern;
 
 /**
@@ -62,7 +62,7 @@ public final class ValidateUtils {
      * @throws IllegalArgumentException thrown when the provided string doesn't adhere to the expected format
      */
     public static final boolean validateApiUrlFormat(String apiUrl) throws IllegalArgumentException {
-        if (!API_BASEURL.matcher(apiUrl.toString()).matches()) {
+        if (!API_BASEURL.matcher(apiUrl).matches()) {
             throw new IllegalArgumentException("Illegal API url "+ apiUrl);
         }
         return true;

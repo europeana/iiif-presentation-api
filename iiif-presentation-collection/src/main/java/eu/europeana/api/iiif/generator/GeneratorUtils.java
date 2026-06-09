@@ -10,12 +10,10 @@ import java.util.Map;
  * @author Srishti
  * @since 03 December 2024
  */
-public class GeneratorUtils extends GeneratorConstants {
-
+public class GeneratorUtils {
     private GeneratorUtils() {
         //private to hide implicit one
     }
-
     /**
      * Builds the url with setId : <url>/<setId>
      * @param uri url

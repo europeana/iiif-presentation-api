@@ -17,23 +17,24 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 import java.util.Map;
 
+import static eu.europeana.api.iiif.generator.CollectionGenConstants.*;
 /**
  * Collection  Generator class for V2
  * @author Hugo
  * @since 14 Oct 2024
  */
-public class CollectionV2Generator extends GeneratorConstants implements CollectionGenerator<Collection> {
+public class CollectionV2Generator  implements CollectionGenerator<Collection> {
 
     private static LanguageValue rootLabel
-        = new LanguageValue(GeneratorConstants.ROOT_LABEL, LANG_META);
+        = new LanguageValue(ROOT_LABEL, LANG_META);
     private static LanguageValue rootDescription
-        = new LanguageValue(GeneratorConstants.ROOT_DESCRIPTION, LANG_META);
+        = new LanguageValue(ROOT_DESCRIPTION, LANG_META);
     private static LanguageValue rootGallerylabel
-        = new LanguageValue(GeneratorConstants.ROOT_GALLERY_LABEL, LANG_META);
+        = new LanguageValue(ROOT_GALLERY_LABEL, LANG_META);
     private static LanguageValue rootGalleryDescription
-        = new LanguageValue(GeneratorConstants.ROOT_GALLERY_DESCRIPTION, LANG_META);
-    private static Image         europeanaLogo
-        = new Image(GeneratorConstants.EUROPEANA_LOGO);
+        = new LanguageValue(ROOT_GALLERY_DESCRIPTION, LANG_META);
+    private static Image europeanaLogo
+        = new Image(EUROPEANA_LOGO);
 
     @Resource
     private CollectionSettings settings;
@@ -41,7 +42,6 @@ public class CollectionV2Generator extends GeneratorConstants implements Collect
     public CollectionV2Generator(CollectionSettings settings) {
         this.settings = settings;
     }
-
     @Override
     public Collection generateRoot() {
         Collection col = new Collection(settings.getCollectionRootURI());
@@ -62,7 +62,7 @@ public class CollectionV2Generator extends GeneratorConstants implements Collect
         col.setLogo(europeanaLogo);
         for (UserSet set : sets) {
             Collection child = new Collection(buildUrlWithSetId(
-                    settings.getGalleryRootURI(), set.getIdentifier()));
+                settings.getGalleryRootURI(), set.getIdentifier()));
             // get the first title for v2
             for (Map.Entry<String, String> entry : set.getTitle().entrySet()) {
                 child.setLabel(new LanguageValue(entry.getValue(), entry.getKey()));
@@ -76,7 +76,7 @@ public class CollectionV2Generator extends GeneratorConstants implements Collect
     @Override
     public Collection generateGallery(UserSet set, List<RecordPreview> items) {
         Collection col = new Collection(
-                buildUrlWithSetId(settings.getGalleryRootURI(), set.getIdentifier()));
+            buildUrlWithSetId(settings.getGalleryRootURI(), set.getIdentifier()));
         if (set.getTitle() != null) {
             col.setLabel(newValue(set.getTitle().values().iterator().next()));
         }
@@ -95,9 +95,9 @@ public class CollectionV2Generator extends GeneratorConstants implements Collect
 
     protected Manifest getManifest(RecordPreview item) {
         Manifest manifest = new Manifest(
-                StringUtils.replace(settings.getIIIfManifestUrl()
-                                  , settings.getIIIFApiIdPlaceholder()
-                                  , item.getId()));
+            StringUtils.replace(settings.getIIIfManifestUrl()
+                , settings.getIIIFApiIdPlaceholder()
+                , item.getId()));
         manifest.setThumbnail(newThumbnail(item));
         if (item.hasDescription()) {
             String description = item.getDescription().values().iterator().next().get(0);
@@ -109,17 +109,17 @@ public class CollectionV2Generator extends GeneratorConstants implements Collect
                 manifest.setLabel(newValue(description));
             }
         }
-        return  manifest;
+        return manifest;
     }
 
     protected LanguageValue newValue(String value) {
-        return ( value == null ? null : new LanguageValue(value) );
+        return (value == null ? null : new LanguageValue(value));
     }
 
     protected Dataset newDataset(UserSet set) {
         Dataset ds = new Dataset(
-                buildUrlWithSetId(settings.getSetApiBaseUrl()
-                                , set.getIdentifier()) + "." + EXTENSION_JSONLD);
+            buildUrlWithSetId(settings.getSetApiBaseUrl()
+                , set.getIdentifier()) + "." + EXTENSION_JSONLD);
         ds.setFormat(MIMETYPE_JSONLD);
         ds.setProfile(SET_JSONLD_CONTEXT);
         return ds;
@@ -135,8 +135,8 @@ public class CollectionV2Generator extends GeneratorConstants implements Collect
     protected ResourceReference newReference(UserSet set) {
         // landing page https://www.europeana.eu/galleries/{setId}"
         ResourceReference ref = new ResourceReference(
-                buildUrlWithSetId(settings.getGalleryLandingPage()
-                                , set.getIdentifier()));
+            buildUrlWithSetId(settings.getGalleryLandingPage()
+                , set.getIdentifier()));
         ref.setLabel(WEBSITE_TITLE_GALLERY);
         ref.setFormat(MIMETYPE_HTML);
         return ref;

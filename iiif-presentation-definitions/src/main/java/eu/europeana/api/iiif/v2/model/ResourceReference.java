@@ -30,6 +30,11 @@ public class ResourceReference extends IIIFv2Resource {
 
     public ResourceReference(String id) { super(id); }
 
+    public ResourceReference(String id, String label, String format) { 
+        super(id); 
+        this.label  = label;
+        this.format = format;
+    }
 
     @Override
     public String getType() {

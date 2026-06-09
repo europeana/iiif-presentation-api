@@ -1,26 +1,16 @@
 package eu.europeana.api.iiif.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.ContextAttributes;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonNodeJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 
-import eu.europeana.api.iiif.exceptions.RecordParseException;
 import eu.europeana.api.iiif.generator.ManifestSettings;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.*;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-import static eu.europeana.api.iiif.v3.io.JsonConstants.context;
-import static eu.europeana.api.iiif.v3.io.JsonConstants.CONTEXT_URI;
-import static eu.europeana.api.iiif.v3.io.JsonConstants.CONTEXT_URI_ANNO;
-import static eu.europeana.api.iiif.v3.io.JsonConstants.CONTEXT_URI_TEXT;
 
 
 /**

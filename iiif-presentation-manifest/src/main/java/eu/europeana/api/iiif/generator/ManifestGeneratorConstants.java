@@ -1,6 +1,5 @@
-package eu.europeana.api.iiif.model;
+package eu.europeana.api.iiif.generator;
 
-import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
 
 /**
  * Definitions specifically for IIIF Manifest. For definitions shared between IIIF Manifest and Fulltext API
@@ -8,8 +7,8 @@ import eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions;
  * @author Patrick Ehlert Created on 26-01-2018
  * @see eu.europeana.api.commons_sb3.definitions.iiif.IIIFDefinitions class
  */
-public final class ManifestDefinitions {
-
+public final class ManifestGeneratorConstants {
+    public static final String LINGUISTIC = "zxx";
     /**
      * Place holder for the dataset and record part of an ID. This is used in various places in the manifest
      */
@@ -49,6 +48,14 @@ public final class ManifestDefinitions {
     public static final String IMAGE_SERVICE_TYPE_3 = "ImageService3";
 
     /**
+     * Context value for embed service description
+     */
+    public static final String EMBED_SERVICE_TYPE = "OEmbedService";
+    public static final String SERVICE_TYPE_IMAGE = "http://iiif.io/api/image";
+    public static final String SERVICE_TYPE_EMBED = "https://oembed.com/";
+
+
+    /**
      * Titles of Fulltext summary types
      */
     public static final String INFO_CANVAS_TYPE   = "FulltextSummaryCanvas";
@@ -56,20 +63,15 @@ public final class ManifestDefinitions {
 
     public static final String CANVAS_THUMBNAIL_POSTFIX = "&type=TEXT";
 
+    public static final String MIME_TYPE_TEXT_HTML = "text/html";
+
     public static final String ATTRIBUTION_STRING = "Attribution";
 
-    private ManifestDefinitions() {
-        // empty constructor to avoid initializationRE
-    }
+    public static final String DEPUBLISHED_STRING = "Depublished";
 
-    /**
-     * /presentation/{europeanaID}/annopage/
-     * @param europeanaId europeana id
-     * @return fulltext summary path
-     */
-    public static String getFulltextSummaryPath(String europeanaId) {
-        return IIIFDefinitions.PRESENTATION_PATH + europeanaId + IIIFDefinitions.FULLTEXT_SUMMARY_PATH +
-               "/"; // for now trailing slash is needed
-    }
+    public static final String DEFAULT_DELETION_REASON = "Reasons not covered by any of the other cases where depublication needs to happen.";
 
+    private ManifestGeneratorConstants(){
+        //Private constructor to hide implicit public constructor.
+    }
 }

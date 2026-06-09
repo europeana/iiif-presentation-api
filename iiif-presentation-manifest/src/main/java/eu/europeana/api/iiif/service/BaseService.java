@@ -22,10 +22,6 @@ import java.util.Map;
 
 public class BaseService {
 
-    protected final HttpConnection recordClient;
-    protected final HttpConnection fulltextClient;
-
-    protected final ObjectMapper   mapper;
 
     private static final int MAX_TOTAL_CONNECTIONS    = 200;
     private static final int DEFAULT_MAX_PER_ROUTE    = 100;
@@ -33,6 +29,12 @@ public class BaseService {
     protected static final int RECORD_SOCKET_TIMEOUT  = 30_000;
     private static final int FULLTEXT_CONNECT_TIMEOUT = 8_000;
     protected static final int FULLTEXT_SOCKET_TIMEOUT  = 20_000;
+
+    protected final HttpConnection recordClient;
+    protected final HttpConnection fulltextClient;
+
+    protected final ObjectMapper   mapper;
+
 
     public BaseService() {
         recordClient = new HttpConnection(createConnectionPool(true));
@@ -67,6 +69,11 @@ public class BaseService {
     }
 
 
+    /**
+     * Create hash map containing header and first header value from HttpHeaders.
+     * @param headers HttpHeaders
+     * @return hashmap of header and value
+     */
     public Map<String, String> getHeaderMap(HttpHeaders headers) {
         if (headers == null)  return Collections.emptyMap() ;
         Map<String, String> headerMap = new HashMap<>();
@@ -76,6 +83,11 @@ public class BaseService {
         return headerMap;
     }
 
+    /**
+     * Create HttpHeaders object based on list of caching related headers
+     * @param cachingHeaders list
+     * @return org.springframework.http.HttpHeaders
+     */
     public HttpHeaders getHeaders(List<Header> cachingHeaders) {
         HttpHeaders headers = new HttpHeaders();
         for (Header h: cachingHeaders) {

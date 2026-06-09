@@ -36,6 +36,9 @@ public class Manifest extends PresentationResource {
     @JsonProperty(JsonConstants.items)
     private List<Canvas> items;
 
+    @JsonProperty(JsonConstants.rights)
+    private String rightsUrl;
+
     public Manifest(String id) {
         super(id);
     }
@@ -70,7 +73,8 @@ public class Manifest extends PresentationResource {
     }
 
     public void setStart(Canvas start) {
-        this.start = start;
+        //Generate new canvas object with the of the intended canvas for indicating the start
+        this.start = new Canvas(start.getID());
     }
 
 
@@ -82,4 +86,13 @@ public class Manifest extends PresentationResource {
         return ( this.items != null ? this.items
                                     : (this.items = new ArrayList<>()));
     }
+
+    public String getRightsUrl() {
+        return this.rightsUrl;
+    }
+
+    public void setRightsUrl(String rights) {
+        this.rightsUrl = rights;
+    }
+
 }

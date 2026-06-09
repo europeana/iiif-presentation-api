@@ -16,7 +16,7 @@ public class LanguageMap extends LinkedHashMap<String, List<String>> {
 
     private static final long serialVersionUID = -7678917507346373456L;
 
-    public static final String NO_LANGUAGE_KEY = "@none";
+    public static final String NO_LANGUAGE_KEY      = "@none";
     public static final String DEFAULT_METADATA_KEY = "en";
 
     public LanguageMap() {

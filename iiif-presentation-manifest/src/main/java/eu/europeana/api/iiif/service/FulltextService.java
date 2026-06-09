@@ -7,8 +7,8 @@ import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
 import eu.europeana.api.iiif.exceptions.FullTextCheckException;
 import eu.europeana.api.iiif.exceptions.ResourceNotChangedException;
+import eu.europeana.api.iiif.generator.ManifestGeneratorUtils;
 import eu.europeana.api.iiif.generator.ManifestSettings;
-import eu.europeana.api.iiif.model.ManifestDefinitions;
 import eu.europeana.api.iiif.model.info.FulltextSummaryCanvas;
 import eu.europeana.api.iiif.model.info.FulltextSummaryManifest;
 import org.apache.hc.core5.http.HttpStatus;
@@ -25,7 +25,6 @@ import java.util.Map;
 public class FulltextService extends BaseService {
 
     private static final Logger LOG = LogManager.getLogger(FulltextService.class);
-
     private final ManifestSettings settings;
 
     public FulltextService(ManifestSettings settings) {
@@ -40,8 +39,8 @@ public class FulltextService extends BaseService {
      * @throws EuropeanaApiException
      */
     public FulltextSummaryManifest fetchFullTextSummary(
-            String url, AuthenticationHandler auth
-          , HttpHeaders reqHeaders, ResourceCaching caching) throws EuropeanaApiException{
+        String url, AuthenticationHandler auth
+        , HttpHeaders reqHeaders, ResourceCaching caching) throws EuropeanaApiException {
         try {
             HttpResponseHandler rsp = fulltextClient.get(url, getHeaderMap(reqHeaders), auth);
             int code = rsp.getStatus();
@@ -49,33 +48,35 @@ public class FulltextService extends BaseService {
             if (code == HttpStatus.SC_OK) {
                 caching.getHeaders(getHeaders(rsp.getCachingHeaders()));
                 return mapper.readValue(responseBody, FulltextSummaryManifest.class);
-            }
-            else if (code == HttpStatus.SC_NOT_MODIFIED) {
+            } else if (code == HttpStatus.SC_NOT_MODIFIED) {
                 throw new ResourceNotChangedException(url);
-            }
-            else if (code == HttpStatus.SC_NOT_FOUND) {
+            } else if (code == HttpStatus.SC_NOT_FOUND) {
                 return null;
             } else {
-                EuropeanaApiErrorResponse errorResponse = mapper.readValue(responseBody, EuropeanaApiErrorResponse.class);
-                LOG.error("Error retrieving fulltext summary {}, reason {}", url, errorResponse.getMessage());
-                throw new FullTextCheckException("Error retrieving fulltext summary - " + errorResponse.getMessage());
+                EuropeanaApiErrorResponse errorResponse = mapper.readValue(responseBody,
+                    EuropeanaApiErrorResponse.class);
+                LOG.error("Error retrieving fulltext summary {}, reason {}", url,
+                    errorResponse.getMessage());
+                throw new FullTextCheckException(
+                    "Error retrieving fulltext summary - " + errorResponse.getMessage());
             }
         } catch (IOException e) {
-            throw new FullTextCheckException("Error retrieving fulltext summary - " + e.getMessage(), e);
+            throw new FullTextCheckException(
+                "Error retrieving fulltext summary - " + e.getMessage(), e);
         }
     }
 
     public Map<String, FulltextSummaryCanvas> getFulltextSummary(
-            String recordId, String fullTextApi, AuthenticationHandler auth
-            , HttpHeaders reqHeaders, ResourceCaching caching)
-            throws EuropeanaApiException {
+        String recordId, String fullTextApi, AuthenticationHandler auth
+        , HttpHeaders reqHeaders, ResourceCaching caching)
+        throws EuropeanaApiException {
         String fullTextSummaryUrl = generateFullTextSummaryUrl(recordId, fullTextApi);
         return getCanvasMap(fullTextSummaryUrl, auth, reqHeaders, caching);
     }
 
     public Map<String, FulltextSummaryCanvas> getCanvasMap(
-            String fulltextUrl, AuthenticationHandler auth
-            , HttpHeaders reqHeaders, ResourceCaching caching) throws EuropeanaApiException {
+        String fulltextUrl, AuthenticationHandler auth
+        , HttpHeaders reqHeaders, ResourceCaching caching) throws EuropeanaApiException {
         return createCanvasMap(fetchFullTextSummary(fulltextUrl, auth, reqHeaders, caching));
     }
 
@@ -93,9 +94,11 @@ public class FulltextService extends BaseService {
      */
     // TODO we are executing ftSummaryCanvasToAdd.getPageNumber() twice
     private Map<String, FulltextSummaryCanvas> createCanvasMap(
-            FulltextSummaryManifest summary) {
+        FulltextSummaryManifest summary) {
 
-        if ( summary == null ) { return null; }
+        if (summary == null) {
+            return null;
+        }
         LinkedHashMap<String, FulltextSummaryCanvas> map = new LinkedHashMap<>();
 
         for (FulltextSummaryCanvas ftSummaryCanvasToAdd : summary.getCanvases()) {
@@ -121,10 +124,11 @@ public class FulltextService extends BaseService {
      * @param europeanaId    identifier to include in the path
      */
     private String generateFullTextSummaryUrl(String europeanaId
-                                            , String fullTextApiUrl) {
-        if ( fullTextApiUrl == null ) {
+        , String fullTextApiUrl) {
+        if (fullTextApiUrl == null) {
             fullTextApiUrl = settings.getFullTextApiBaseUrl();
         }
-        return fullTextApiUrl + ManifestDefinitions.getFulltextSummaryPath(europeanaId);
+        return fullTextApiUrl + ManifestGeneratorUtils.getFulltextSummaryPath(europeanaId);
     }
+
 }

@@ -2,71 +2,48 @@ package eu.europeana.api.iiif.media;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import eu.europeana.api.iiif.generator.media.MediaGeneratorType;
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
- * @author srishti singh
- * @since 18 April 2023
+ * @author Hugo Manguinhas
+ * @since 20 Feb 2026
+ *
+ * Represents the xml data for media type mapping.
+ * Example:
+ * <format mediaType="image/gif" label="GIF" category="Image" methodV2="supported" methodV3="supported"/>
  */
 @JacksonXmlRootElement(localName = "format")
-public class MediaType {
-
-    private static final String BROWSER = "Browser";
-    private static final String RENDERED = "Rendered";
-    private static final String EU_SCREEN = "EUScreen";
-    private static final String O_EMBED = "oEmbed";
-
-    public static final String  VIDEO    = "Video";
-    public static final String  SOUND    = "Sound";
-    public static final String  TEXT     = "Text";
-    public static final String  IMAGE    = "Image";
-
-    @JacksonXmlProperty(localName =  "mediaType", isAttribute = true)
+public class MediaType implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 3536623038532600461L;
+    @JacksonXmlProperty(localName = "mediaType", isAttribute = true)
     private String mimeType;
-
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(localName = "label", isAttribute = true)
     private String label;
-
-    @JacksonXmlProperty(isAttribute = true)
-    private String type;
-
-    @JacksonXmlProperty(isAttribute = true)
-    private String support;
-
+    @JacksonXmlProperty(localName = "category", isAttribute = true)
+    private MediaCategory category;
+    @JacksonXmlProperty(localName = "methodV2", isAttribute = true)
+    private String methodV2;
+    @JacksonXmlProperty(localName = "methodV3", isAttribute = true)
+    private String methodV3;
     public String getMimeType() {
         return mimeType;
     }
-
     public String getLabel() {
         return label;
     }
-
-    public String getType() {
-        return type;
+    public MediaCategory getCategory() {
+        return category;
     }
-
-    public String getSupport() {
-        return support;
+    public boolean isAudioVisual() {
+        return category.isAudioVisual() ;
     }
-
-    public boolean isRendered() {
-        return RENDERED.equals(getSupport());
+    public MediaGeneratorType getMethodV2() {
+        return MediaGeneratorType.valueOf(methodV2.toUpperCase());
     }
-
-    public boolean isBrowserSupported() {
-        return BROWSER.equals(getSupport());
-    }
-
-    public boolean isVideoOrSound() {
-        return ( VIDEO.equals(getType()) || SOUND.equals(getType()) ) ;
-    }
-
-    public boolean isEuScreen() {
-        return EU_SCREEN.equals(getSupport());
-    }
-
-    public boolean isOEmbed() {
-        return O_EMBED.equals(getLabel());
+    public MediaGeneratorType getMethodV3() {
+        return MediaGeneratorType.valueOf(methodV3.toUpperCase());
     }
 }
-
-
