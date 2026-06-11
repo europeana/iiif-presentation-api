@@ -5,7 +5,6 @@ package eu.europeana.api.iiif.v3.model.content;
 
 import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -16,13 +15,13 @@ import eu.europeana.api.iiif.v3.model.ContentResource;
  * @author Hugo
  * @since 7 Nov 2024
  */
-@JsonPropertyOrder({ id, type, label, language, format, height, width, service })
+@JsonPropertyOrder({ID, TYPE, LABEL, LANGUAGE, FORMAT, HEIGHT, WIDTH, SERVICE})
 public class Image extends ContentResource {
 
-    @JsonProperty(JsonConstants.height)
+    @JsonProperty(JsonConstants.HEIGHT)
     private Integer height;
 
-    @JsonProperty(JsonConstants.width)
+    @JsonProperty(JsonConstants.WIDTH)
     private Integer width;
 
 
@@ -32,9 +31,9 @@ public class Image extends ContentResource {
 
     public Image() {}
 
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     public String getType() {
-        return JsonConstants.Image;
+        return JsonConstants.IMAGE;
     }
 
     public Integer getHeight() {

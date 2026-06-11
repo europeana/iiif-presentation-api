@@ -367,6 +367,7 @@ public class ManifestSettings {
      *
      * @param europeanaId consisting of dataset ID and record ID separated by a slash (string should have a leading
      *                    slash and not trailing slash)
+     * @param  postFix -
      * @return string containing the dataset ID consisting of a base url, Europeana ID and postfix (rdf/xml, json or
      * json-ld)
      */

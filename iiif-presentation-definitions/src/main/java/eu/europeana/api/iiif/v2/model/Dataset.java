@@ -28,6 +28,13 @@ public class Dataset extends ContentResource {
         super(id);
     }
 
+    /**
+     * Initialize Dataset with id, format and profile
+     *
+     * @param id -
+     * @param format -
+     * @param profile -
+     */
     public Dataset(String id, String format, String profile) {
         super(id, format);
         this.profile = profile;

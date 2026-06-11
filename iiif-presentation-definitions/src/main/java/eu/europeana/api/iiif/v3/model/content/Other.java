@@ -19,10 +19,10 @@ import eu.europeana.api.iiif.v3.model.ContentResource;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonPropertyOrder({ id, type, label, language, format, service })
+@JsonPropertyOrder({ID, TYPE, LABEL, LANGUAGE, FORMAT, SERVICE})
 public class Other extends ContentResource {
 
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     private String type;
 
     public Other(String id) {

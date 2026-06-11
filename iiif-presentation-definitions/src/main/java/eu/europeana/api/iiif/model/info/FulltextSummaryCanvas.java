@@ -22,7 +22,7 @@ public class FulltextSummaryCanvas extends IIIFv3Resource implements Serializabl
 
     private String originalLanguage;
 
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     private String type;
 
     @JsonProperty("annotations")

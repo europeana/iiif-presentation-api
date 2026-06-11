@@ -18,27 +18,27 @@ import org.apache.commons.lang3.StringUtils;
  * @since 29 Oct 2024
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ id, type, label, height, width, duration, requiredStatement
-                   , rights, thumbnail, items })
+@JsonPropertyOrder({ID, TYPE, LABEL, HEIGHT, WIDTH, DURATION, REQUIRED_STATEMENT
+                   , RIGHTS, THUMBNAIL, ITEMS})
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class Canvas extends PresentationResource {
 
-    @JsonProperty(JsonConstants.label)
+    @JsonProperty(JsonConstants.LABEL)
     private LanguageMap label;
 
-    @JsonProperty(JsonConstants.height)
+    @JsonProperty(JsonConstants.HEIGHT)
     private Integer height; 
 
-    @JsonProperty(JsonConstants.width)
+    @JsonProperty(JsonConstants.WIDTH)
     private Integer width;
 
-    @JsonProperty(JsonConstants.duration)
+    @JsonProperty(JsonConstants.DURATION)
     private Double duration;
 
-    @JsonProperty(JsonConstants.items)
+    @JsonProperty(JsonConstants.ITEMS)
     private List<AnnotationPage> items;
 
-    @JsonProperty(JsonConstants.annotations)
+    @JsonProperty(JsonConstants.ANNOTATIONS)
     private List<AnnotationPage> annotations;
 
     /**
@@ -53,7 +53,7 @@ public class Canvas extends PresentationResource {
 
     @Override
     public String getType() {
-        return JsonConstants.Canvas;
+        return JsonConstants.CANVAS;
     }
 
 

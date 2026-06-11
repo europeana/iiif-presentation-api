@@ -30,6 +30,7 @@ import eu.europeana.api.record.serialization.BeanLifecycleModifier;
 
 import static eu.europeana.api.commons_sb3.error.EuropeanaErrorConstants.*;
 
+
 @Service
 public class RecordService extends BaseService {
 

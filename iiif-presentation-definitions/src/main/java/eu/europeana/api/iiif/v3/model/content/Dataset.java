@@ -16,16 +16,23 @@ import eu.europeana.api.iiif.v3.model.ContentResource;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonPropertyOrder({ id, type, label, language, format, profile, service })
+@JsonPropertyOrder({ID, TYPE, LABEL, LANGUAGE, FORMAT, PROFILE, SERVICE})
 public class Dataset extends ContentResource {
 
-    @JsonProperty(JsonConstants.profile)
+    @JsonProperty(JsonConstants.PROFILE)
     private String profile;
 
     public Dataset(String id) {
         super(id);
     }
 
+    /**
+     * Initialize Dataset with id, format and profile
+     *
+     * @param id -
+     * @param format -
+     * @param profile -
+     */
     public Dataset(String id, String format, String profile) {
         super(id, null, format);
         this.profile = profile;
@@ -34,9 +41,9 @@ public class Dataset extends ContentResource {
     protected Dataset() {}
 
 
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     public String getType() {
-        return JsonConstants.Dataset;
+        return JsonConstants.DATASET;
     }
 
     public String getProfile() {

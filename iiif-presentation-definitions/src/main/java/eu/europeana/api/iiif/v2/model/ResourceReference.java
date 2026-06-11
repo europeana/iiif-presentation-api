@@ -30,6 +30,12 @@ public class ResourceReference extends IIIFv2Resource {
 
     public ResourceReference(String id) { super(id); }
 
+    /**
+     * Initialize ResourceReference with id, label and format
+     * @param id
+     * @param label
+     * @param format
+     */
     public ResourceReference(String id, String label, String format) { 
         super(id); 
         this.label  = label;

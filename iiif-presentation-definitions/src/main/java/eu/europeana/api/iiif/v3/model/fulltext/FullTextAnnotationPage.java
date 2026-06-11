@@ -21,23 +21,30 @@ import eu.europeana.api.iiif.v3.model.AnnotationPage;
  * @since 20 Nov 2024
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ id, type, language, textGranularity, source, items })
+@JsonPropertyOrder({ID, TYPE, LANGUAGE, TEXT_GRANULARITY, SOURCE, ITEMS})
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class FullTextAnnotationPage extends AnnotationPage {
 
-    @JsonProperty(JsonConstants.language)
+    @JsonProperty(JsonConstants.LANGUAGE)
     private String language;
 
-    @JsonProperty(JsonConstants.textGranularity)
+    @JsonProperty(JsonConstants.TEXT_GRANULARITY)
     private List<TextGranularity> textGranularity;
 
-    @JsonProperty(JsonConstants.source)
+    @JsonProperty(JsonConstants.SOURCE)
     private String source;
 
     public FullTextAnnotationPage(String id) {
         super(id);
     }
 
+    /**
+     * Initialize FullTextAnnotationPage with id , language, textGranularity and source
+     * @param id -
+     * @param language -
+     * @param textGranularity -
+     * @param source -
+     */
     public FullTextAnnotationPage(String id, String language, List<TextGranularity> textGranularity, String source) {
         super(id);
         this.language = language;

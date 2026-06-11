@@ -41,6 +41,11 @@ public class LanguageMap extends LinkedHashMap<String, List<String>> {
         addValue(language, value);
     }
 
+    /**
+     * Add language and value to Language map
+     * @param language -
+     * @param value -
+     */
     public final void addValue(String language, String value) {
         this.add(language, value);
     }

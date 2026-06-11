@@ -18,7 +18,7 @@ import eu.europeana.api.iiif.v2.io.JsonConstants;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonPropertyOrder({ id, type, format, height, width, language, service })
+@JsonPropertyOrder({ID, TYPE, FORMAT, HEIGHT, WIDTH, LANGUAGE, SERVICE})
 public class AnnotationBody extends Image {
 
     @JsonProperty(JsonConstants.language)

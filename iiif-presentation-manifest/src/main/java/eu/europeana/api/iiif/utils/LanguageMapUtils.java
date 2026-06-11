@@ -20,7 +20,9 @@ public final class LanguageMapUtils {
 
     /**
      * This merges an array of languagemaps into a single languagemap. We also check for empty maps and return null if
-     * the provided array is empty
+     *  the provided array is empty
+     * @param maps -
+     * @return - LanguageMap
      */
     public static LanguageMap mergeLanguageMaps(LanguageMap[] maps) {
         if (maps == null || maps.length == 0) {

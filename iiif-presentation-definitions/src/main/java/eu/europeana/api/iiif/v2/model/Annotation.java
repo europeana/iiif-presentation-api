@@ -35,6 +35,12 @@ public class Annotation extends IIIFv2Resource {
         super(id);
     }
 
+    /**
+     * Initialize Annotation with id and motivation
+     *
+     * @param id -
+     * @param motivation -
+     */
     public Annotation(String id, String motivation) {
         super(id);
         this.motivation = motivation;

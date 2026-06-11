@@ -29,11 +29,11 @@ import eu.europeana.api.iiif.v3.model.fulltext.FullTextAnnotationPage;
 @JsonSubTypes({ 
    @JsonSubTypes.Type(FullTextAnnotationPage.class)
 })
-@JsonPropertyOrder({ id, type, items })
+@JsonPropertyOrder({ID, TYPE, ITEMS})
 @SuppressWarnings("javaarchitecture:S7027")
 public class AnnotationPage extends IIIFv3Resource {
 
-    @JsonProperty(JsonConstants.items)
+    @JsonProperty(JsonConstants.ITEMS)
     private List<Annotation> items;
 
 
@@ -44,9 +44,9 @@ public class AnnotationPage extends IIIFv3Resource {
     protected AnnotationPage() {}
 
     @Override
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     public String getType() {
-        return JsonConstants.AnnotationPage;
+        return JsonConstants.ANNOTATION_PAGE;
     }
 
     public boolean hasItems() {

@@ -20,57 +20,57 @@ import eu.europeana.api.iiif.v3.model.content.Text;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = type )
+        property = TYPE)
 @JsonSubTypes({
-  @JsonSubTypes.Type(value = Manifest.class  , name = Manifest)
-, @JsonSubTypes.Type(value = Collection.class, name = Collection) 
-, @JsonSubTypes.Type(value = Canvas.class    , name = Canvas) 
+  @JsonSubTypes.Type(value = Manifest.class  , name = MANIFEST)
+, @JsonSubTypes.Type(value = Collection.class, name = COLLECTION)
+, @JsonSubTypes.Type(value = Canvas.class    , name = CANVAS)
 })
 @SuppressWarnings("javaarchitecture:S7027")
 public abstract class PresentationResource extends IIIFv3Resource {
 
-    @JsonProperty(JsonConstants.label)
+    @JsonProperty(JsonConstants.LABEL)
     private LanguageMap label;
 
-    @JsonProperty(JsonConstants.summary)
+    @JsonProperty(JsonConstants.SUMMARY)
     private LanguageMap summary;
 
-    @JsonProperty(JsonConstants.metadata)
+    @JsonProperty(JsonConstants.METADATA)
     private List<LabelledValue> metadata;
 
-    @JsonProperty(JsonConstants.requiredStatement)
+    @JsonProperty(JsonConstants.REQUIRED_STATEMENT)
     private LabelledValue requiredStatement;
 
-    @JsonProperty(JsonConstants.rights)
+    @JsonProperty(JsonConstants.RIGHTS)
     private Text rights;
 
-    @JsonProperty(JsonConstants.provider)
+    @JsonProperty(JsonConstants.PROVIDER)
     private List<Agent> provider;
 
-    @JsonProperty(JsonConstants.homepage)
+    @JsonProperty(JsonConstants.HOMEPAGE)
     private List<Text> homepage;
 
-    @JsonProperty(JsonConstants.seeAlso)
+    @JsonProperty(JsonConstants.SEE_ALSO)
     private List<Dataset> seeAlso;
 
-    @JsonProperty(JsonConstants.service)
+    @JsonProperty(JsonConstants.SERVICE)
     private List<Service> service;
 
-    @JsonProperty(JsonConstants.navDate)
+    @JsonProperty(JsonConstants.NAV_DATE)
     private String navDate;
 
-    @JsonProperty(JsonConstants.behavior)
+    @JsonProperty(JsonConstants.BEHAVIOR)
     private List<Behavior> behavior;
 
-    @JsonProperty(JsonConstants.thumbnail)
+    @JsonProperty(JsonConstants.THUMBNAIL)
     private List<Image> thumbnail;
 
-    @JsonProperty(JsonConstants.rendering)
+    @JsonProperty(JsonConstants.RENDERING)
     @JsonFormat(with = { JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY
             , JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED } )
     private List<Image> rendering;
 
-    @JsonProperty(JsonConstants.placeholderCanvas)
+    @JsonProperty(JsonConstants.PLACEHOLDER_CANVAS)
     private Canvas placeholderCanvas;
 
     public PresentationResource(String id) {

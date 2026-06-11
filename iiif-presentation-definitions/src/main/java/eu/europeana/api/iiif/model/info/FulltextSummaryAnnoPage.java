@@ -47,7 +47,7 @@ public class FulltextSummaryAnnoPage extends IIIFv3Resource implements Serializa
         this.source = source;
     }
 
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     public String getType() {
         return this.type;
     }

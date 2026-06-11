@@ -17,26 +17,26 @@ import eu.europeana.api.iiif.v3.io.JsonConstants;
  * @since 14 Oct 2024
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ id, type, label, summary, metadata, requiredStatement
-                   , rights, provider, homepage, seeAlso, service, partOf
-                   , navDate, behavior, viewingDirection, thumbnail, start, items
-                   , rendering, placeholderCanvas })
+@JsonPropertyOrder({ID, TYPE, LABEL, SUMMARY, METADATA, REQUIRED_STATEMENT
+                   , RIGHTS, PROVIDER, HOMEPAGE, SEE_ALSO, SERVICE, PART_OF
+                   , NAV_DATE, BEHAVIOR, VIEWING_DIRECTION, THUMBNAIL, START, ITEMS
+                   , RENDERING, PLACEHOLDER_CANVAS})
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class Manifest extends PresentationResource {
 
-    @JsonProperty(JsonConstants.partOf)
+    @JsonProperty(JsonConstants.PART_OF)
     private List<Collection> partOf;
 
-    @JsonProperty(JsonConstants.viewingDirection)
+    @JsonProperty(JsonConstants.VIEWING_DIRECTION)
     private ViewingDirection viewingDirection;
 
-    @JsonProperty(JsonConstants.start)
+    @JsonProperty(JsonConstants.START)
     private Canvas start;
 
-    @JsonProperty(JsonConstants.items)
+    @JsonProperty(JsonConstants.ITEMS)
     private List<Canvas> items;
 
-    @JsonProperty(JsonConstants.rights)
+    @JsonProperty(JsonConstants.RIGHTS)
     private String rightsUrl;
 
     public Manifest(String id) {
@@ -46,7 +46,7 @@ public class Manifest extends PresentationResource {
     protected Manifest() {}
 
     public String getType() {
-        return JsonConstants.Manifest;
+        return JsonConstants.MANIFEST;
     }
 
 

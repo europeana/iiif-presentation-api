@@ -1,6 +1,8 @@
 package eu.europeana.api.iiif.v2.io;
 
 /**
+ * Defines constants used for V2 json response elements
+ *
  * @author Hugo
  * @since 14 Oct 2024
  *
@@ -8,11 +10,7 @@ package eu.europeana.api.iiif.v2.io;
  *           constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'
  */
 @java.lang.SuppressWarnings("java:S115")
-public class JsonConstants {
-
-    private JsonConstants() {
-        //to hide implicit one
-    }
+public final class JsonConstants {
 
     public static final String CONTEXT_URI = "http://iiif.io/api/presentation/2/context.json";
 
@@ -65,4 +63,8 @@ public class JsonConstants {
     public static final String height      = "height";
     public static final String language    = "language";
     public static final String service     = "service";
+
+    private JsonConstants() {
+        //to hide implicit one
+    }
 }

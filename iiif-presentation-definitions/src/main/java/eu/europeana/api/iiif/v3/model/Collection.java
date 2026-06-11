@@ -17,20 +17,20 @@ import java.util.List;
  * @since 14 Oct 2024
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ id, type, label, summary, metadata, requiredStatement
-                   , rights, provider, homepage, seeAlso, service, partOf
-                   , navDate, behavior, viewingDirection, thumbnail, items
-                   , rendering, placeholderCanvas })
+@JsonPropertyOrder({ID, TYPE, LABEL, SUMMARY, METADATA, REQUIRED_STATEMENT
+                   , RIGHTS, PROVIDER, HOMEPAGE, SEE_ALSO, SERVICE, PART_OF
+                   , NAV_DATE, BEHAVIOR, VIEWING_DIRECTION, THUMBNAIL, ITEMS
+                   , RENDERING, PLACEHOLDER_CANVAS})
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class Collection extends PresentationResource {
 
-    @JsonProperty(JsonConstants.partOf)
+    @JsonProperty(JsonConstants.PART_OF)
     private List<Collection> partOf;
 
-    @JsonProperty(JsonConstants.viewingDirection)
+    @JsonProperty(JsonConstants.VIEWING_DIRECTION)
     private ViewingDirection viewingDirection;
 
-    @JsonProperty(JsonConstants.items)
+    @JsonProperty(JsonConstants.ITEMS)
     private List<PresentationResource> items;
 
     public Collection(String id) {
@@ -39,9 +39,9 @@ public class Collection extends PresentationResource {
 
     protected Collection() {}
 
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     public String getType() {
-        return JsonConstants.Collection;
+        return JsonConstants.COLLECTION;
     }
 
 
