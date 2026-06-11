@@ -14,10 +14,10 @@ import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
  * @since 14 Oct 2024
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ id, type})
+@JsonPropertyOrder({ID, TYPE})
 public abstract class IIIFv3Resource implements IIIFResource {
 
-    @JsonProperty(JsonConstants.id)
+    @JsonProperty(JsonConstants.ID)
     private String id;
 
     public IIIFv3Resource(String id) {
@@ -30,6 +30,6 @@ public abstract class IIIFv3Resource implements IIIFResource {
         return this.id;
     }
 
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     public abstract String getType();
 }

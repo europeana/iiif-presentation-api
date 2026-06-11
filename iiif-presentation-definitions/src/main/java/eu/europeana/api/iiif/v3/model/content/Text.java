@@ -13,7 +13,7 @@ import eu.europeana.api.iiif.v3.model.LanguageMap;
  * @author Hugo
  * @since 7 Nov 2024
  */
-@JsonPropertyOrder({ id, type, label, language, format, service })
+@JsonPropertyOrder({ID, TYPE, LABEL, LANGUAGE, FORMAT, SERVICE})
 public class Text extends ContentResource {
 
     public Text(String id) {
@@ -28,8 +28,8 @@ public class Text extends ContentResource {
 
     // Added JsonIgnore - fetches type value from the parent class @JsonTypeInfo
     // EA-4232 creates duplicate type value after parsing.
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     public String getType() {
-        return JsonConstants.Text;
+        return JsonConstants.TEXT;
     }
 }

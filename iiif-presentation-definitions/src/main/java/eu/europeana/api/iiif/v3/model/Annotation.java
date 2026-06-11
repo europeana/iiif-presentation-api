@@ -18,19 +18,19 @@ import eu.europeana.api.iiif.v3.io.JsonConstants;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonPropertyOrder({ id, type, motivation, timeMode, body, target })
+@JsonPropertyOrder({ID, TYPE, MOTIVATION, TIME_MODE, BODY, TARGET})
 public class Annotation extends IIIFv3Resource {
 
-    @JsonProperty(JsonConstants.motivation)
+    @JsonProperty(JsonConstants.MOTIVATION)
     private String motivation;
 
-    @JsonProperty(JsonConstants.timeMode)
+    @JsonProperty(JsonConstants.TIME_MODE)
     private TimeMode timeMode;
 
-    @JsonProperty(JsonConstants.body)
+    @JsonProperty(JsonConstants.BODY)
     private ContentResource body;
     
-    @JsonProperty(JsonConstants.target)
+    @JsonProperty(JsonConstants.TARGET)
     private String target;
 
 
@@ -42,9 +42,9 @@ public class Annotation extends IIIFv3Resource {
     protected Annotation() {}
 
     @Override
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     public String getType() {
-        return JsonConstants.Annotation;
+        return JsonConstants.ANNOTATION;
     }
 
     public String getMotivation() {

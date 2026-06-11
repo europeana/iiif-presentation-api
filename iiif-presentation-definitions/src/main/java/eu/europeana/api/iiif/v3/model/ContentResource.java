@@ -31,28 +31,28 @@ import eu.europeana.api.iiif.v3.model.content.Video;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY
-            , property = type )
+            , property = TYPE)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = Dataset.class, name = Dataset)
-  , @JsonSubTypes.Type(value = Image.class  , name = Image) 
-  , @JsonSubTypes.Type(value = Model.class  , name = Model) 
-  , @JsonSubTypes.Type(value = Sound.class  , name = Sound) 
-  , @JsonSubTypes.Type(value = Text.class   , name = Text) 
-  , @JsonSubTypes.Type(value = Video.class  , name = Video) 
+    @JsonSubTypes.Type(value = Dataset.class, name = DATASET)
+  , @JsonSubTypes.Type(value = Image.class  , name = IMAGE)
+  , @JsonSubTypes.Type(value = Model.class  , name = MODEL)
+  , @JsonSubTypes.Type(value = Sound.class  , name = SOUND)
+  , @JsonSubTypes.Type(value = Text.class   , name = TEXT)
+  , @JsonSubTypes.Type(value = Video.class  , name = VIDEO)
 })
-@JsonPropertyOrder({ id, type, label, language, format, service })
+@JsonPropertyOrder({ID, TYPE, LABEL, LANGUAGE, FORMAT, SERVICE})
 public abstract class ContentResource extends IIIFv3Resource {
 
-    @JsonProperty(JsonConstants.label)
+    @JsonProperty(JsonConstants.LABEL)
     private LanguageMap label;
 
-    @JsonProperty(JsonConstants.language)
+    @JsonProperty(JsonConstants.LANGUAGE)
     private String  originalLanguage;
 
-    @JsonProperty(JsonConstants.format)
+    @JsonProperty(JsonConstants.FORMAT)
     private String format;
 
-    @JsonProperty(JsonConstants.service)
+    @JsonProperty(JsonConstants.SERVICE)
     //temporary until we fix our data
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     private List<Service> service;

@@ -13,14 +13,14 @@ import eu.europeana.api.iiif.v3.io.JsonConstants;
  */
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ JsonConstants.label, JsonConstants.value })
+@JsonPropertyOrder({ JsonConstants.LABEL, JsonConstants.VALUE})
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class LabelledValue {
 
-    @JsonProperty(JsonConstants.label)
+    @JsonProperty(JsonConstants.LABEL)
     private LanguageMap label;
 
-    @JsonProperty(JsonConstants.value)
+    @JsonProperty(JsonConstants.VALUE)
     private LanguageMap value;
 
     /**

@@ -23,13 +23,13 @@ import java.util.List;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonPropertyOrder({ id, type, logo, homepage })
+@JsonPropertyOrder({ID, TYPE, LOGO, HOMEPAGE})
 public class Agent extends IIIFv3Resource {
 
-    @JsonProperty(JsonConstants.logo)
+    @JsonProperty(JsonConstants.LOGO)
     private List<Image> logo;
 
-    @JsonProperty(JsonConstants.homepage)
+    @JsonProperty(JsonConstants.HOMEPAGE)
     private List<Text> homepage;
 
     public Agent(String id, Image logo, Text homepage) {
@@ -44,9 +44,9 @@ public class Agent extends IIIFv3Resource {
 
     protected Agent() {}
 
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     public String getType() {
-        return JsonConstants.Agent;
+        return JsonConstants.AGENT;
     }
 
     public boolean hasHomepage() {

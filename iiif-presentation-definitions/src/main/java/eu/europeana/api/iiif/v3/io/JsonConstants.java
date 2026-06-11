@@ -1,73 +1,76 @@
 package eu.europeana.api.iiif.v3.io;
 
 /**
+ * Defines constants used for json response elements
+ *
  * @author Hugo
  * @since 14 Oct 2024
  */
-public class JsonConstants {
+public final class JsonConstants {
 
     public static final String CONTEXT_URI = "http://iiif.io/api/presentation/3/context.json";
     public static final String CONTEXT_URI_ANNO = "http://www.w3.org/ns/anno.jsonld";
     public static final String CONTEXT_URI_TEXT = "http://iiif.io/api/extension/text-granularity/context.json";
 
 
-    public static final String context = "@context";
+    public static final String CONTEXT = "@context";
 
-    public static final String Collection = "Collection";
-    public static final String Manifest = "Manifest";
-    public static final String Canvas = "Canvas";
-    public static final String AnnotationPage = "AnnotationPage";
-    public static final String Annotation = "Annotation";
-    public static final String Agent = "Agent";
+    public static final String COLLECTION = "Collection";
+    public static final String MANIFEST = "Manifest";
+    public static final String CANVAS = "Canvas";
+    public static final String ANNOTATION_PAGE = "AnnotationPage";
+    public static final String ANNOTATION = "Annotation";
+    public static final String AGENT = "Agent";
 
-    public static final String Dataset = "Dataset";
-    public static final String Image = "Image";
-    public static final String Model = "Model";
-    public static final String Sound = "Sound";
-    public static final String Text = "Text";
-    public static final String Video = "Video";
-    public static final String EmbeddableResource = "EmbeddableResource";
+    public static final String DATASET = "Dataset";
+    public static final String IMAGE = "Image";
+    public static final String MODEL = "Model";
+    public static final String SOUND = "Sound";
+    public static final String TEXT = "Text";
+    public static final String VIDEO = "Video";
+    public static final String EMBEDDABLE_RESOURCE = "EmbeddableResource";
 
-    public static final String ImageService3 = "ImageService3";
+    public static final String IMAGE_SERVICE_3 = "ImageService3";
 
-    public static final String id = "id";
-    public static final String type = "type";
-    public static final String label = "label";
-    public static final String value = "value";
-    public static final String summary = "summary";
-    public static final String metadata = "metadata";
-    public static final String requiredStatement = "requiredStatement";
-    public static final String rights = "rights";
-    public static final String provider = "provider";
-    public static final String homepage = "homepage";
-    public static final String seeAlso = "seeAlso";
-    public static final String service = "service";
-    public static final String thumbnail = "thumbnail";
-    public static final String navDate = "navDate";
-    public static final String behavior = "behavior";
-    public static final String viewingDirection = "viewingDirection";
-    public static final String start = "start";
-    public static final String partOf = "partOf";
-    public static final String rendering = "rendering";
-    public static final String placeholderCanvas = "placeholderCanvas";
+    public static final String ID = "id";
+    public static final String TYPE = "type";
+    public static final String LABEL = "label";
+    public static final String VALUE = "value";
+    public static final String SUMMARY = "summary";
+    public static final String METADATA = "metadata";
+    public static final String REQUIRED_STATEMENT = "requiredStatement";
+    public static final String RIGHTS = "rights";
+    public static final String PROVIDER = "provider";
+    public static final String HOMEPAGE = "homepage";
+    public static final String SEE_ALSO = "seeAlso";
+    public static final String SERVICE = "service";
+    public static final String THUMBNAIL = "thumbnail";
+    public static final String NAV_DATE = "navDate";
+    public static final String BEHAVIOR = "behavior";
+    public static final String VIEWING_DIRECTION = "viewingDirection";
+    public static final String START = "start";
+    public static final String PART_OF = "partOf";
+    public static final String RENDERING = "rendering";
+    public static final String PLACEHOLDER_CANVAS = "placeholderCanvas";
 
-    public static final String items = "items";
-    public static final String annotations = "annotations";
+    public static final String ITEMS = "items";
+    public static final String ANNOTATIONS = "annotations";
 
-    public static final String logo = "logo";
-    public static final String format = "format";
-    public static final String profile = "profile";
-    public static final String width = "width";
-    public static final String height = "height";
-    public static final String duration = "duration";
-    public static final String language = "language";
+    public static final String LOGO = "logo";
+    public static final String FORMAT = "format";
+    public static final String PROFILE = "profile";
+    public static final String WIDTH = "width";
+    public static final String HEIGHT = "height";
+    public static final String DURATION = "duration";
+    public static final String LANGUAGE = "language";
 
-    public static final String motivation = "motivation";
-    public static final String body = "body";
-    public static final String target = "target";
-    public static final String timeMode = "timeMode";
+    public static final String MOTIVATION = "motivation";
+    public static final String BODY = "body";
+    public static final String TARGET = "target";
+    public static final String TIME_MODE = "timeMode";
 
-    public static final String textGranularity = "textGranularity";
-    public static final String source = "source";
+    public static final String TEXT_GRANULARITY = "textGranularity";
+    public static final String SOURCE = "source";
 
+    private JsonConstants(){}
 }

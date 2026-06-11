@@ -18,19 +18,19 @@ import eu.europeana.api.iiif.v3.io.JsonConstants;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonPropertyOrder({context, id, type, profile, label})
+@JsonPropertyOrder({CONTEXT, ID, TYPE, PROFILE, LABEL})
 public class Service extends IIIFv3Resource {
 
-    @JsonProperty(JsonConstants.context)
+    @JsonProperty(JsonConstants.CONTEXT)
     private String context;
 
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     private String type;
 
-    @JsonProperty(JsonConstants.profile)
+    @JsonProperty(JsonConstants.PROFILE)
     private String profile;
 
-    @JsonProperty(JsonConstants.label)
+    @JsonProperty(JsonConstants.LABEL)
     private LanguageMap label;
 
     public Service(String id, String type) {

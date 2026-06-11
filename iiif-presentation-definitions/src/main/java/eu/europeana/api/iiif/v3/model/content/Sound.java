@@ -15,10 +15,10 @@ import eu.europeana.api.iiif.v3.model.ContentResource;
  * @author Hugo
  * @since 7 Nov 2024
  */
-@JsonPropertyOrder({ id, type, label, language, format, duration, service })
+@JsonPropertyOrder({ID, TYPE, LABEL, LANGUAGE, FORMAT, DURATION, SERVICE})
 public class Sound extends ContentResource {
 
-    @JsonProperty(JsonConstants.duration)
+    @JsonProperty(JsonConstants.DURATION)
     private Double  duration;
 
 
@@ -28,9 +28,9 @@ public class Sound extends ContentResource {
 
     protected Sound() {}
 
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     public String getType() {
-        return JsonConstants.Sound;
+        return JsonConstants.SOUND;
     }
 
     public Double getDuration() {

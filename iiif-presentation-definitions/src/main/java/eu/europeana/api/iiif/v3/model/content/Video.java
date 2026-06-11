@@ -12,17 +12,17 @@ import eu.europeana.api.iiif.v3.model.ContentResource;
  * @author Hugo
  * @since 7 Nov 2024
  */
-@JsonPropertyOrder({ id, type, label, language
-                   , format, height, width, duration, service })
+@JsonPropertyOrder({ID, TYPE, LABEL, LANGUAGE
+                   , FORMAT, HEIGHT, WIDTH, DURATION, SERVICE})
 public class Video extends ContentResource {
 
-    @JsonProperty(JsonConstants.height)
+    @JsonProperty(JsonConstants.HEIGHT)
     private Integer height;
 
-    @JsonProperty(JsonConstants.width)
+    @JsonProperty(JsonConstants.WIDTH)
     private Integer width;
 
-    @JsonProperty(JsonConstants.duration)
+    @JsonProperty(JsonConstants.DURATION)
     private Double  duration;
 
 
@@ -33,9 +33,9 @@ public class Video extends ContentResource {
     protected Video() {}
 
 
-    @JsonProperty(JsonConstants.type)
+    @JsonProperty(JsonConstants.TYPE)
     public String getType() {
-        return JsonConstants.Video;
+        return JsonConstants.VIDEO;
     }
 
 

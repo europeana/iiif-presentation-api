@@ -3,9 +3,9 @@ package eu.europeana.api.iiif.v3.model.content;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import static eu.europeana.api.iiif.v3.io.JsonConstants.*;
-import static eu.europeana.api.iiif.v3.io.JsonConstants.service;
+import static eu.europeana.api.iiif.v3.io.JsonConstants.SERVICE;
 
-@JsonPropertyOrder({ id, type, label, language, format, height, width, service })
+@JsonPropertyOrder({ID, TYPE, LABEL, LANGUAGE, FORMAT, HEIGHT, WIDTH, SERVICE})
 public class Rendering extends Image {
 
     private String type;
