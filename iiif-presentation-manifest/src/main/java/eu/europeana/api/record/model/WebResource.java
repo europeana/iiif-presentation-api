@@ -21,6 +21,8 @@ import eu.europeana.api.record.serialization.ConverterUtils;
     , getterVisibility = Visibility.NONE)
 public class WebResource {
 
+    public static final double MILLISECONDS_IN_ONE_SECOND = 1000D;
+    public static final int DEFAULT_RESOLUTION_DIMENTION = 400;
     @JsonProperty("about")
     private String id;
 
@@ -108,7 +110,7 @@ public class WebResource {
 
     public Double getDurationInSeconds() {
         Long durationVal = getDuration();
-        return (durationVal == null ? null : durationVal / 1000D);
+        return (durationVal == null ? null : (durationVal / MILLISECONDS_IN_ONE_SECOND));
     }
 
     public Resolution getResolution() {
@@ -118,7 +120,7 @@ public class WebResource {
         // if the WebResource does not have width or height
         // Set width and height to 400 (this is the size of the default icon which is what will likely be displayed)
         return (h != null && w != null ? new Resolution(w, h)
-            : new Resolution(400, 400));
+            : new Resolution(DEFAULT_RESOLUTION_DIMENTION, DEFAULT_RESOLUTION_DIMENTION));
     }
 
     public boolean hasIsFormatOf() {
@@ -156,6 +158,11 @@ public class WebResource {
         return (getServiceByConformsTo(conformsTo) != null);
     }
 
+    /**
+     *
+     * @param conformsTo
+     * @return
+     */
     public SvcsService getServiceByConformsTo(String conformsTo) {
         if (!hasServices()) {
             return null;

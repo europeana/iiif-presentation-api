@@ -36,11 +36,25 @@ public class ContentResource extends IIIFv2Resource {
         super(id);
     }
 
+    /**
+     * Initialize  ContentResource with id, format
+     *
+     * @param id -
+     * @param format -
+     */
+
     public ContentResource(String id, String format) {
         super(id);
         this.format = format;
     }
 
+    /**
+     * Initialize ContentResource with id, language and format
+     *
+     * @param id  -
+     * @param label -
+     * @param format -
+     */
     public ContentResource(String id, LanguageValue label, String format) {
         this(id, format);
         this.label = label;

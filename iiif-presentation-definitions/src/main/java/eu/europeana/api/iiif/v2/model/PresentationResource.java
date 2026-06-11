@@ -107,6 +107,10 @@ public abstract class PresentationResource extends IIIFv2Resource {
                 : (this.description = new ArrayList<>()));
     }
 
+    /**
+     * Check if description is specified
+     * @return boolean
+     */
     public boolean hasDescription() {
         return ( this.description != null && !this.description.isEmpty() );
     }

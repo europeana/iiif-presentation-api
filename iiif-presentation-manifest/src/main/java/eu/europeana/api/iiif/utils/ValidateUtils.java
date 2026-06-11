@@ -70,7 +70,7 @@ public final class ValidateUtils {
 
     /**
      * This check is similar to validateApiUrlFormat but doesn't throw an error
-     * @param url
+     * @param url -
      * @return true if the provided String is a valid Europeana API url (*.eanadev.org or *.europeana.eu), otherwise false
      */
     public static final boolean isEuropeanaUrl(String url) {

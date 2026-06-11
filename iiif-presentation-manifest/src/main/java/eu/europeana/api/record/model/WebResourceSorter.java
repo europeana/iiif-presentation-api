@@ -38,6 +38,8 @@ public final class WebResourceSorter {
      * orderViews List contains edm:isShownBy/edmIsShowAt (EUScreen items) as the first element and then order of the edm:hasView
      * If there are multiple sequences, the order between sequences doesn't matter. Also the order between webresources
      * not part of a sequence doesn't matter.
+     * @param webResources -
+     * @param orderViews -
      * @throws DataInconsistentException when
      * @return sorted array of webResources
      */

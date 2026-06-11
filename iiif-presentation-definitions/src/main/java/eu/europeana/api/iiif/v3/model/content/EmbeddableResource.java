@@ -12,6 +12,8 @@ import eu.europeana.api.iiif.v3.io.JsonConstants;
 import eu.europeana.api.iiif.v3.model.ContentResource;
 
 /**
+ * Defines details of json response for  EmbeddableResource
+ *
  * @author Hugo
  * @since 7 Nov 2024
  */

@@ -35,7 +35,9 @@ public class BaseService {
 
     protected final ObjectMapper   mapper;
 
-
+    /**
+     * Initialize BaseService
+     */
     public BaseService() {
         recordClient = new HttpConnection(createConnectionPool(true));
         fulltextClient = new HttpConnection(createConnectionPool(false));

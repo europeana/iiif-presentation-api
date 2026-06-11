@@ -1,7 +1,7 @@
 package eu.europeana.api.iiif.v3.io;
 
 /**
- * Defines constants used for json response elements
+ * Defines constants used for V3 json response elements
  *
  * @author Hugo
  * @since 14 Oct 2024

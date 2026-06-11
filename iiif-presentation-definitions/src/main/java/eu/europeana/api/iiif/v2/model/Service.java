@@ -34,6 +34,11 @@ public class Service extends IIIFv2Resource {
         super(id);
     }
 
+    /**
+     * Initialize Service with id , context
+     * @param id -
+     * @param context -
+     */
     public Service(String id, String context) {
         super(id);
         this.context = context;

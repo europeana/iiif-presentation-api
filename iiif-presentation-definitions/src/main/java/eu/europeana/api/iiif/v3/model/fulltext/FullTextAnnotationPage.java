@@ -38,6 +38,13 @@ public class FullTextAnnotationPage extends AnnotationPage {
         super(id);
     }
 
+    /**
+     * Initialize FullTextAnnotationPage with id , language, textGranularity and source
+     * @param id -
+     * @param language -
+     * @param textGranularity -
+     * @param source -
+     */
     public FullTextAnnotationPage(String id, String language, List<TextGranularity> textGranularity, String source) {
         super(id);
         this.language = language;
